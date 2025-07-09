@@ -58,3 +58,4 @@ nunit-*.xml
 
 # Local Db
 taskit.db
+taskit.db-*
