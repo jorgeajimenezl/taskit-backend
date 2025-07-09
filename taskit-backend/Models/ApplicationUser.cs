@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace TaskItBackend.Models;
+namespace Taskit.Models;
 
 public class ApplicationUser : IdentityUser
 {
