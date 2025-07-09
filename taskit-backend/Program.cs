@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -16,20 +17,29 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>();
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = true;
+    options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
@@ -39,15 +49,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddControllers(options =>
 {
-    // TODO: Configure password requirements
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddControllers();
+    options.Conventions.Add(new RouteTokenTransformerConvention(new LowercaseParameterTransformer()));
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -80,7 +85,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, DummyEmailSender>()
 
 var app = builder.Build();
 
-// app.UseHealthChecks("/health");
+app.UseHealthChecks("/health");
 app.UseRouting();
 
 // Set up authentication and authorization
@@ -88,9 +93,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Map the controllers
-// app.MapGet("/", () => "Backend is running!");
 app.MapControllers();
-// app.MapGroup("api/auth").MapIdentityApi<ApplicationUser>();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -106,3 +110,11 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.Run();
+
+public class LowercaseParameterTransformer : IOutboundParameterTransformer
+{
+    public string? TransformOutbound(object? value)
+    {
+        return value?.ToString()?.ToLowerInvariant();
+    }
+}
