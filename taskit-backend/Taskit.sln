@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
@@ -7,6 +8,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Domain", "Taskit.Domain\Taskit.Domain.csproj", "{20F0D158-CF65-077E-73C2-4BA22BCA4B84}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Web", "Taskit.Web\Taskit.Web.csproj", "{BBC51BC1-80E2-2CB5-2AE4-88E6D1825D32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Infrastructure", "Taskit.Infrastructure\Taskit.Infrastructure.csproj", "{462FE568-4A5B-4D78-B4F9-B1C294762FCC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +25,10 @@ Global
 		{BBC51BC1-80E2-2CB5-2AE4-88E6D1825D32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBC51BC1-80E2-2CB5-2AE4-88E6D1825D32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBC51BC1-80E2-2CB5-2AE4-88E6D1825D32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462FE568-4A5B-4D78-B4F9-B1C294762FCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462FE568-4A5B-4D78-B4F9-B1C294762FCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462FE568-4A5B-4D78-B4F9-B1C294762FCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462FE568-4A5B-4D78-B4F9-B1C294762FCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -29,6 +36,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{20F0D158-CF65-077E-73C2-4BA22BCA4B84} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 		{BBC51BC1-80E2-2CB5-2AE4-88E6D1825D32} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
+		{462FE568-4A5B-4D78-B4F9-B1C294762FCC} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE9325F6-E848-4A70-8464-D029E0E0899A}

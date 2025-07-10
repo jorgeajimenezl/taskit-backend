@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-using Taskit.Web.Data;
+using Taskit.Infrastructure;
 using Taskit.Domain.Entities;
 using Taskit.Web.Services;
 
