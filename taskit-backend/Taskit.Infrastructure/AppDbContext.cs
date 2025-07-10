@@ -4,11 +4,11 @@ using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<AppTask> Tasks { get; set; }
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :
+    public AppDbContext(DbContextOptions<AppDbContext> options) :
         base(options)
     { }
 }
