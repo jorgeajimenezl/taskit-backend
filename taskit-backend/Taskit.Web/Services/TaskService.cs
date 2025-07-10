@@ -1,4 +1,4 @@
-namespace Taskit.Services;
+namespace Taskit.Web.Services;
 
 public class TaskService
 {

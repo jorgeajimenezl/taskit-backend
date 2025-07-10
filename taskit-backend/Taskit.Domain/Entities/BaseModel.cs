@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Taskit.Models;
+namespace Taskit.Domain.Entities;
 
-public abstract class BaseModel
+public abstract class BaseEntity
 {
     [Key]
     public int Id { get; set; }

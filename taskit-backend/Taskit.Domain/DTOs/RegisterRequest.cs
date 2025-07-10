@@ -1,4 +1,4 @@
-namespace Taskit.DTOs;
+namespace Taskit.Domain.DTOs;
 
 public record RegisterRequest
 {

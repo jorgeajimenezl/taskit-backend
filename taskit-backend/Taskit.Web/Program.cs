@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-using Taskit.Data;
-using Taskit.Models;
-using Taskit.Services;
+using Taskit.Web.Data;
+using Taskit.Domain.Entities;
+using Taskit.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,4 +1,4 @@
-namespace Taskit.Controllers;
+namespace Taskit.Web.Controllers;
 
 public class TaskController : ApiControllerBase
 {

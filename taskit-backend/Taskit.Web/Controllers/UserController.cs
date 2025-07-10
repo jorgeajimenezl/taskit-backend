@@ -2,10 +2,11 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Taskit.Models;
-using Taskit.Services;
 
-namespace Taskit.Controllers;
+using Taskit.Domain.Entities;
+using Taskit.Web.Services;
+
+namespace Taskit.Web.Controllers;
 
 [Authorize]
 public class UserController(UserManager<ApplicationUser> userManager) : ApiControllerBase

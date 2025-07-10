@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Taskit.Models;
+namespace Taskit.Domain.Entities;
 
-public class AppTask : BaseModel
+public class AppTask : BaseEntity
 {
     [Required]
     public string Title { get; set; } = string.Empty;
