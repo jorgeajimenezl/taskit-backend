@@ -1,15 +1,16 @@
 using System.ComponentModel.DataAnnotations;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Domain.Entities;
 
 public class AppTask : BaseEntity
 {
     [Required]
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+    public required string Title { get; set; }
+    public required string Description { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; } = null;
     public DateTime? CompletedAt { get; set; } = null;
-    public bool IsCompleted => CompletedAt.HasValue;
+    public Enums.TaskStatus Status { get; set; } = Enums.TaskStatus.Created;
     public string? UserId { get; set; } = null;
     public AppUser User { get; set; } = null!;
     public string? AssignedToId { get; set; } = null;
