@@ -23,7 +23,7 @@ public static class DependencyInjection
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<AppDbContext>();
 
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        builder.Services.AddIdentity<AppUser, IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 

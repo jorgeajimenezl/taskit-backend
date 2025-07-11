@@ -4,7 +4,7 @@ using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<AppUser>
 {
     public DbSet<AppTask> Tasks { get; set; }
 

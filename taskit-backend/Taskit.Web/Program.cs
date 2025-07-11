@@ -9,7 +9,7 @@ builder.AddWebServices();
 builder.Services.AddOpenApi();
 
 // Register custom services
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, DummyEmailSender>();
+builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
 
 var app = builder.Build();
 

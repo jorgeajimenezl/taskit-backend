@@ -11,7 +11,11 @@ public class AppTask : BaseEntity
     public DateTime? CompletedAt { get; set; } = null;
     public bool IsCompleted => CompletedAt.HasValue;
     public string? UserId { get; set; } = null;
-    public ApplicationUser User { get; set; } = null!;
+    public AppUser User { get; set; } = null!;
+    public string? AssignedToId { get; set; } = null;
+    public AppUser? AssignedTo { get; set; } = null;
+    public int ProjectId { get; set; }
+    public Project Project { get; set; } = null!;
     public int? ParentTaskId { get; set; } = null;
     public AppTask? ParentTask { get; set; } = null;
     public ICollection<AppTask> SubTasks { get; set; } = new List<AppTask>();

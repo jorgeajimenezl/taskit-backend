@@ -11,18 +11,18 @@ using Taskit.Domain.Entities;
 namespace Taskit.Web.Controllers;
 
 public class AuthController(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+    UserManager<AppUser> userManager,
+    SignInManager<AppUser> signInManager,
     IConfiguration configuration) : ApiControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+    private readonly UserManager<AppUser> _userManager = userManager;
+    private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly IConfiguration _configuration = configuration;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest dto)
     {
-        var user = new ApplicationUser { UserName = dto.Username, Email = dto.Email };
+        var user = new AppUser { UserName = dto.Username, Email = dto.Email };
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
             return BadRequest(result.Errors);

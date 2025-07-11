@@ -9,9 +9,9 @@ using Taskit.Web.Services;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class UserController(UserManager<ApplicationUser> userManager) : ApiControllerBase
+public class UserController(UserManager<AppUser> userManager) : ApiControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly UserManager<AppUser> _userManager = userManager;
 
     [HttpGet("me")]
     public async Task<IActionResult> GetMe()
