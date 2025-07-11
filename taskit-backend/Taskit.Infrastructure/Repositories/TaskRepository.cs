@@ -3,7 +3,7 @@ using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure.Repositories;
 
-class TaskRepository(AppDbContext context) : Repository<Task>(context)
+public class TaskRepository(AppDbContext context) : Repository<Task, int>(context)
 {
     public async Task<IEnumerable<AppTask>> GetTasksByProjectIdAsync(int projectId)
     {

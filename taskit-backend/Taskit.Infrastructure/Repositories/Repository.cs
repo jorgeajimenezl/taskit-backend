@@ -6,7 +6,7 @@ using Taskit.Infrastructure.Interfaces;
 
 namespace Taskit.Infrastructure.Repositories;
 
-public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
 {
     protected readonly AppDbContext _context;
     protected readonly DbSet<TEntity> _dbSet;
@@ -17,7 +17,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         _dbSet = context.Set<TEntity>();
     }
 
-    public virtual async Task<TEntity?> GetByIdAsync(Guid id)
+    public virtual async Task<TEntity?> GetByIdAsync(TKey id)
     {
         return await _dbSet.FindAsync(id);
     }
@@ -39,7 +39,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         await _context.SaveChangesAsync();
     }
 
-    public virtual async Task DeleteAsync(Guid id)
+    public virtual async Task DeleteAsync(TKey id)
     {
         var entity = await GetByIdAsync(id);
         if (entity != null)
@@ -49,7 +49,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         }
     }
 
-    public virtual async Task<bool> ExistsAsync(Guid id)
+    public virtual async Task<bool> ExistsAsync(TKey id)
     {
         var entity = await GetByIdAsync(id);
         return entity != null;
