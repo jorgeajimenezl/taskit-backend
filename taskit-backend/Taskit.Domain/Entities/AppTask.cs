@@ -13,8 +13,8 @@ public class AppTask : BaseEntity
     public Enums.TaskStatus Status { get; set; } = Enums.TaskStatus.Created;
     public string? UserId { get; set; } = null;
     public AppUser User { get; set; } = null!;
-    public string? AssignedToId { get; set; } = null;
-    public AppUser? AssignedTo { get; set; } = null;
+    public string? AssignedUserId { get; set; } = null;
+    public AppUser? AssignedUser { get; set; } = null;
     public int ProjectId { get; set; }
     public Project Project { get; set; } = null!;
     public int? ParentTaskId { get; set; } = null;
