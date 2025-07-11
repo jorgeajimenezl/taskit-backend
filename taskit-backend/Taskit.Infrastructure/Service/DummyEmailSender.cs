@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Taskit.Domain.Entities;
 
-namespace Taskit.Web.Services;
+namespace Taskit.Infrastructure.Services;
 
 public class DummyEmailSender : IEmailSender<AppUser>
 {

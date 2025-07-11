@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+
 using Taskit.Domain.Entities;
 using Taskit.Infrastructure;
+using Taskit.Infrastructure.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -52,5 +53,8 @@ public static class DependencyInjection
         });
 
         builder.Services.AddAuthorization();
+
+        // Custom services can be added here
+        builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
     }
 }

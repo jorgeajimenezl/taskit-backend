@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Taskit.Domain.DTOs;
+using Taskit.Application.DTOs;
 using Taskit.Domain.Entities;
 
 namespace Taskit.Web.Controllers;

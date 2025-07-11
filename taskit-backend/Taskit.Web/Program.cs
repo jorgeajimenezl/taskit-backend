@@ -1,15 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Taskit.Domain.Entities;
-using Taskit.Web.Services;
+using Taskit.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
 builder.Services.AddOpenApi();
-
-// Register custom services
-builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
 
 var app = builder.Build();
 
