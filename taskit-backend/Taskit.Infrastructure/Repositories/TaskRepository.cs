@@ -4,7 +4,7 @@ using Taskit.Application.Interfaces;
 
 namespace Taskit.Infrastructure.Repositories;
 
-public class TaskRepository(AppDbContext context) : Repository<Task, int>(context)
+public class TaskRepository(AppDbContext context) : Repository<AppTask, int>(context), ITaskRepository
 {
     public async Task<IEnumerable<AppTask>> GetTasksByProjectIdAsync(int projectId)
     {
