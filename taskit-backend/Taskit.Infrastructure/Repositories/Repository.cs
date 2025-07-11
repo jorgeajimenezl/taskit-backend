@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Taskit.Infrastructure.Interfaces;
+using Taskit.Application.Interfaces;
 
 namespace Taskit.Infrastructure.Repositories;
 

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Taskit.Domain\Taskit.Domain.csproj" />
-    <ProjectReference Include="..\Taskit.Infrastructure\Taskit.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

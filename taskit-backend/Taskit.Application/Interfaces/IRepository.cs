@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Taskit.Infrastructure.Interfaces;
+namespace Taskit.Application.Interfaces;
 
 public interface IRepository<TEntity, TKey> where TEntity : class
 {

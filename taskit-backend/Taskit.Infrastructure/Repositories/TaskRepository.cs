@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
+using Taskit.Application.Interfaces;
 
 namespace Taskit.Infrastructure.Repositories;
 
