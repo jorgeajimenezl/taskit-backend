@@ -1,10 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Taskit.Domain.Entities;
 
 public class Project : BaseEntity
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string OwnerId { get; set; } = string.Empty;
+    [Required]
+    public required string Name { get; set; }
+    public required string Description { get; set; } = string.Empty;
+    [Required]
+    public required string OwnerId { get; set; }
     public AppUser Owner { get; set; } = null!;
     
     // Navigation property for tasks in the project
