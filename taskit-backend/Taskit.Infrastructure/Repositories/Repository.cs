@@ -51,4 +51,9 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
         var entity = await GetByIdAsync(id);
         return entity != null;
     }
+
+    public virtual IQueryable<TEntity> Query()
+    {
+        return _dbSet.AsQueryable();
+    }
 }

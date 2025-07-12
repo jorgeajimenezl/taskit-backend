@@ -5,5 +5,4 @@ namespace Taskit.Application.Interfaces;
 
 public interface ITaskRepository : IRepository<AppTask, int>
 {
-    public Task<PaginatedList<AppTask>> GetTasksByAssignedUserIdAsync(string assignedUserId, int pageIndex, int pageSize);
 }

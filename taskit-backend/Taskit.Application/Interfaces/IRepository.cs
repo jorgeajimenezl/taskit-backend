@@ -8,4 +8,5 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     Task UpdateAsync(TEntity entity);
     Task DeleteAsync(TKey id);
     Task<bool> ExistsAsync(TKey id);
+    IQueryable<TEntity> Query();
 }

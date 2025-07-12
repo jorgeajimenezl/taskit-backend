@@ -1,4 +1,6 @@
 using AutoMapper;
+using Gridify;
+using Gridify.EntityFramework;
 using Taskit.Application.Common.Mappings;
 using Taskit.Application.Common.Models;
 using Taskit.Application.DTOs;
@@ -12,9 +14,9 @@ public class TaskService(ITaskRepository taskRepository, IMapper mapper)
     private readonly ITaskRepository _taskRepository = taskRepository;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<PaginatedList<TaskDto>> GetTasksByAssignedUserIdAsync(string assignedUserId, int pageIndex, int pageSize)
+    public async Task<Paging<TaskDto>> GetAllAsync(IGridifyQuery query)
     {
-        var tasks = await _taskRepository.GetTasksByAssignedUserIdAsync(assignedUserId, pageIndex, pageSize);
-        return _mapper.Map<PaginatedList<TaskDto>>(tasks);
+        return await _taskRepository.Query()
+            .GridifyToAsync<AppTask, TaskDto>(_mapper, query);
     }
 }

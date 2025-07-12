@@ -1,30 +1,21 @@
+using Gridify;
+using Microsoft.AspNetCore.Mvc;
+using Taskit.Application.Services;
+
 namespace Taskit.Web.Controllers;
 
 public class TaskController : ApiControllerBase
 {
-    // private readonly ITaskService _taskService;
+    private readonly TaskService _taskService;
 
-    // public TaskController(ITaskService taskService)
-    // {
-    //     _taskService = taskService;
-    // }
+    public TaskController(TaskService taskService)
+    {
+        _taskService = taskService;
+    }
 
-    // [HttpGet("tasks")]
-    // public async Task<IActionResult> GetTasks()
-    // {
-    //     var tasks = await _taskService.GetTasksAsync();
-    //     return Ok(tasks);
-    // }
-
-    // [HttpPost("tasks")]
-    // public async Task<IActionResult> CreateTask([FromBody] TaskDto taskDto)
-    // {
-    //     if (!ModelState.IsValid)
-    //     {
-    //         return BadRequest(ModelState);
-    //     }
-
-    //     var createdTask = await _taskService.CreateTaskAsync(taskDto);
-    //     return CreatedAtAction(nameof(GetTasks), new { id = createdTask.Id }, createdTask);
-    // }
+    [HttpGet("")]
+    public async Task<IActionResult> GetTasks([FromQuery] GridifyQuery query)
+    {
+        return Ok(await _taskService.GetAllAsync(query));
+    }
 }

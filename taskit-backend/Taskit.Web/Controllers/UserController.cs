@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 using Taskit.Domain.Entities;
-using Taskit.Web.Services;
 
 namespace Taskit.Web.Controllers;
 

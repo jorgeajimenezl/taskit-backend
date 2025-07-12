@@ -9,6 +9,8 @@ using System.Text;
 using Taskit.Domain.Entities;
 using Taskit.Infrastructure;
 using Taskit.Infrastructure.Services;
+using Taskit.Application.Interfaces;
+using Taskit.Infrastructure.Repositories;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -54,7 +56,8 @@ public static class DependencyInjection
 
         builder.Services.AddAuthorization();
 
-        // Custom services can be added here
+        // Custom services
         builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
+        builder.Services.AddScoped<ITaskRepository, TaskRepository>();
     }
 }

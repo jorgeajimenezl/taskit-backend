@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Gridify;
+using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.Common.Models;
-using Taskit.Domain.Entities;
 
 namespace Taskit.Application.Common.Mappings;
 
@@ -14,11 +15,10 @@ public static class MappingExtensions
     public static Task<List<TDestination>> ProjectToListAsync<TDestination>(this IQueryable queryable, IConfigurationProvider configuration, CancellationToken cancellationToken = default) where TDestination : class
         => queryable.ProjectTo<TDestination>(configuration).AsNoTracking().ToListAsync(cancellationToken);
 
-    // public static PaginatedList<TDestination> MapPaginatedList<TSource, TDestination>(this IMapper mapper, PaginatedList<TSource> source)
-    //     where TSource : class
-    //     where TDestination : class
-    // {
-    //     var items = mapper.Map<List<TDestination>>(source);
-    //     return new PaginatedList<TDestination>(items, source.Count, source.PageIndex, source.TotalPages);
-    // }
+    public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination>(
+   this IQueryable<TSource> query, IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource>? mapper = null)
+    {
+        var res = await query.GridifyQueryableAsync(gridifyQuery, mapper);
+        return new Paging<TDestination>(res.Count, await res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToListAsync());
+    }
 }
