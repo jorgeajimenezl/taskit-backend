@@ -1,22 +1,19 @@
-using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
 using Taskit.Application.Interfaces;
+using Taskit.Application.Common.Models;
+using Taskit.Application.Common.Mappings;
+using Microsoft.EntityFrameworkCore;
 
 namespace Taskit.Infrastructure.Repositories;
 
 public class TaskRepository(AppDbContext context) : Repository<AppTask, int>(context), ITaskRepository
 {
-    public async Task<IEnumerable<AppTask>> GetTasksByProjectIdAsync(int projectId)
+    public async Task<PaginatedList<AppTask>> GetTasksByAssignedUserIdAsync(string assignedUserId, int pageIndex, int pageSize)
     {
-        return await _context.Tasks
-            .Where(t => t.ProjectId == projectId)
-            .ToListAsync();
-    }
+        var query = _context.Tasks
+            .Where(t => t.AssignedUserId == assignedUserId)
+            .OrderBy(t => t.Id);
 
-    public async Task<IEnumerable<AppTask>> GetTasksByIdAsync(string userId)
-    {
-        return await _context.Tasks
-            .Where(t => t.AssignedUserId == userId)
-            .ToListAsync();
+        return await query.PaginatedListAsync(pageIndex, pageSize);
     }
 }

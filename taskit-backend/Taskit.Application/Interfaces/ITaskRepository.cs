@@ -1,10 +1,9 @@
-using Taskit.Application.Interfaces;
+using Taskit.Application.Common.Models;
 using Taskit.Domain.Entities;
 
 namespace Taskit.Application.Interfaces;
 
 public interface ITaskRepository : IRepository<AppTask, int>
 {
-    Task<IEnumerable<AppTask>> GetTasksByIdAsync(string userId);
-    Task<IEnumerable<AppTask>> GetTasksByProjectIdAsync(int projectId);
+    public Task<PaginatedList<AppTask>> GetTasksByAssignedUserIdAsync(string assignedUserId, int pageIndex, int pageSize);
 }
