@@ -2,22 +2,27 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Taskit.Application.DTOs;
 using Taskit.Domain.Entities;
+using Taskit.Infrastructure;
 
 namespace Taskit.Web.Controllers;
 
 public class AuthController(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
-    IConfiguration configuration) : ApiControllerBase
+    IConfiguration configuration,
+    AppDbContext dbContext) : ApiControllerBase
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly IConfiguration _configuration = configuration;
+    private readonly AppDbContext _db = dbContext;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest dto)
@@ -40,9 +45,12 @@ public class AuthController(
         if (result.Succeeded)
         {
             var token = GenerateJwtToken(user);
+            var refresh = CreateRefreshToken(user);
+            await _db.SaveChangesAsync();
             return Ok(new LoginResponse
             {
                 Token = token,
+                RefreshToken = refresh.Token
             });
         }
 
@@ -55,6 +63,24 @@ public class AuthController(
     {
         await _signInManager.SignOutAsync();
         return Ok();
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<RefreshResponse>> Refresh(RefreshRequest dto)
+    {
+        var stored = await _db.RefreshTokens
+            .Include(r => r.User)
+            .FirstOrDefaultAsync(r => r.Token == dto.RefreshToken && r.RevokedAt == null);
+
+        if (stored == null || stored.ExpiresAt <= DateTime.UtcNow)
+            return Unauthorized();
+
+        stored.RevokedAt = DateTime.UtcNow;
+        var newRefresh = CreateRefreshToken(stored.User!);
+        await _db.SaveChangesAsync();
+
+        var token = GenerateJwtToken(stored.User!);
+        return Ok(new RefreshResponse { Token = token, RefreshToken = newRefresh.Token });
     }
 
     private string GenerateJwtToken(IdentityUser user)
@@ -89,5 +115,19 @@ public class AuthController(
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private RefreshToken CreateRefreshToken(AppUser user)
+    {
+        var refresh = new RefreshToken
+        {
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            UserId = user.Id,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+
+        _db.RefreshTokens.Add(refresh);
+        return refresh;
     }
 }
