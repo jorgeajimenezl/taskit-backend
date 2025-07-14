@@ -5,7 +5,7 @@ using Taskit.Infrastructure;
 
 namespace Taskit.Infrastructure.Repositories;
 
-public class RefreshTokenRepository(AppDbContext context) : Repository<RefreshToken, int>(context), IRefreshTokenRepository
+public class RefreshTokenRepository(AppDbContext context) : Repository<RefreshToken, Guid>(context), IRefreshTokenRepository
 {
     public async Task<RefreshToken?> GetByTokenAsync(string token)
     {
