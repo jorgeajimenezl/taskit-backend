@@ -11,6 +11,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<ProjectMember> ProjectMembers { get; set; }
     public DbSet<TaskComment> TaskComments { get; set; }
     public DbSet<TaskTag> TaskTags { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) :
         base(options)
@@ -62,5 +63,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .HasOne(pm => pm.User)
             .WithMany()
             .HasForeignKey(pm => pm.UserId);
+
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
