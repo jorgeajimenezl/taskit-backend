@@ -9,6 +9,7 @@ public static class DependencyInjection
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddAutoMapper((_) => Assembly.GetExecutingAssembly());
+        builder.Services.AddHttpContextAccessor();
 
         // Custom services
         builder.Services.AddScoped<TaskService>();
