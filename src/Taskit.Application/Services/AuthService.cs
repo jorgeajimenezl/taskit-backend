@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Taskit.Application.Services;
 
@@ -16,12 +17,14 @@ public class AuthService(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
     IConfiguration configuration,
-    IRefreshTokenRepository refreshTokenRepository)
+    IRefreshTokenRepository refreshTokenRepository,
+    HttpContextAccessor httpContextAccessor)
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly IConfiguration _configuration = configuration;
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
+    private readonly HttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task RegisterAsync(RegisterRequest dto)
     {
@@ -106,7 +109,9 @@ public class AuthService(
             Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
             UserId = user.Id,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString(),
+            IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress
         };
 
         await _refreshTokens.AddAsync(refresh);
