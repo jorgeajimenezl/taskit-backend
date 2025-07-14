@@ -12,5 +12,6 @@ public static class DependencyInjection
 
         // Custom services
         builder.Services.AddScoped<TaskService>();
+        builder.Services.AddScoped<AuthService>();
     }
 }
