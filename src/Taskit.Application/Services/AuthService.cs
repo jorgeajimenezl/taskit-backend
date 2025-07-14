@@ -18,13 +18,13 @@ public class AuthService(
     SignInManager<AppUser> signInManager,
     IConfiguration configuration,
     IRefreshTokenRepository refreshTokenRepository,
-    HttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor)
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly IConfiguration _configuration = configuration;
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
-    private readonly HttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task RegisterAsync(RegisterRequest dto)
     {
