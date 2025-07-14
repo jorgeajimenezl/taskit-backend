@@ -45,8 +45,8 @@ public class AuthService(
             return null;
 
         var token = GenerateJwtToken(user);
-        var refresh = await CreateRefreshTokenAsync(user);
-        return new LoginResponse { Token = token, RefreshToken = refresh.Token };
+        var refreshToken = await CreateRefreshTokenAsync(user);
+        return new LoginResponse { Token = token, RefreshToken = refreshToken };
     }
 
     public async Task LogoutAsync()
@@ -56,16 +56,17 @@ public class AuthService(
 
     public async Task<RefreshResponse?> RefreshAsync(RefreshRequest dto)
     {
-        var stored = await _refreshTokens.GetByTokenAsync(dto.RefreshToken);
+        var tokenHash = ComputeSha256Hash(dto.RefreshToken);
+        var stored = await _refreshTokens.GetByTokenAsync(tokenHash);
         if (stored == null || stored.RevokedAt != null || stored.ExpiresAt <= DateTime.UtcNow)
             return null;
 
         stored.RevokedAt = DateTime.UtcNow;
         await _refreshTokens.UpdateAsync(stored);
 
-        var newRefresh = await CreateRefreshTokenAsync(stored.User!);
+        var newRefreshToken = await CreateRefreshTokenAsync(stored.User!);
         var token = GenerateJwtToken(stored.User!);
-        return new RefreshResponse { Token = token, RefreshToken = newRefresh.Token };
+        return new RefreshResponse { Token = token, RefreshToken = newRefreshToken };
     }
 
     private string GenerateJwtToken(IdentityUser user)
@@ -102,11 +103,14 @@ public class AuthService(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private async Task<RefreshToken> CreateRefreshTokenAsync(AppUser user)
+    private async Task<string> CreateRefreshTokenAsync(AppUser user)
     {
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var tokenHash = ComputeSha256Hash(token);
+
         var refresh = new RefreshToken
         {
-            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            TokenHash = tokenHash,
             UserId = user.Id,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddDays(7),
@@ -115,6 +119,12 @@ public class AuthService(
         };
 
         await _refreshTokens.AddAsync(refresh);
-        return refresh;
+        return token;
+    }
+
+    private static string ComputeSha256Hash(string raw)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
+        return Convert.ToHexString(bytes);
     }
 }

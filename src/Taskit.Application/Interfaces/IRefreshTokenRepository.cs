@@ -4,5 +4,5 @@ using Taskit.Domain.Entities;
 
 public interface IRefreshTokenRepository : IRepository<RefreshToken, Guid>
 {
-    Task<RefreshToken?> GetByTokenAsync(string token);
+    Task<RefreshToken?> GetByTokenAsync(string tokenHash);
 }

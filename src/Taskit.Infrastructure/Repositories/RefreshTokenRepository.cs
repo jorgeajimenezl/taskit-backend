@@ -7,9 +7,9 @@ namespace Taskit.Infrastructure.Repositories;
 
 public class RefreshTokenRepository(AppDbContext context) : Repository<RefreshToken, Guid>(context), IRefreshTokenRepository
 {
-    public async Task<RefreshToken?> GetByTokenAsync(string token)
+    public async Task<RefreshToken?> GetByTokenAsync(string tokenHash)
     {
         return await _dbSet.Include(r => r.User)
-            .FirstOrDefaultAsync(r => r.Token == token);
+            .FirstOrDefaultAsync(r => r.TokenHash == tokenHash);
     }
 }
