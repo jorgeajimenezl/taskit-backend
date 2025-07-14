@@ -46,7 +46,7 @@ public class AuthService(
 
         var token = GenerateJwtToken(user);
         var refreshToken = await CreateRefreshTokenAsync(user);
-        return new LoginResponse { Token = token, RefreshToken = refreshToken };
+        return new LoginResponse { AccessToken = token, RefreshToken = refreshToken };
     }
 
     public async Task LogoutAsync()
@@ -66,10 +66,10 @@ public class AuthService(
 
         var newRefreshToken = await CreateRefreshTokenAsync(stored.User!);
         var token = GenerateJwtToken(stored.User!);
-        return new RefreshResponse { Token = token, RefreshToken = newRefreshToken };
+        return new RefreshResponse { AccessToken = token, RefreshToken = newRefreshToken };
     }
 
-    private string GenerateJwtToken(IdentityUser user)
+    private string GenerateJwtToken(AppUser user)
     {
         var jwtKey = _configuration["JWT:Key"];
         var jwtAudience = _configuration["JWT:Audience"];
