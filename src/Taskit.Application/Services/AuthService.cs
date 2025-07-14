@@ -46,17 +46,42 @@ public class AuthService(
 
         var token = GenerateJwtToken(user);
         var refreshToken = await CreateRefreshTokenAsync(user);
-        return new LoginResponse { AccessToken = token, RefreshToken = refreshToken };
+
+        var http = _httpContextAccessor.HttpContext;
+        http?.Response.Cookies.Append(
+            "refreshToken",
+            refreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+        var response = new LoginResponse { AccessToken = token };
+        if (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true")
+        {
+            response.RefreshToken = refreshToken;
+        }
+
+        return response;
     }
 
     public async Task LogoutAsync()
     {
         await _signInManager.SignOutAsync();
+        _httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken");
     }
 
-    public async Task<RefreshResponse?> RefreshAsync(RefreshRequest dto)
+    public async Task<RefreshResponse?> RefreshAsync(string? providedRefreshToken)
     {
-        var tokenHash = ComputeSha256Hash(dto.RefreshToken);
+        var http = _httpContextAccessor.HttpContext;
+        var refreshToken = providedRefreshToken ?? http?.Request.Cookies["refreshToken"];
+        if (string.IsNullOrEmpty(refreshToken))
+            return null;
+
+        var tokenHash = ComputeSha256Hash(refreshToken);
         var stored = await _refreshTokens.GetByTokenAsync(tokenHash);
         if (stored == null || stored.RevokedAt != null || stored.ExpiresAt <= DateTime.UtcNow)
             return null;
@@ -66,7 +91,25 @@ public class AuthService(
 
         var newRefreshToken = await CreateRefreshTokenAsync(stored.User!);
         var token = GenerateJwtToken(stored.User!);
-        return new RefreshResponse { AccessToken = token, RefreshToken = newRefreshToken };
+
+        http?.Response.Cookies.Append(
+            "refreshToken",
+            newRefreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+        var response = new RefreshResponse { AccessToken = token };
+        if (providedRefreshToken is not null || (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true"))
+        {
+            response.RefreshToken = newRefreshToken;
+        }
+
+        return response;
     }
 
     private string GenerateJwtToken(AppUser user)

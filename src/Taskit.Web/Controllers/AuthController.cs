@@ -32,9 +32,9 @@ public class AuthController(AuthService authService) : ApiControllerBase
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<RefreshResponse>> Refresh(RefreshRequest dto)
+    public async Task<ActionResult<RefreshResponse>> Refresh([FromBody] RefreshRequest? dto)
     {
-        var result = await _auth.RefreshAsync(dto);
+        var result = await _auth.RefreshAsync(dto?.RefreshToken);
         return result is null ? Unauthorized() : Ok(result);
     }
 }
