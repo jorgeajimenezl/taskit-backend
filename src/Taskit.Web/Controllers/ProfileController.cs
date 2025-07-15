@@ -12,7 +12,7 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
 {
     private readonly UserManager<AppUser> _userManager = userManager;
 
-    [HttpPut("{id}")]
+    [HttpPut]
     public async Task<IActionResult> UpdateProfile(UpdateProfileRequest dto)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
