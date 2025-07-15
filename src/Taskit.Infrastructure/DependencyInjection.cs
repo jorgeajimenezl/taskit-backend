@@ -20,8 +20,28 @@ public static class DependencyInjection
     {
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(connectionString));
+        builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+        {
+            options.UseSqlite(connectionString)
+                .UseAsyncSeeding(async (context, _, cancellationToken) =>
+                {
+                    Console.WriteLine("Seeding database...");
+                    var seeder = new DataSeeder(
+                        (AppDbContext)context,
+                        sp.GetRequiredService<RoleManager<IdentityRole>>(),
+                        sp.GetRequiredService<UserManager<AppUser>>());
+                    await seeder.SeedAsync();
+                })
+                .UseSeeding((context, _) =>
+                {
+                    Console.WriteLine("Seeding database...");
+                    var seeder = new DataSeeder(
+                        (AppDbContext)context,
+                        sp.GetRequiredService<RoleManager<IdentityRole>>(),
+                        sp.GetRequiredService<UserManager<AppUser>>());
+                    seeder.Seed();
+                });
+        });
 
         builder.Services.AddHealthChecks()
             .AddDbContextCheck<AppDbContext>();
