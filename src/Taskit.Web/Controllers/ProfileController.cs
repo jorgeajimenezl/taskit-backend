@@ -43,8 +43,8 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteProfile(string id)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteProfile()
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (currentUserId == null)
