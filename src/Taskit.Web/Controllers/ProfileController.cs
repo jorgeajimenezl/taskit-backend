@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Taskit.Application.DTOs;
 using Taskit.Domain.Entities;
 
@@ -12,40 +12,29 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
 {
     private readonly UserManager<AppUser> _userManager = userManager;
 
-    [HttpGet]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetProfiles()
-    {
-        var users = await _userManager.Users
-            .Select(u => new { u.Id, u.FullName, u.UserName })
-            .ToListAsync();
-
-        return Ok(users);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetProfile(string id)
-    {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null)
-            return NotFound();
-
-        return Ok(new { user.Id, user.FullName, user.UserName, user.Email });
-    }
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProfile(string id, UpdateProfileRequest dto)
+    public async Task<IActionResult> UpdateProfile(UpdateProfileRequest dto)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (currentUserId == null)
+            return Unauthorized();
+        var user = await _userManager.FindByIdAsync(currentUserId);
         if (user == null)
             return NotFound();
 
         if (dto.FullName != null)
             user.FullName = dto.FullName;
+
         if (dto.Username != null)
             user.UserName = dto.Username;
+
         if (dto.Email != null)
             user.Email = dto.Email;
+        {
+            var emailResult = await _userManager.SetEmailAsync(user, dto.Email);
+            if (!emailResult.Succeeded)
+                return BadRequest(emailResult.Errors);
+        }
 
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
@@ -57,7 +46,10 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProfile(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (currentUserId == null)
+            return Unauthorized();
+        var user = await _userManager.FindByIdAsync(currentUserId);
         if (user == null)
             return NotFound();
 
