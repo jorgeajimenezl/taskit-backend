@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Gridify;
 using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +17,14 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
 
     public async Task<Paging<ProjectDto>> GetAllForUserAsync(string userId, IGridifyQuery query)
     {
-        var q = _projects.QueryWithMembers()
+        var q = _projects.Query().Include(p => p.Members)
             .Where(p => p.OwnerId == userId || p.Members.Any(m => m.UserId == userId));
         return await q.GridifyToAsync<Project, ProjectDto>(_mapper, query);
     }
 
     public async Task<ProjectDto?> GetByIdAsync(int id, string userId)
     {
-        var project = await _projects.QueryWithMembers()
+        var project = await _projects.Query().Include(p => p.Members)
             .Where(p => p.Id == id && (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)))
             .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
