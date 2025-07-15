@@ -10,7 +10,17 @@ public class TaskRepository(AppDbContext context) : Repository<AppTask, int>(con
 {
     public override IQueryable<AppTask> Query()
     {
-        // TODO:Check access to the tasks
-        return base.Query();
+        return base.Query()
+            .Include(t => t.Project)
+            .ThenInclude(p => p.Members);
+    }
+
+    public IQueryable<AppTask> QueryForUser(string userId)
+    {
+        return Query().Where(t =>
+            t.AuthorId == userId ||
+            t.AssignedUserId == userId ||
+            (t.Project != null &&
+                (t.Project.OwnerId == userId || t.Project.Members.Any(m => m.UserId == userId))));
     }
 }
