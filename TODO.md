@@ -1,0 +1,1 @@
+- Refactor: group the ownership filtering logic of ProjectService methods to avoid code duplication.

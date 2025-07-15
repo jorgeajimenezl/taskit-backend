@@ -1,7 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Gridify;
-using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.Common.Mappings;
 using Taskit.Application.DTOs;
