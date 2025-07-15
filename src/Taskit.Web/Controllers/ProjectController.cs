@@ -12,7 +12,7 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
 {
     private readonly ProjectService _projects = projectService;
 
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> GetProjects([FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -27,7 +27,7 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
         return project is null ? NotFound() : Ok(project);
     }
 
-    [HttpPost("")]
+    [HttpPost]
     public async Task<ActionResult<ProjectDto>> CreateProject(CreateProjectRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -39,6 +39,13 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
     public async Task<IActionResult> UpdateProject(int id, UpdateProjectRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var project = await _projects.GetByIdAsync(id, userId);
+
+        if (project is null)
+        {
+            return NotFound();
+        }
+
         var success = await _projects.UpdateAsync(id, dto, userId);
         return success ? NoContent() : Forbid();
     }
@@ -47,6 +54,13 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
     public async Task<IActionResult> DeleteProject(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var project = await _projects.GetByIdAsync(id, userId);
+        
+        if (project is null)
+        {
+            return NotFound();
+        }
+        
         var success = await _projects.DeleteAsync(id, userId);
         return success ? NoContent() : Forbid();
     }
