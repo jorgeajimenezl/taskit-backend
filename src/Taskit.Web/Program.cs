@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using Taskit.Domain.Entities;
-using Taskit.Infrastructure.Services;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddApplicationServices();
@@ -23,11 +19,18 @@ app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
+    // app.UseCors(policy =>
+    // {
+    //     policy.AllowAnyOrigin()
+    //         .AllowAnyMethod()
+    //         .AllowAnyHeader();
+    // });
     app.UseCors(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowCredentials();
     });
 
     app.MapOpenApi();
