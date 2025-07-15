@@ -6,7 +6,7 @@ namespace Taskit.Infrastructure.Repositories;
 
 public class ProjectRepository(AppDbContext context) : Repository<Project, int>(context), IProjectRepository
 {
-    public override IQueryable<Project> Query()
+    public IQueryable<Project> QueryWithMembers()
     {
         return base.Query().Include(p => p.Members);
     }

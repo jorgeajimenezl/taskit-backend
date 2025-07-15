@@ -16,14 +16,14 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
 
     public async Task<Paging<ProjectDto>> GetAllForUserAsync(string userId, IGridifyQuery query)
     {
-        var q = _projects.Query()
+        var q = _projects.QueryWithMembers()
             .Where(p => p.OwnerId == userId || p.Members.Any(m => m.UserId == userId));
         return await q.GridifyToAsync<Project, ProjectDto>(_mapper, query);
     }
 
     public async Task<ProjectDto?> GetByIdAsync(int id, string userId)
     {
-        var project = await _projects.Query()
+        var project = await _projects.QueryWithMembers()
             .Where(p => p.Id == id && (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)))
             .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
