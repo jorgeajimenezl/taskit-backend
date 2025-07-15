@@ -10,13 +10,6 @@ var app = builder.Build();
 app.UseHealthChecks("/health");
 app.UseRouting();
 
-// Set up authentication and authorization
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Map the controllers
-app.MapControllers();
-
 if (app.Environment.IsDevelopment())
 {
     // app.UseCors(policy =>
@@ -42,6 +35,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Set up authentication and authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map the controllers
+app.MapControllers();
 app.UseHttpsRedirection();
 
 app.Run();
