@@ -79,6 +79,7 @@ public static class DependencyInjection
         // Custom services
         builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
         builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+        builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     }
 }
