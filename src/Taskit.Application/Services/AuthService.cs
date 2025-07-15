@@ -59,11 +59,11 @@ public class AuthService(
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-        var response = new LoginResponse { AccessToken = token };
-        if (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true")
+        var response = new LoginResponse
         {
-            response.RefreshToken = refreshToken;
-        }
+            AccessToken = token,
+            RefreshToken = http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true" ? refreshToken : null
+        };
 
         return response;
     }
@@ -103,11 +103,13 @@ public class AuthService(
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-        var response = new RefreshResponse { AccessToken = token };
-        if (providedRefreshToken is not null || (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true"))
+        var response = new RefreshResponse
         {
-            response.RefreshToken = newRefreshToken;
-        }
+            AccessToken = token,
+            RefreshToken = providedRefreshToken is not null || (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true") 
+                ? newRefreshToken 
+                : null
+        };
 
         return response;
     }
