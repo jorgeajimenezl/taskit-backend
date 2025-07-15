@@ -29,8 +29,8 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
             user.UserName = dto.Username;
 
         if (dto.Email != null)
-            user.Email = dto.Email;
         {
+            user.Email = dto.Email;
             var emailResult = await _userManager.SetEmailAsync(user, dto.Email);
             if (!emailResult.Succeeded)
                 return BadRequest(emailResult.Errors);
