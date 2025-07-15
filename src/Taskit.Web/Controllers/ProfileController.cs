@@ -13,10 +13,11 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
     private readonly UserManager<AppUser> _userManager = userManager;
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetProfiles()
     {
         var users = await _userManager.Users
-            .Select(u => new { u.Id, u.FullName, u.UserName, u.Email })
+            .Select(u => new { u.Id, u.FullName, u.UserName })
             .ToListAsync();
 
         return Ok(users);
