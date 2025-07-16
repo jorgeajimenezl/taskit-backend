@@ -3,6 +3,7 @@ using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
+using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
@@ -12,10 +13,12 @@ namespace Taskit.Web.Controllers;
 public class TaskController : ApiControllerBase
 {
     private readonly TaskService _taskService;
+    private readonly IMapper _mapper;
 
-    public TaskController(TaskService taskService)
+    public TaskController(TaskService taskService, IMapper mapper)
     {
         _taskService = taskService;
+        _mapper = mapper;
     }
 
     [HttpGet("")]
@@ -61,16 +64,7 @@ public class TaskController : ApiControllerBase
         if (existing is null)
             return NotFound();
 
-        var dto = new UpdateTaskRequest
-        {
-            Title = existing.Title,
-            Description = existing.Description,
-            DueDate = existing.DueDate,
-            Status = existing.Status,
-            Priority = existing.Priority,
-            Complexity = existing.Complexity,
-            CompletedPercentage = existing.CompletedPercentage
-        };
+        var dto = _mapper.Map<UpdateTaskRequest>(existing);
 
         patch.ApplyTo(dto, ModelState);
 

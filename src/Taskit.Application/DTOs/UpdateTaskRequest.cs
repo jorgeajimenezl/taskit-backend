@@ -1,6 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
 
+using AutoMapper;
+using Taskit.Domain.Entities;
+
 namespace Taskit.Application.DTOs;
 
 public record UpdateTaskRequest
@@ -23,4 +26,14 @@ public record UpdateTaskRequest
     public string? AssignedUserId { get; init; }
 
     public bool? IsArchived { get; init; }
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<UpdateTaskRequest, AppTask>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<TaskDto, UpdateTaskRequest>();
+        }
+    }
 }

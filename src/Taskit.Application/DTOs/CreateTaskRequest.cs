@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using AutoMapper;
+using Taskit.Domain.Entities;
 
 
 namespace Taskit.Application.DTOs;
@@ -24,4 +26,12 @@ public record CreateTaskRequest
     public int? ProjectId { get; init; }
 
     public string? AssignedUserId { get; init; }
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<CreateTaskRequest, AppTask>();
+        }
+    }
 }

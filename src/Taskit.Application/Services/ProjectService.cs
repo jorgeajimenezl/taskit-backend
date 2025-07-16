@@ -32,12 +32,8 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
 
     public async Task<ProjectDto> CreateAsync(CreateProjectRequest dto, string ownerId)
     {
-        var project = new Project
-        {
-            Name = dto.Name,
-            Description = dto.Description ?? string.Empty,
-            OwnerId = ownerId
-        };
+        var project = _mapper.Map<Project>(dto);
+        project.OwnerId = ownerId;
 
         await _projects.AddAsync(project);
         return _mapper.Map<ProjectDto>(project);
@@ -49,11 +45,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         if (project == null || project.OwnerId != userId)
             return false;
 
-        if (dto.Name is not null)
-            project.Name = dto.Name;
-        if (dto.Description is not null)
-            project.Description = dto.Description;
-
+        _mapper.Map(dto, project);
         project.UpdateTimestamps();
         await _projects.UpdateAsync(project);
         return true;

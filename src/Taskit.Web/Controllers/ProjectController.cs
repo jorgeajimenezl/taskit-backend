@@ -3,15 +3,17 @@ using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
+using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class ProjectController(ProjectService projectService) : ApiControllerBase
+public class ProjectController(ProjectService projectService, IMapper mapper) : ApiControllerBase
 {
     private readonly ProjectService _projects = projectService;
+    private readonly IMapper _mapper = mapper;
 
     [HttpGet]
     public async Task<IActionResult> GetProjects([FromQuery] GridifyQuery query)
@@ -62,11 +64,7 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
             return NotFound();
         }
 
-        var dto = new UpdateProjectRequest
-        {
-            Name = project.Name,
-            Description = project.Description
-        };
+        var dto = _mapper.Map<UpdateProjectRequest>(project);
         patch.ApplyTo(dto, ModelState);
 
         if (!ModelState.IsValid)
