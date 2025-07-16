@@ -43,19 +43,8 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
                 throw new InvalidOperationException("Project not found or access denied");
         }
 
-        var task = new AppTask
-        {
-            Title = dto.Title,
-            Description = dto.Description ?? string.Empty,
-            DueDate = dto.DueDate,
-            Status = dto.Status,
-            Priority = dto.Priority,
-            Complexity = dto.Complexity,
-            CompletedPercentage = dto.CompletedPercentage,
-            AuthorId = userId,
-            ProjectId = dto.ProjectId,
-            AssignedUserId = dto.AssignedUserId
-        };
+        var task = _mapper.Map<AppTask>(dto);
+        task.AuthorId = userId;
 
         await _tasks.AddAsync(task);
         return _mapper.Map<TaskDto>(task);
@@ -69,25 +58,7 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
         if (task == null)
             return false;
 
-        if (dto.Title is not null)
-            task.Title = dto.Title;
-        if (dto.Description is not null)
-            task.Description = dto.Description;
-        if (dto.DueDate.HasValue)
-            task.DueDate = dto.DueDate;
-        if (dto.Status.HasValue)
-            task.Status = dto.Status.Value;
-        if (dto.Priority.HasValue)
-            task.Priority = dto.Priority.Value;
-        if (dto.Complexity.HasValue)
-            task.Complexity = dto.Complexity.Value;
-        if (dto.CompletedPercentage.HasValue)
-            task.CompletedPercentage = dto.CompletedPercentage.Value;
-        if (dto.AssignedUserId is not null)
-            task.AssignedUserId = dto.AssignedUserId;
-        if (dto.IsArchived.HasValue)
-            task.IsArchived = dto.IsArchived.Value;
-
+        _mapper.Map(dto, task);
         task.UpdateTimestamps();
         await _tasks.UpdateAsync(task);
         return true;
