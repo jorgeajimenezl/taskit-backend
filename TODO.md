@@ -1,2 +1,3 @@
 - Refactor: group the ownership filtering logic of ProjectService methods to avoid code duplication.
 - Test: add unit test for the whole suite
+- Feat: create generic base entity class for avoid code duplication
