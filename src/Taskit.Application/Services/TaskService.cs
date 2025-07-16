@@ -39,7 +39,7 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
                 .AnyAsync(p => p.Id == dto.ProjectId &&
                     (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)));
             if (!projectAllowed)
-                throw new InvalidOperationException("Invalid project");
+                throw new InvalidOperationException("Project not found or access denied");
         }
 
         var task = new AppTask
