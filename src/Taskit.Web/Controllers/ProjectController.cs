@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
@@ -44,6 +45,29 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
         if (project is null)
         {
             return NotFound();
+        }
+
+        var success = await _projects.UpdateAsync(id, dto, userId);
+        return success ? NoContent() : Forbid();
+    }
+
+    [HttpPatch("{id:int}")]
+    public async Task<IActionResult> PatchProject(int id, JsonPatchDocument<UpdateProjectRequest> patch)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var project = await _projects.GetByIdAsync(id, userId);
+
+        if (project is null)
+        {
+            return NotFound();
+        }
+
+        var dto = new UpdateProjectRequest();
+        patch.ApplyTo(dto, ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
         }
 
         var success = await _projects.UpdateAsync(id, dto, userId);
