@@ -5,4 +5,5 @@ namespace Taskit.Application.Interfaces;
 
 public interface ITaskRepository : IRepository<AppTask, int>
 {
+    IQueryable<AppTask> QueryForUser(string userId);
 }
