@@ -48,6 +48,9 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
             Description = dto.Description ?? string.Empty,
             DueDate = dto.DueDate,
             Status = dto.Status,
+            Priority = dto.Priority,
+            Complexity = dto.Complexity,
+            CompletedPercentage = dto.CompletedPercentage,
             AuthorId = userId,
             ProjectId = dto.ProjectId,
             AssignedUserId = dto.AssignedUserId
@@ -71,6 +74,12 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
             task.DueDate = dto.DueDate;
         if (dto.Status.HasValue)
             task.Status = dto.Status.Value;
+        if (dto.Priority.HasValue)
+            task.Priority = dto.Priority.Value;
+        if (dto.Complexity.HasValue)
+            task.Complexity = dto.Complexity.Value;
+        if (dto.CompletedPercentage.HasValue)
+            task.CompletedPercentage = dto.CompletedPercentage.Value;
         if (dto.AssignedUserId is not null)
             task.AssignedUserId = dto.AssignedUserId;
         if (dto.IsArchived.HasValue)

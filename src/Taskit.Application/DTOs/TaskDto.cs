@@ -12,6 +12,12 @@ public record TaskDto
     public DateTime? CompletedAt { get; init; }
     public Taskit.Domain.Enums.TaskStatus Status { get; init; }
 
+    public int Priority { get; init; }
+
+    public int Complexity { get; init; }
+
+    public int CompletedPercentage { get; init; }
+
     private class Mapping : Profile
     {
         public Mapping()

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Taskit.Domain.Enums;
+
 
 namespace Taskit.Application.DTOs;
 
@@ -12,7 +12,13 @@ public record UpdateTaskRequest
 
     public DateTime? DueDate { get; init; }
 
-    public TaskStatus? Status { get; init; }
+    public Taskit.Domain.Enums.TaskStatus? Status { get; init; }
+
+    public int? Priority { get; init; }
+
+    public int? Complexity { get; init; }
+
+    public int? CompletedPercentage { get; init; }
 
     public string? AssignedUserId { get; init; }
 
