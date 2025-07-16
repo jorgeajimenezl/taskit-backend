@@ -62,8 +62,10 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
 
     public async Task<bool> UpdateAsync(int id, UpdateTaskRequest dto, string userId)
     {
-        var task = await _tasks.GetByIdAsync(id);
-        if (task == null || task.AuthorId != userId)
+        var task = await _tasks.QueryForUser(userId)
+            .Where(t => t.Id == id)
+            .FirstOrDefaultAsync();
+        if (task == null)
             return false;
 
         if (dto.Title is not null)
