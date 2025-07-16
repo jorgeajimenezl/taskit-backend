@@ -106,8 +106,8 @@ public class AuthService(
         var response = new RefreshResponse
         {
             AccessToken = token,
-            RefreshToken = providedRefreshToken is not null || (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true") 
-                ? newRefreshToken 
+            RefreshToken = providedRefreshToken is not null || (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true")
+                ? newRefreshToken
                 : null
         };
 

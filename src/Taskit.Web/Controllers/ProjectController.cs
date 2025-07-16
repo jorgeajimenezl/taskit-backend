@@ -81,12 +81,12 @@ public class ProjectController(ProjectService projectService, IMapper mapper) : 
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var project = await _projectService.GetByIdAsync(id, userId);
-        
+
         if (project is null)
         {
             return NotFound();
         }
-        
+
         var success = await _projectService.DeleteAsync(id, userId);
         return success ? NoContent() : Forbid();
     }
