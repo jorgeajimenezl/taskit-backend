@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
@@ -47,6 +48,24 @@ public class TaskController : ApiControllerBase
         var existing = await _taskService.GetByIdAsync(id, userId);
         if (existing is null)
             return NotFound();
+
+        var success = await _taskService.UpdateAsync(id, dto, userId);
+        return success ? NoContent() : Forbid();
+    }
+
+    [HttpPatch("{id:int}")]
+    public async Task<IActionResult> PatchTask(int id, JsonPatchDocument<UpdateTaskRequest> patch)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var existing = await _taskService.GetByIdAsync(id, userId);
+        if (existing is null)
+            return NotFound();
+
+        var dto = new UpdateTaskRequest();
+        patch.ApplyTo(dto, ModelState);
+
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
 
         var success = await _taskService.UpdateAsync(id, dto, userId);
         return success ? NoContent() : Forbid();

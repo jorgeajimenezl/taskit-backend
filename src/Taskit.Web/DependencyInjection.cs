@@ -20,7 +20,8 @@ public static class DependencyInjection
         builder.Services.AddControllers(options =>
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new LowercaseParameterTransformer()));
-        });
+        })
+        .AddNewtonsoftJson();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
