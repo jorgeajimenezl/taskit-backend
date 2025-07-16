@@ -61,7 +61,17 @@ public class TaskController : ApiControllerBase
         if (existing is null)
             return NotFound();
 
-        var dto = new UpdateTaskRequest();
+        var dto = new UpdateTaskRequest
+        {
+            Title = existing.Title,
+            Description = existing.Description,
+            DueDate = existing.DueDate,
+            Status = existing.Status,
+            Priority = existing.Priority,
+            Complexity = existing.Complexity,
+            CompletedPercentage = existing.CompletedPercentage
+        };
+
         patch.ApplyTo(dto, ModelState);
 
         if (!ModelState.IsValid)

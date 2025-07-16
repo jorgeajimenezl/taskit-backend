@@ -62,7 +62,11 @@ public class ProjectController(ProjectService projectService) : ApiControllerBas
             return NotFound();
         }
 
-        var dto = new UpdateProjectRequest();
+        var dto = new UpdateProjectRequest
+        {
+            Name = project.Name,
+            Description = project.Description
+        };
         patch.ApplyTo(dto, ModelState);
 
         if (!ModelState.IsValid)
