@@ -1,6 +1,6 @@
 namespace Taskit.Domain.Entities;
 
-public class ProjectMember : BaseEntity
+public class ProjectMember : BaseEntity<int>
 {
     public required int ProjectId { get; set; }
     public required Project Project { get; set; }
