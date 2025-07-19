@@ -27,12 +27,6 @@ public class MediaService(IMediaRepository mediaRepository)
         return await query.ToListAsync();
     }
 
-    public Task<IEnumerable<Media>> GetMediaAsync<TModel>(int modelId, string? collectionName = null)
-        where TModel : class
-    {
-        return GetMediaAsync(typeof(TModel).Name, modelId, collectionName);
-    }
-
     public async Task<Media?> GetFirstMediaAsync(string modelType, int modelId, string? collectionName = null)
     {
         var query = _mediaRepository.Query()
@@ -40,12 +34,6 @@ public class MediaService(IMediaRepository mediaRepository)
         if (!string.IsNullOrEmpty(collectionName))
             query = query.Where(m => m.CollectionName == collectionName);
         return await query.FirstOrDefaultAsync();
-    }
-
-    public Task<Media?> GetFirstMediaAsync<TModel>(int modelId, string? collectionName = null)
-        where TModel : class
-    {
-        return GetFirstMediaAsync(typeof(TModel).Name, modelId, collectionName);
     }
 
     public async Task<bool> DeleteAsync(int id)
