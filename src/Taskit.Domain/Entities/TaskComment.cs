@@ -1,6 +1,6 @@
 namespace Taskit.Domain.Entities;
 
-public class TaskComment : BaseEntity
+public class TaskComment : BaseEntity<int>
 {
     public required string Content { get; set; }
 

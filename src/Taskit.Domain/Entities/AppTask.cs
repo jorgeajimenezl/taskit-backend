@@ -3,7 +3,7 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Domain.Entities;
 
-public class AppTask : BaseEntity
+public class AppTask : BaseEntity<int>
 {
     [Required]
     public required string Title { get; set; }

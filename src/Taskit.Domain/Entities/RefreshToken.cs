@@ -3,13 +3,10 @@ using System.Net;
 
 namespace Taskit.Domain.Entities;
 
-public class RefreshToken
+public class RefreshToken : BaseEntity<Guid>
 {
-    [Key]
-    public Guid Id { get; set; }
     public required string TokenHash { get; set; }
     public DateTime ExpiresAt { get; set; }
-    public DateTime CreatedAt { get; set; }
     public DateTime? RevokedAt { get; set; }
     public string? UserAgent { get; set; }
     public IPAddress? IpAddress { get; set; }

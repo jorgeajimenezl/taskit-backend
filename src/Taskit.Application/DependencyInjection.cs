@@ -15,5 +15,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<TaskService>();
         builder.Services.AddScoped<ProjectService>();
         builder.Services.AddScoped<AuthService>();
+        builder.Services.AddScoped<MediaService>();
     }
 }

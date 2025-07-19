@@ -46,6 +46,12 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
         }
     }
 
+    public virtual async Task DeleteRangeAsync(IEnumerable<TEntity> entities)
+    {
+        _dbSet.RemoveRange(entities);
+        await _context.SaveChangesAsync();
+    }
+
     public virtual async Task<bool> ExistsAsync(TKey id)
     {
         var entity = await GetByIdAsync(id);
