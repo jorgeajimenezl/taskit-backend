@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<TaskComment> TaskComments { get; set; }
     public DbSet<TaskTag> TaskTags { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Media> Media { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) :
         base(options)
