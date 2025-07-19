@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
@@ -70,5 +71,16 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .WithMany(u => u.RefreshTokens)
             .HasForeignKey(rt => rt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Media>()
+            .HasOne(m => m.UploadedBy)
+            .WithMany();
+
+        modelBuilder.Entity<Media>()
+            .Property(m => m.Metadata)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<IDictionary<string, object>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object>()
+            );
     }
 }
