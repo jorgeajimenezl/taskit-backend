@@ -71,7 +71,7 @@ public class ProjectMemberService(
             throw new InvalidOperationException("Access denied");
 
         if (project.Members.Any(m => m.UserId == dto.UserId))
-            throw new InvalidOperationException("User already a member");
+            throw new InvalidOperationException("User is already a member of this project");
 
         var user = await _users.FindByIdAsync(dto.UserId);
         if (user == null)
