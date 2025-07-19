@@ -1,6 +1,6 @@
 namespace Taskit.Domain.Entities;
 
-public class Media : BaseEntity
+public class Media : BaseEntity<int>
 {
     public Guid Uuid { get; set; }
     public required string CollectionName { get; set; }
