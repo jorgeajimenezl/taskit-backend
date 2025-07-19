@@ -80,6 +80,7 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
         builder.Services.AddScoped<ITaskRepository, TaskRepository>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+        builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddScoped<IMediaRepository, MediaRepository>();
     }
