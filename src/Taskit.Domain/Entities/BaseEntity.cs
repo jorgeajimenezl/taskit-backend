@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Taskit.Domain.Interfaces;
 
 namespace Taskit.Domain.Entities;
