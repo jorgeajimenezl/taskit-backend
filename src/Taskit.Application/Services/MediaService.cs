@@ -65,7 +65,7 @@ public class MediaService(IMediaRepository mediaRepository)
                         m.CollectionName == collectionName)
             .ToListAsync();
 
-        if (mediaItems.Count > 0)
+        if (mediaItems.Any())
             await _mediaRepository.DeleteRangeAsync(mediaItems);
     }
 
