@@ -62,7 +62,13 @@ public class AuthService(
         var response = new LoginResponse
         {
             AccessToken = token,
-            RefreshToken = http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true" ? refreshToken : null
+            RefreshToken = http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true" ? refreshToken : null,
+            User = new AppUserDto
+            {
+                UserName = user.UserName!,
+                Email = user.Email!,
+                FullName = user.FullName!
+            }
         };
 
         return response;
