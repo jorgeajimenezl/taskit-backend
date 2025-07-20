@@ -13,7 +13,7 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
     private readonly MediaService _mediaService = mediaService;
 
     [HttpPost]
-    public async Task<ActionResult<MediaDto>> Upload([FromForm] IFormFile file)
+    public async Task<ActionResult<MediaDto>> Upload(IFormFile file)
     {
         if (file == null)
             return BadRequest();
