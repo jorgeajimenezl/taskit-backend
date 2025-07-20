@@ -16,7 +16,7 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
     public async Task<ActionResult<MediaDto>> Upload([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
-            return BadRequest();
+            return BadRequest("File is required and must not be empty.");
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var media = await _mediaService.UploadAsync(file, userId);
