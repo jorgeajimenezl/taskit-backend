@@ -15,11 +15,13 @@ public class TaskService(
     ITaskRepository taskRepository,
     IProjectRepository projectRepository,
     ITagRepository tagRepository,
+    IMediaRepository mediaRepository,
     IMapper mapper)
 {
     private readonly ITaskRepository _tasks = taskRepository;
     private readonly IProjectRepository _projects = projectRepository;
     private readonly ITagRepository _tagsRepo = tagRepository;
+    private readonly IMediaRepository _mediaRepository = mediaRepository;
     private readonly IMapper _mapper = mapper;
 
     private async Task<AppTask?> GetAccessibleTaskWithTagsAsync(int taskId, string userId)
@@ -170,5 +172,37 @@ public class TaskService(
         subTask.UpdateTimestamps();
         await _tasks.UpdateAsync(subTask);
         return true;
+    }
+
+    private Task<bool> HasAccessToTaskAsync(int taskId, string userId)
+    {
+        return _tasks.QueryForUser(userId).AnyAsync(t => t.Id == taskId);
+    }
+
+    public async Task<AttachMediaResult> AttachMediaAsync(int taskId, int mediaId, string userId)
+    {
+        if (!await HasAccessToTaskAsync(taskId, userId))
+            return AttachMediaResult.TaskNotFound;
+
+        var media = await _mediaRepository.GetByIdAsync(mediaId);
+        if (media is null || media.UploadedById != userId)
+            return AttachMediaResult.InvalidMedia;
+
+        media.ModelId = taskId;
+        media.ModelType = nameof(AppTask);
+        await _mediaRepository.UpdateAsync(media);
+        return AttachMediaResult.Success;
+    }
+
+    public async Task<IEnumerable<MediaDto>> GetAttachmentsAsync(int taskId, string userId)
+    {
+        if (!await HasAccessToTaskAsync(taskId, userId))
+            throw new InvalidOperationException("Task not found or access denied");
+
+        var media = await _mediaRepository.Query()
+            .Where(m => m.ModelType == nameof(AppTask) && m.ModelId == taskId)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<MediaDto>>(media);
     }
 }
