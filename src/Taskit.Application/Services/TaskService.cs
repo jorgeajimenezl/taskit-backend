@@ -84,7 +84,6 @@ public class TaskService(
                 .AnyAsync(t => t.Id == dto.ParentTaskId);
             if (!parentAllowed)
                 throw new InvalidOperationException("Parent task not found or access denied");
-            task.ParentTaskId = dto.ParentTaskId;
         }
 
         _mapper.Map(dto, task);
