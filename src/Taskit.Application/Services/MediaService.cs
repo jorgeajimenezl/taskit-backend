@@ -111,6 +111,12 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             return false;
         if (media.UploadedById != userId && media.ModelId != 0)
             return false;
+        if (media.UploadedById != userId && media.ModelId != 0)
+            return false;
+
+        var path = Path.Combine(UploadsPath, media.FileName);
+        if (File.Exists(path))
+            File.Delete(path);
 
         var path = Path.Combine(UploadsPath, media.FileName);
         if (File.Exists(path))
