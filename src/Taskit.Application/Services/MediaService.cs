@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using System.Collections.Generic;
 using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
@@ -14,6 +15,13 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     private readonly IMediaRepository _mediaRepository = mediaRepository;
     private readonly IWebHostEnvironment _environment = environment;
     private readonly IMapper _mapper = mapper;
+
+    private static readonly string[] _allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" };
+    private static readonly HashSet<string> _allowedMimeTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg", "image/png", "image/gif", "application/pdf"
+    };
+    private const long _maxFileSize = 10 * 1024 * 1024; // 10 MB
 
     private string UploadsPath => Path.Combine(
         _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"),
@@ -30,8 +38,11 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return media is null ? null : _mapper.Map<MediaDto>(media);
     }
 
-    public async Task<MediaDto> UploadAsync(IFormFile file, string userId)
+    public async Task<MediaDto?> UploadAsync(IFormFile file, string userId)
     {
+        if (!IsValidFile(file))
+            return null;
+
         Directory.CreateDirectory(UploadsPath);
         var extension = Path.GetExtension(file.FileName);
         var storedName = $"{Guid.NewGuid()}{extension}";
@@ -46,7 +57,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         {
             Uuid = Guid.NewGuid(),
             CollectionName = "default",
-            Name = file.FileName,
+            Name = Path.GetFileName(file.FileName),
             FileName = storedName,
             MimeType = file.ContentType,
             Disk = "local",
@@ -58,6 +69,21 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
 
         await _mediaRepository.AddAsync(media);
         return _mapper.Map<MediaDto>(media);
+    }
+
+    private static bool IsValidFile(IFormFile file)
+    {
+        if (file.Length == 0 || file.Length > _maxFileSize)
+            return false;
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (string.IsNullOrEmpty(extension) || Array.IndexOf(_allowedExtensions, extension) < 0)
+            return false;
+
+        if (string.IsNullOrEmpty(file.ContentType) || !_allowedMimeTypes.Contains(file.ContentType))
+            return false;
+
+        return true;
     }
 
     public async Task<IEnumerable<Media>> GetMediaAsync(string modelType, int modelId, string? collectionName = null)
@@ -85,6 +111,12 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             return false;
         if (media.UploadedById != userId && media.ModelId != 0)
             return false;
+        if (media.UploadedById != userId && media.ModelId != 0)
+            return false;
+
+        var path = Path.Combine(UploadsPath, media.FileName);
+        if (File.Exists(path))
+            File.Delete(path);
 
         var path = Path.Combine(UploadsPath, media.FileName);
         if (File.Exists(path))
@@ -112,3 +144,4 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return ClearMediaCollectionAsync(typeof(TModel).Name, modelId, collectionName);
     }
 }
+
