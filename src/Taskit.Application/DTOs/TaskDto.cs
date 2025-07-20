@@ -1,4 +1,5 @@
 using AutoMapper;
+using System;
 using Taskit.Domain.Entities;
 
 namespace Taskit.Application.DTOs;
@@ -17,6 +18,8 @@ public record TaskDto
     public int Complexity { get; init; }
 
     public int CompletedPercentage { get; init; }
+
+    public IEnumerable<TagDto> Tags { get; init; } = Array.Empty<TagDto>();
 
     private class Mapping : Profile
     {

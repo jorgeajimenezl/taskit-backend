@@ -86,4 +86,27 @@ public class TaskController : ApiControllerBase
         var success = await _taskService.DeleteAsync(id, userId);
         return success ? NoContent() : Forbid();
     }
+
+    [HttpPost("{id:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> AddTag(int id, int tagId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var success = await _taskService.AddTagAsync(id, tagId, userId);
+        return success ? NoContent() : NotFound();
+    }
+
+    [HttpDelete("{id:int}/tags/{tagId:int}")]
+    public async Task<IActionResult> RemoveTag(int id, int tagId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var success = await _taskService.RemoveTagAsync(id, tagId, userId);
+        return success ? NoContent() : NotFound();
+    }
+
+    [HttpGet("by-tags")]
+    public async Task<IActionResult> GetTasksByTags([FromQuery(Name = "ids")] int[] tagIds, [FromQuery] GridifyQuery query)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        return Ok(await _taskService.GetByTagsAsync(tagIds, userId, query));
+    }
 }
