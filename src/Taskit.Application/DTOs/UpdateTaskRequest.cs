@@ -34,7 +34,6 @@ public record UpdateTaskRequest
         public Mapping()
         {
             CreateMap<UpdateTaskRequest, AppTask>()
-                .ForMember(d => d.ParentTaskId, o => o.MapFrom(s => s.ParentTaskId))
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<TaskDto, UpdateTaskRequest>();
         }
