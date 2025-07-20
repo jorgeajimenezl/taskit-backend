@@ -89,7 +89,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         var media = await _mediaRepository.GetByIdAsync(id);
         if (media is null)
             return false;
-        if (media.UploadedById != userId && media.ModelId != 0)
+        if (media.UploadedById != userId)
             return false;
 
         var path = Path.Combine(UploadsPath, media.FileName);
