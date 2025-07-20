@@ -83,7 +83,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             return false;
 
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (string.IsNullOrEmpty(extension) || Array.IndexOf(_allowedExtensions, extension) < 0)
+        if (string.IsNullOrEmpty(extension) || !_allowedExtensions.Contains(extension))
             return false;
 
         if (string.IsNullOrEmpty(file.ContentType) || !_allowedMimeTypes.Contains(file.ContentType))
