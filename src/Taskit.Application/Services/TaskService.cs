@@ -148,15 +148,15 @@ public class TaskService(
 
     public async Task<IEnumerable<TaskDto>> GetSubTasksAsync(int taskId, string userId)
     {
-        var hasAccess = await _tasks.QueryForUser(userId)
-            .AnyAsync(t => t.Id == taskId);
-        if (!hasAccess)
-            throw new InvalidOperationException("Task not found or access denied");
-
-        return await _tasks.QueryForUser(userId)
+        var subtasks = await _tasks.QueryForUser(userId)
             .Where(t => t.ParentTaskId == taskId)
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+
+        if (!subtasks.Any())
+            throw new InvalidOperationException("Task not found or access denied");
+
+        return subtasks;
     }
 
     public async Task<bool> DetachSubTaskAsync(int parentTaskId, int subTaskId, string userId)
