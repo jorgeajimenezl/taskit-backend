@@ -55,6 +55,14 @@ public class TaskService(
                 throw new InvalidOperationException("Project not found or access denied");
         }
 
+        if (dto.ParentTaskId is not null)
+        {
+            var parentAllowed = await _tasks.QueryForUser(userId)
+                .AnyAsync(t => t.Id == dto.ParentTaskId);
+            if (!parentAllowed)
+                throw new InvalidOperationException("Parent task not found or access denied");
+        }
+
         var task = _mapper.Map<AppTask>(dto);
         task.AuthorId = userId;
 
@@ -128,5 +136,18 @@ public class TaskService(
             queryable = queryable.Where(t => t.Tags.Any(tag => tagIdSet.Contains(tag.Id)));
         }
         return await queryable.GridifyToAsync<AppTask, TaskDto>(_mapper, query);
+    }
+
+    public async Task<IEnumerable<TaskDto>> GetSubTasksAsync(int taskId, string userId)
+    {
+        var hasAccess = await _tasks.QueryForUser(userId)
+            .AnyAsync(t => t.Id == taskId);
+        if (!hasAccess)
+            throw new InvalidOperationException("Task not found or access denied");
+
+        return await _tasks.QueryForUser(userId)
+            .Where(t => t.ParentTaskId == taskId)
+            .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }

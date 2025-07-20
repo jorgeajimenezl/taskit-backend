@@ -27,6 +27,8 @@ public record CreateTaskRequest
 
     public string? AssignedUserId { get; init; }
 
+    public int? ParentTaskId { get; init; }
+
     private class Mapping : Profile
     {
         public Mapping()
