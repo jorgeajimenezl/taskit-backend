@@ -15,12 +15,14 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<MediaDto>> Upload([FromForm] IFormFile file)
     {
-        if (file == null || file.Length == 0)
-            return BadRequest("File is required and must not be empty.");
+        if (file == null)
+            return BadRequest();
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var media = await _mediaService.UploadAsync(file, userId);
-        return Created($"/api/media/{media.Id}", media);
+        return media is null
+            ? BadRequest()
+            : Created($"/api/media/{media.Id}", media);
     }
 
     [HttpDelete("{mediaId:int}")]
@@ -31,3 +33,4 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
         return success ? NoContent() : Forbid();
     }
 }
+
