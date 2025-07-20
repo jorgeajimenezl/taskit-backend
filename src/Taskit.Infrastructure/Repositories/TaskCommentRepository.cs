@@ -1,4 +1,3 @@
-using System.Linq;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 
