@@ -78,6 +78,15 @@ public class TaskService(
         if (task == null)
             return false;
 
+        if (dto.ParentTaskId is not null)
+        {
+            var parentAllowed = await _tasks.QueryForUser(userId)
+                .AnyAsync(t => t.Id == dto.ParentTaskId);
+            if (!parentAllowed)
+                throw new InvalidOperationException("Parent task not found or access denied");
+            task.ParentTaskId = dto.ParentTaskId;
+        }
+
         _mapper.Map(dto, task);
         task.UpdateTimestamps();
         await _tasks.UpdateAsync(task);
@@ -149,5 +158,18 @@ public class TaskService(
             .Where(t => t.ParentTaskId == taskId)
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<bool> DetachSubTaskAsync(int parentTaskId, int subTaskId, string userId)
+    {
+        var subTask = await _tasks.QueryForUser(userId)
+            .FirstOrDefaultAsync(t => t.Id == subTaskId && t.ParentTaskId == parentTaskId);
+        if (subTask == null)
+            return false;
+
+        subTask.ParentTaskId = null;
+        subTask.UpdateTimestamps();
+        await _tasks.UpdateAsync(subTask);
+        return true;
     }
 }
