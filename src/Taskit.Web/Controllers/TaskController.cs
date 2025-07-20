@@ -125,4 +125,20 @@ public class TaskController : ApiControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         return Ok(await _taskService.GetByTagsAsync(tagIds, userId, query));
     }
+
+    [HttpPost("{taskId:int}/attachments")]
+    public async Task<IActionResult> AddAttachment(int taskId, AddTaskAttachmentRequest dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var success = await _taskService.AttachMediaAsync(taskId, dto.MediaId, userId);
+        return success ? NoContent() : NotFound();
+    }
+
+    [HttpGet("{taskId:int}/attachments")]
+    public async Task<IActionResult> GetAttachments(int taskId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var attachments = await _taskService.GetAttachmentsAsync(taskId, userId);
+        return Ok(attachments);
+    }
 }
