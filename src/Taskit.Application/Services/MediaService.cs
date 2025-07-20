@@ -30,7 +30,13 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return media is null ? null : _mapper.Map<MediaDto>(media);
     }
 
-    public async Task<MediaDto> UploadAsync(IFormFile file, string userId)
+    public async Task<MediaDto> UploadAsync(
+        IFormFile file,
+        string userId,
+        int? modelId = null,
+        string? modelType = null,
+        string? collectionName = null
+    )
     {
         Directory.CreateDirectory(UploadsPath);
         var extension = Path.GetExtension(file.FileName);
@@ -45,14 +51,14 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         var media = new Media
         {
             Uuid = Guid.NewGuid(),
-            CollectionName = "default",
+            CollectionName = collectionName ?? "default",
             Name = file.FileName,
             FileName = storedName,
             MimeType = file.ContentType,
             Disk = "local",
             Size = (ulong)file.Length,
-            ModelId = 0,
-            ModelType = "Generic",
+            ModelId = modelId,
+            ModelType = modelType,
             UploadedById = userId
         };
 
