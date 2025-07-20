@@ -63,7 +63,7 @@ public class TaskCommentService(
             .FirstOrDefaultAsync(c => c.Id == id);
         if (comment == null)
             return false;
-        if (!await HasAccessToTask(taskId, userId) || comment.AuthorId != userId)
+        if (comment.AuthorId != userId || !await HasAccessToTask(taskId, userId))
             return false;
 
         _mapper.Map(dto, comment);
