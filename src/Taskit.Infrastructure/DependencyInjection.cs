@@ -83,5 +83,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         builder.Services.AddScoped<IMediaRepository, MediaRepository>();
+        builder.Services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
     }
 }
