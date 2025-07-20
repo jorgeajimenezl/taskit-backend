@@ -25,6 +25,8 @@ public record UpdateTaskRequest
 
     public string? AssignedUserId { get; init; }
 
+    public int? ParentTaskId { get; init; }
+
     public bool? IsArchived { get; init; }
 
     private class Mapping : Profile

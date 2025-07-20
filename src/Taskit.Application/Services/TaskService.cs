@@ -55,6 +55,14 @@ public class TaskService(
                 throw new InvalidOperationException("Project not found or access denied");
         }
 
+        if (dto.ParentTaskId is not null)
+        {
+            var parentAllowed = await _tasks.QueryForUser(userId)
+                .AnyAsync(t => t.Id == dto.ParentTaskId);
+            if (!parentAllowed)
+                throw new InvalidOperationException("Parent task not found or access denied");
+        }
+
         var task = _mapper.Map<AppTask>(dto);
         task.AuthorId = userId;
 
@@ -69,6 +77,14 @@ public class TaskService(
             .FirstOrDefaultAsync();
         if (task == null)
             return false;
+
+        if (dto.ParentTaskId is not null)
+        {
+            var parentAllowed = await _tasks.QueryForUser(userId)
+                .AnyAsync(t => t.Id == dto.ParentTaskId);
+            if (!parentAllowed)
+                throw new InvalidOperationException("Parent task not found or access denied");
+        }
 
         _mapper.Map(dto, task);
         task.UpdateTimestamps();
@@ -128,5 +144,31 @@ public class TaskService(
             queryable = queryable.Where(t => t.Tags.Any(tag => tagIdSet.Contains(tag.Id)));
         }
         return await queryable.GridifyToAsync<AppTask, TaskDto>(_mapper, query);
+    }
+
+    public async Task<IEnumerable<TaskDto>> GetSubTasksAsync(int taskId, string userId)
+    {
+        var subtasks = await _tasks.QueryForUser(userId)
+            .Where(t => t.ParentTaskId == taskId)
+            .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        if (!subtasks.Any())
+            throw new InvalidOperationException("Task not found or access denied");
+
+        return subtasks;
+    }
+
+    public async Task<bool> DetachSubTaskAsync(int parentTaskId, int subTaskId, string userId)
+    {
+        var subTask = await _tasks.QueryForUser(userId)
+            .FirstOrDefaultAsync(t => t.Id == subTaskId && t.ParentTaskId == parentTaskId);
+        if (subTask == null)
+            return false;
+
+        subTask.ParentTaskId = null;
+        subTask.UpdateTimestamps();
+        await _tasks.UpdateAsync(subTask);
+        return true;
     }
 }

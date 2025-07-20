@@ -103,6 +103,22 @@ public class TaskController : ApiControllerBase
         return success ? NoContent() : NotFound();
     }
 
+    [HttpGet("{id:int}/subtasks")]
+    public async Task<IActionResult> GetSubTasks(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var tasks = await _taskService.GetSubTasksAsync(id, userId);
+        return Ok(tasks);
+    }
+
+    [HttpDelete("{parentId:int}/subtasks/{subTaskId:int}")]
+    public async Task<IActionResult> DetachSubTask(int parentId, int subTaskId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var success = await _taskService.DetachSubTaskAsync(parentId, subTaskId, userId);
+        return success ? NoContent() : NotFound();
+    }
+
     [HttpGet("by-tags")]
     public async Task<IActionResult> GetTasksByTags([FromQuery(Name = "ids")] int[] tagIds, [FromQuery] GridifyQuery query)
     {
