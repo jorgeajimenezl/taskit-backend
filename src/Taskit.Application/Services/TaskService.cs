@@ -121,8 +121,9 @@ public class TaskService(
 
     public async Task<Paging<TaskDto>> GetByTagsAsync(IEnumerable<int> tagIds, string userId, IGridifyQuery query)
     {
+        var tagIdSet = new HashSet<int>(tagIds);
         return await _tasks.QueryForUser(userId)
-            .Where(t => t.Tags.Any(tag => tagIds.Contains(tag.Id)))
+            .Where(t => t.Tags.Any(tag => tagIdSet.Contains(tag.Id)))
             .GridifyToAsync<AppTask, TaskDto>(_mapper, query);
     }
 }
