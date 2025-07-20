@@ -11,11 +11,23 @@ using Taskit.Domain.Entities;
 
 namespace Taskit.Application.Services;
 
-public class TaskService(ITaskRepository taskRepository, IProjectRepository projectRepository, IMapper mapper)
+public class TaskService(
+    ITaskRepository taskRepository,
+    IProjectRepository projectRepository,
+    ITagRepository tagRepository,
+    IMapper mapper)
 {
     private readonly ITaskRepository _tasks = taskRepository;
     private readonly IProjectRepository _projects = projectRepository;
+    private readonly ITagRepository _tagsRepo = tagRepository;
     private readonly IMapper _mapper = mapper;
+
+    private async Task<AppTask?> GetAccessibleTaskWithTagsAsync(int taskId, string userId)
+    {
+        return await _tasks.QueryForUser(userId)
+            .Include(t => t.Tags)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
+    }
 
     public async Task<Paging<TaskDto>> GetAllForUserAsync(string userId, IGridifyQuery query)
     {
@@ -72,5 +84,49 @@ public class TaskService(ITaskRepository taskRepository, IProjectRepository proj
 
         await _tasks.DeleteAsync(id);
         return true;
+    }
+
+    public async Task<bool> AddTagAsync(int taskId, int tagId, string userId)
+    {
+        var task = await GetAccessibleTaskWithTagsAsync(taskId, userId);
+        if (task == null)
+            return false;
+
+        if (task.Tags.Any(t => t.Id == tagId))
+            return true;
+
+        var tag = await _tagsRepo.GetByIdAsync(tagId);
+        if (tag == null)
+            return false;
+
+        task.Tags.Add(tag);
+        await _tasks.UpdateAsync(task);
+        return true;
+    }
+
+    public async Task<bool> RemoveTagAsync(int taskId, int tagId, string userId)
+    {
+        var task = await GetAccessibleTaskWithTagsAsync(taskId, userId);
+        if (task == null)
+            return false;
+
+        var tag = task.Tags.FirstOrDefault(t => t.Id == tagId);
+        if (tag == null)
+            return false;
+
+        task.Tags.Remove(tag);
+        await _tasks.UpdateAsync(task);
+        return true;
+    }
+
+    public async Task<Paging<TaskDto>> GetByTagsAsync(IEnumerable<int> tagIds, string userId, IGridifyQuery query)
+    {
+        var tagIdSet = new HashSet<int>(tagIds);
+        var queryable = _tasks.QueryForUser(userId);
+        if (tagIds != null && tagIds.Any())
+        {
+            queryable = queryable.Where(t => t.Tags.Any(tag => tagIdSet.Contains(tag.Id)));
+        }
+        return await queryable.GridifyToAsync<AppTask, TaskDto>(_mapper, query);
     }
 }
