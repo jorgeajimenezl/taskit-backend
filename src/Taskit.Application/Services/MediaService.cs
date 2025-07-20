@@ -49,14 +49,35 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         if (!IsValidFile(file))
             return null;
 
-        Directory.CreateDirectory(UploadsPath);
-        var extension = Path.GetExtension(file.FileName);
-        var storedName = $"{Guid.NewGuid()}{extension}";
-        var path = Path.Combine(UploadsPath, storedName);
-
-        using (var stream = File.Create(path))
+        try
         {
-            await file.CopyToAsync(stream);
+            Directory.CreateDirectory(UploadsPath);
+            var extension = Path.GetExtension(file.FileName);
+            var storedName = $"{Guid.NewGuid()}{extension}";
+            var path = Path.Combine(UploadsPath, storedName);
+
+            using (var stream = File.Create(path))
+            {
+                await file.CopyToAsync(stream);
+            }
+        }
+        catch (IOException ex)
+        {
+            // Log the exception or handle it appropriately
+            Console.WriteLine($"File operation failed: {ex.Message}");
+            return null;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // Log the exception or handle it appropriately
+            Console.WriteLine($"Access denied: {ex.Message}");
+            return null;
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            // Log the exception or handle it appropriately
+            Console.WriteLine($"Directory not found: {ex.Message}");
+            return null;
         }
 
         var media = new Media
