@@ -155,7 +155,7 @@ public class TaskService(
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        if (!subtasks.Any())
+        if (subtasks.Count == 0)
             throw new InvalidOperationException("Task not found or access denied");
 
         return subtasks;
