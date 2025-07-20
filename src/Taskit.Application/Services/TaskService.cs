@@ -179,19 +179,19 @@ public class TaskService(
         return _tasks.QueryForUser(userId).AnyAsync(t => t.Id == taskId);
     }
 
-    public async Task<bool> AttachMediaAsync(int taskId, int mediaId, string userId)
+    public async Task<AttachMediaResult> AttachMediaAsync(int taskId, int mediaId, string userId)
     {
         if (!await HasAccessToTaskAsync(taskId, userId))
-            return false;
+            return AttachMediaResult.TaskNotFound;
 
         var media = await _mediaRepository.GetByIdAsync(mediaId);
-        if (media is null)
-            return false;
+        if (media is null || media.UploadedById != userId)
+            return AttachMediaResult.InvalidMedia;
 
         media.ModelId = taskId;
         media.ModelType = nameof(AppTask);
         await _mediaRepository.UpdateAsync(media);
-        return true;
+        return AttachMediaResult.Success;
     }
 
     public async Task<IEnumerable<MediaDto>> GetAttachmentsAsync(int taskId, string userId)
