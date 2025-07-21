@@ -5,7 +5,6 @@ namespace Taskit.Domain.Entities;
 
 public class AppTask : BaseEntity<int>
 {
-    [Required]
     public required string Title { get; set; }
     public required string Description { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; }
@@ -28,7 +27,7 @@ public class AppTask : BaseEntity<int>
     public int? ParentTaskId { get; set; }
     public AppTask? ParentTask { get; set; }
 
-    // Navigation properties for related entities
+    // Navigaiton properties
     public ICollection<AppTask> SubTasks { get; set; } = [];
     public ICollection<TaskTag> Tags { get; set; } = [];
     public ICollection<TaskComment> Comments { get; set; } = [];

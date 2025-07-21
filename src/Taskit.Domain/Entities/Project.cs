@@ -10,7 +10,7 @@ public class Project : BaseEntity<int>
     public required string OwnerId { get; set; }
     public AppUser Owner { get; set; } = null!;
 
-    // Navigation property for tasks in the project
+    // Navigation properties
     public ICollection<AppTask> Tasks { get; set; } = [];
     public ICollection<ProjectMember> Members { get; set; } = [];
 }
