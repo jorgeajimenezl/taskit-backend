@@ -10,6 +10,7 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Microsoft.AspNetCore.Http;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
 
@@ -31,7 +32,7 @@ public class AuthService(
         var user = new AppUser { UserName = dto.Username, Email = dto.Email, FullName = dto.FullName };
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
-            throw new InvalidOperationException(string.Join(";", result.Errors.Select(e => e.Description)));
+            throw new ValidationException(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
     }
 
     public async Task<LoginResponse?> LoginAsync(LoginRequest dto)
