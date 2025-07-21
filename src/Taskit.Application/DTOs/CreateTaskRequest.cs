@@ -8,9 +8,10 @@ namespace Taskit.Application.DTOs;
 public record CreateTaskRequest
 {
     [Required]
-    [StringLength(100)]
+    [StringLength(200)]
     public required string Title { get; init; }
 
+    [StringLength(2000)]
     public string? Description { get; init; }
 
     public DateTime? DueDate { get; init; }
@@ -21,6 +22,7 @@ public record CreateTaskRequest
 
     public int Complexity { get; init; } = 0;
 
+    [Range(0, 100)]
     public int CompletedPercentage { get; init; } = 0;
 
     public int? ProjectId { get; init; }

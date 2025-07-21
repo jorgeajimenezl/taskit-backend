@@ -11,5 +11,6 @@ public record UpdateProfileRequest
     public string? Username { get; init; }
 
     [EmailAddress]
+    [StringLength(100)]
     public string? Email { get; init; }
 }

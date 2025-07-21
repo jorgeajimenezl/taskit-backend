@@ -6,7 +6,7 @@ namespace Taskit.Application.DTOs;
 
 public record UpdateTaskCommentRequest
 {
-    [StringLength(500)]
+    [StringLength(1000)]
     public string? Content { get; init; }
 
     private class Mapping : Profile
