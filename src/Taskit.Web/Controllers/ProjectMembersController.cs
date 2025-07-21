@@ -9,7 +9,7 @@ namespace Taskit.Web.Controllers;
 
 [Authorize]
 [Route("api/projects/{projectId:int}/members")]
-public class ProjectMemberController(ProjectMemberService service, IMapper mapper) : ApiControllerBase
+public class ProjectMembersController(ProjectMemberService service, IMapper mapper) : ApiControllerBase
 {
     private readonly ProjectMemberService _service = service;
     private readonly IMapper _mapper = mapper;

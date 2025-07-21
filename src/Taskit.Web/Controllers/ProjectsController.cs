@@ -11,7 +11,7 @@ using Taskit.Application.Services;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class ProjectController(ProjectService projectService, IMapper mapper) : ApiControllerBase
+public class ProjectsController(ProjectService projectService, IMapper mapper) : ApiControllerBase
 {
     private readonly ProjectService _projectService = projectService;
     private readonly IMapper _mapper = mapper;

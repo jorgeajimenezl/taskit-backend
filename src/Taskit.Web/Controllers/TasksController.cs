@@ -11,16 +11,10 @@ using Taskit.Application.Services;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class TaskController : ApiControllerBase
+public class TasksController(TaskService taskService, IMapper mapper) : ApiControllerBase
 {
-    private readonly TaskService _taskService;
-    private readonly IMapper _mapper;
-
-    public TaskController(TaskService taskService, IMapper mapper)
-    {
-        _taskService = taskService;
-        _mapper = mapper;
-    }
+    private readonly TaskService _taskService = taskService;
+    private readonly IMapper _mapper = mapper;
 
     [HttpGet("")]
     public async Task<ActionResult<Paging<TaskDto>>> GetTasks([FromQuery] GridifyQuery query)

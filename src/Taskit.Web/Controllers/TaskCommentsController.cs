@@ -10,7 +10,7 @@ namespace Taskit.Web.Controllers;
 
 [Authorize]
 [Route("api/tasks/{taskId:int}/comments")]
-public class TaskCommentController(TaskCommentService service, IMapper mapper) : ApiControllerBase
+public class TaskCommentsController(TaskCommentService service, IMapper mapper) : ApiControllerBase
 {
     private readonly TaskCommentService _service = service;
     private readonly IMapper _mapper = mapper;

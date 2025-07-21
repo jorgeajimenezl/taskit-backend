@@ -6,7 +6,7 @@ using Taskit.Application.Services;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class TagController(TagService service) : ApiControllerBase
+public class TagsController(TagService service) : ApiControllerBase
 {
     private readonly TagService _service = service;
 
