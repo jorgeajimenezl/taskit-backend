@@ -23,7 +23,7 @@ public class TaskController : ApiControllerBase
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetTasks([FromQuery] GridifyQuery query)
+    public async Task<ActionResult<Paging<TaskDto>>> GetTasks([FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         return Ok(await _taskService.GetAllForUserAsync(userId, query));
@@ -38,7 +38,7 @@ public class TaskController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TaskDto>> CreateTask(CreateTaskRequest dto)
+    public async Task<IActionResult> CreateTask(CreateTaskRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var task = await _taskService.CreateAsync(dto, userId);
@@ -94,7 +94,7 @@ public class TaskController : ApiControllerBase
     }
 
     [HttpGet("{id:int}/subtasks")]
-    public async Task<IActionResult> GetSubTasks(int id)
+    public async Task<ActionResult<IEnumerable<TaskDto>>> GetSubTasks(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var tasks = await _taskService.GetSubTasksAsync(id, userId);
@@ -110,7 +110,7 @@ public class TaskController : ApiControllerBase
     }
 
     [HttpGet("by-tags")]
-    public async Task<IActionResult> GetTasksByTags([FromQuery(Name = "ids")] int[] tagIds, [FromQuery] GridifyQuery query)
+    public async Task<ActionResult<Paging<TaskDto>>> GetTasksByTags([FromQuery(Name = "ids")] int[] tagIds, [FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         return Ok(await _taskService.GetByTagsAsync(tagIds, userId, query));
@@ -125,7 +125,7 @@ public class TaskController : ApiControllerBase
     }
 
     [HttpGet("{taskId:int}/attachments")]
-    public async Task<IActionResult> GetAttachments(int taskId)
+    public async Task<ActionResult<IEnumerable<MediaDto>>> GetAttachments(int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var attachments = await _taskService.GetAttachmentsAsync(taskId, userId);
