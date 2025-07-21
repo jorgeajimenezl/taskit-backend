@@ -12,7 +12,7 @@ public record CreateTagRequest
 
     [Required]
     [StringLength(7)]
-    [RegularExpression("^#[0-9A-Fa-f]{6}$")]
+    [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "The color must be a valid hex code in the format #RRGGBB.")]
     public string Color { get; init; } = "#000000";
 
     private class Mapping : Profile
