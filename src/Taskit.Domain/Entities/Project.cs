@@ -8,8 +8,8 @@ public class Project : BaseEntity<int>
     [Required, MaxLength(100)]
     public required string Name { get; set; }
 
-    [MaxLength(500)]
-    public required string Description { get; set; } = string.Empty;
+    [Required, MaxLength(500)]
+    public string Description { get; set; } = string.Empty;
 
     [Required, ForeignKey(nameof(Owner))]
     public required string OwnerId { get; set; }
