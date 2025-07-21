@@ -1,4 +1,5 @@
 using System.Reflection;
+using Gridify;
 using Microsoft.Extensions.Hosting;
 using Taskit.Application.Services;
 
@@ -8,6 +9,9 @@ public static class DependencyInjection
 {
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
+        // Configure Gridify global settings
+        GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+
         builder.Services.AddAutoMapper((_) => Assembly.GetExecutingAssembly());
         builder.Services.AddHttpContextAccessor();
 
