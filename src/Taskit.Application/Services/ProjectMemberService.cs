@@ -44,9 +44,11 @@ public class ProjectMemberService(
 
     public async Task<IEnumerable<ProjectMemberDto>> GetAllAsync(int projectId, string userId)
     {
-        var project = await GetProjectAsync(projectId) ?? throw new InvalidOperationException("Project not found");
+        var project = await GetProjectAsync(projectId);
+        Guard.Against.NotFound(projectId, project);
+
         if (!CanRead(project, userId))
-            throw new InvalidOperationException("Access denied");
+            throw new ForbiddenAccessException();
 
         return await _members.QueryForProject(projectId)
             .Include(m => m.User)
@@ -57,8 +59,8 @@ public class ProjectMemberService(
     public async Task<ProjectMemberDto> GetByIdAsync(int projectId, int id, string userId)
     {
         var project = await GetProjectAsync(projectId);
-        if (project is null)
-            throw new NotFoundException(nameof(Project), projectId.ToString());
+        Guard.Against.NotFound(projectId, project);
+
         if (!CanRead(project, userId))
             throw new ForbiddenAccessException();
 
@@ -66,25 +68,23 @@ public class ProjectMemberService(
             .Include(m => m.User)
             .FirstOrDefaultAsync(m => m.Id == id);
 
-        if (member is null)
-            throw new NotFoundException(nameof(ProjectMember), id.ToString());
+        Guard.Against.NotFound(id, member);
         return _mapper.Map<ProjectMemberDto>(member);
     }
 
     public async Task<ProjectMemberDto> AddAsync(int projectId, AddProjectMemberRequest dto, string userId)
     {
         var project = await GetProjectAsync(projectId);
-        if (project is null)
-            throw new NotFoundException(nameof(Project), projectId.ToString());
+        Guard.Against.NotFound(projectId, project);
+
         if (!CanManage(project, userId))
             throw new ForbiddenAccessException();
 
         if (project.Members.Any(m => m.UserId == dto.UserId))
-            throw new InvalidOperationException("User is already a member of this project");
+            throw new RuleViolationException("User is already a member of this project");
 
         var user = await _users.FindByIdAsync(dto.UserId);
-        if (user is null)
-            throw new NotFoundException(nameof(AppUser), dto.UserId);
+        Guard.Against.NotFound(dto.UserId, user);
 
         var member = _mapper.Map<ProjectMember>(dto);
         member.ProjectId = projectId;
@@ -98,10 +98,10 @@ public class ProjectMemberService(
     {
         var member = await _members.Query()
             .Include(m => m.Project)
-                .ThenInclude(p => p.Members)
+            .ThenInclude(p => p.Members)
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
-        if (member is null)
-            throw new NotFoundException(nameof(ProjectMember), id.ToString());
+        Guard.Against.NotFound(id, member);
+
         if (!CanManage(member.Project, userId))
             throw new ForbiddenAccessException();
 
@@ -116,8 +116,8 @@ public class ProjectMemberService(
             .Include(m => m.Project)
                 .ThenInclude(p => p.Members)
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
-        if (member is null)
-            throw new NotFoundException(nameof(ProjectMember), id.ToString());
+        Guard.Against.NotFound(id, member);
+
         if (!CanManage(member.Project, userId))
             throw new ForbiddenAccessException();
 
