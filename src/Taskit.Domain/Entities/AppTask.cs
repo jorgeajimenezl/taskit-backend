@@ -1,5 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using Taskit.Domain.Enums;
+using TaskStatus = Taskit.Domain.Enums.TaskStatus;
 
 namespace Taskit.Domain.Entities;
 
@@ -9,7 +8,7 @@ public class AppTask : BaseEntity<int>
     public required string Description { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; }
     public DateTime? CompletedAt { get; set; }
-    public Enums.TaskStatus Status { get; set; } = Enums.TaskStatus.Created;
+    public TaskStatus Status { get; set; } = TaskStatus.Created;
     public int Priority { get; set; } = 0;
     public bool IsArchived { get; set; } = false;
     public int Complexity { get; set; } = 0;
