@@ -143,7 +143,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
                         m.CollectionName == collectionName)
             .ToListAsync();
 
-        if (mediaItems.Count != 0)
+        if (mediaItems.Any())
             await _mediaRepository.DeleteRangeAsync(mediaItems);
     }
 
