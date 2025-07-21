@@ -8,8 +8,10 @@ namespace Taskit.Application.DTOs;
 public record AddProjectMemberRequest
 {
     [Required]
+    [StringLength(450)]
     public required string UserId { get; init; }
 
+    [EnumDataType(typeof(ProjectRole))]
     public ProjectRole Role { get; init; } = ProjectRole.Member;
 
     private class Mapping : Profile

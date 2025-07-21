@@ -8,9 +8,10 @@ namespace Taskit.Application.DTOs;
 
 public record UpdateTaskRequest
 {
-    [StringLength(100)]
+    [StringLength(200)]
     public string? Title { get; init; }
 
+    [StringLength(2000)]
     public string? Description { get; init; }
 
     public DateTime? DueDate { get; init; }
@@ -21,6 +22,7 @@ public record UpdateTaskRequest
 
     public int? Complexity { get; init; }
 
+    [Range(0, 100)]
     public int? CompletedPercentage { get; init; }
 
     public string? AssignedUserId { get; init; }
