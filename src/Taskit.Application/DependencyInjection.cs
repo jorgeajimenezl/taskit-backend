@@ -12,7 +12,10 @@ public static class DependencyInjection
         // Configure Gridify global settings
         GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
 
-        builder.Services.AddAutoMapper((_) => Assembly.GetExecutingAssembly());
+        builder.Services.AddAutoMapper(cfg =>
+        {
+            cfg.AddMaps(Assembly.GetExecutingAssembly());
+        });
         builder.Services.AddHttpContextAccessor();
 
         // Custom services
