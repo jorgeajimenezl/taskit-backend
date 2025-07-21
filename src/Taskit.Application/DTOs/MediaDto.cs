@@ -13,7 +13,7 @@ public record MediaDto
         public Mapping()
         {
             CreateMap<Media, MediaDto>()
-                .ForMember(d => d.Url, opt => opt.MapFrom(src => $"/uploads/{src.FileName}"));
+                .ForMember(d => d.Url, opt => opt.MapFrom(src => $"/media/{src.FileName}"));
         }
     }
 }
