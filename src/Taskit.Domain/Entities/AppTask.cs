@@ -10,7 +10,7 @@ public class AppTask : BaseEntity<int>
     public required string Title { get; set; }
 
     [Required, MaxLength(2000)]
-    public required string Description { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 
     public DateTime? DueDate { get; set; }
     public DateTime? CompletedAt { get; set; }
