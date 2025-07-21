@@ -39,7 +39,8 @@ public class AuthService(
     public async Task<LoginResponse> LoginAsync(LoginRequest dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
-        Guard.Against.Null(user, nameof(user), "Invalid credentials");
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid email or password");
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!result.Succeeded)
@@ -85,7 +86,8 @@ public class AuthService(
     {
         var http = _httpContextAccessor.HttpContext;
         var refreshToken = providedRefreshToken ?? http?.Request.Cookies["refreshToken"];
-        Guard.Against.NullOrEmpty(refreshToken, nameof(refreshToken), "Invalid refresh token");
+        if (string.IsNullOrEmpty(refreshToken))
+            throw new UnauthorizedAccessException("Refresh token is required");
 
         var tokenHash = ComputeSha256Hash(refreshToken);
         var stored = await _refreshTokens.GetByTokenAsync(tokenHash);
