@@ -15,7 +15,7 @@ public class ProjectMemberController(ProjectMemberService service, IMapper mappe
     private readonly IMapper _mapper = mapper;
 
     [HttpGet]
-    public async Task<IActionResult> GetMembers(int projectId)
+    public async Task<ActionResult<IEnumerable<ProjectMemberDto>>> GetMembers(int projectId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var members = await _service.GetAllAsync(projectId, userId);

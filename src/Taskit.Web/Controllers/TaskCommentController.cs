@@ -16,7 +16,7 @@ public class TaskCommentController(TaskCommentService service, IMapper mapper) :
     private readonly IMapper _mapper = mapper;
 
     [HttpGet]
-    public async Task<IActionResult> GetComments(int taskId)
+    public async Task<ActionResult<IEnumerable<TaskCommentDto>>> GetComments(int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var comments = await _service.GetAllAsync(taskId, userId);

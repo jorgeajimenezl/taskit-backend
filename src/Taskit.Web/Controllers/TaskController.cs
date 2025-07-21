@@ -38,7 +38,7 @@ public class TaskController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTask(CreateTaskRequest dto)
+    public async Task<ActionResult<TaskDto>> CreateTask(CreateTaskRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var task = await _taskService.CreateAsync(dto, userId);
