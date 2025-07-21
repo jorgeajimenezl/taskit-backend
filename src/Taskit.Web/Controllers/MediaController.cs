@@ -20,17 +20,15 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var media = await _mediaService.UploadAsync(file, userId);
-        return media is null
-            ? BadRequest()
-            : Created($"/api/media/{media.Id}", media);
+        return Created($"/api/media/{media.Id}", media);
     }
 
     [HttpDelete("{mediaId:int}")]
     public async Task<IActionResult> Delete(int mediaId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var success = await _mediaService.DeleteAsync(mediaId, userId);
-        return success ? NoContent() : Forbid();
+        await _mediaService.DeleteAsync(mediaId, userId);
+        return NoContent();
     }
 }
 

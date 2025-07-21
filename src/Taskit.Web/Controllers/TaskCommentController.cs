@@ -28,7 +28,7 @@ public class TaskCommentController(TaskCommentService service, IMapper mapper) :
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var comment = await _service.GetByIdAsync(taskId, id, userId);
-        return comment is null ? NotFound() : Ok(comment);
+        return Ok(comment);
     }
 
     [HttpPost]
@@ -43,12 +43,8 @@ public class TaskCommentController(TaskCommentService service, IMapper mapper) :
     public async Task<IActionResult> UpdateComment(int taskId, int id, UpdateTaskCommentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var existing = await _service.GetByIdAsync(taskId, id, userId);
-        if (existing is null)
-            return NotFound();
-
-        var success = await _service.UpdateAsync(taskId, id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _service.UpdateAsync(taskId, id, dto, userId);
+        return NoContent();
     }
 
     [HttpPatch("{id:int}")]
@@ -56,27 +52,20 @@ public class TaskCommentController(TaskCommentService service, IMapper mapper) :
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var existing = await _service.GetByIdAsync(taskId, id, userId);
-        if (existing is null)
-            return NotFound();
-
         var dto = _mapper.Map<UpdateTaskCommentRequest>(existing);
         patch.ApplyTo(dto, ModelState);
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        var success = await _service.UpdateAsync(taskId, id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _service.UpdateAsync(taskId, id, dto, userId);
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteComment(int taskId, int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var existing = await _service.GetByIdAsync(taskId, id, userId);
-        if (existing is null)
-            return NotFound();
-
-        var success = await _service.DeleteAsync(taskId, id, userId);
-        return success ? NoContent() : Forbid();
+        await _service.DeleteAsync(taskId, id, userId);
+        return NoContent();
     }
 }

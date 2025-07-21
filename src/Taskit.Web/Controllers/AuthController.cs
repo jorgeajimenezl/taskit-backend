@@ -20,7 +20,7 @@ public class AuthController(AuthService authService) : ApiControllerBase
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest dto)
     {
         var result = await _auth.LoginAsync(dto);
-        return result is null ? Unauthorized() : Ok(result);
+        return Ok(result);
     }
 
     [Authorize]
@@ -35,6 +35,6 @@ public class AuthController(AuthService authService) : ApiControllerBase
     public async Task<ActionResult<RefreshResponse>> Refresh([FromBody] RefreshRequest? dto)
     {
         var result = await _auth.RefreshAsync(dto?.RefreshToken);
-        return result is null ? Unauthorized() : Ok(result);
+        return Ok(result);
     }
 }

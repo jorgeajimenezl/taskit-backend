@@ -3,11 +3,13 @@ using AutoMapper.QueryableExtensions;
 using Gridify;
 using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
+using Ardalis.GuardClauses;
 using Taskit.Application.Common.Mappings;
 using Taskit.Application.Common.Models;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
 
@@ -72,13 +74,13 @@ public class TaskService(
         return _mapper.Map<TaskDto>(task);
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateTaskRequest dto, string userId)
+    public async Task UpdateAsync(int id, UpdateTaskRequest dto, string userId)
     {
         var task = await _tasks.QueryForUser(userId)
             .Where(t => t.Id == id)
             .FirstOrDefaultAsync();
-        if (task == null)
-            return false;
+        if (task is null)
+            throw new NotFoundException(nameof(AppTask), id.ToString());
 
         if (dto.ParentTaskId is not null)
         {
@@ -91,50 +93,48 @@ public class TaskService(
         _mapper.Map(dto, task);
         task.UpdateTimestamps();
         await _tasks.UpdateAsync(task);
-        return true;
     }
 
-    public async Task<bool> DeleteAsync(int id, string userId)
+    public async Task DeleteAsync(int id, string userId)
     {
         var task = await _tasks.GetByIdAsync(id);
-        if (task == null || task.AuthorId != userId)
-            return false;
+        if (task is null)
+            throw new NotFoundException(nameof(AppTask), id.ToString());
+        if (task.AuthorId != userId)
+            throw new ForbiddenAccessException();
 
         await _tasks.DeleteAsync(id);
-        return true;
     }
 
-    public async Task<bool> AddTagAsync(int taskId, int tagId, string userId)
+    public async Task AddTagAsync(int taskId, int tagId, string userId)
     {
         var task = await GetAccessibleTaskWithTagsAsync(taskId, userId);
-        if (task == null)
-            return false;
+        if (task is null)
+            throw new NotFoundException(nameof(AppTask), taskId.ToString());
 
         if (task.Tags.Any(t => t.Id == tagId))
-            return true;
+            return;
 
         var tag = await _tagsRepo.GetByIdAsync(tagId);
-        if (tag == null)
-            return false;
+        if (tag is null)
+            throw new NotFoundException(nameof(TaskTag), tagId.ToString());
 
         task.Tags.Add(tag);
         await _tasks.UpdateAsync(task);
-        return true;
     }
 
-    public async Task<bool> RemoveTagAsync(int taskId, int tagId, string userId)
+    public async Task RemoveTagAsync(int taskId, int tagId, string userId)
     {
         var task = await GetAccessibleTaskWithTagsAsync(taskId, userId);
-        if (task == null)
-            return false;
+        if (task is null)
+            throw new NotFoundException(nameof(AppTask), taskId.ToString());
 
         var tag = task.Tags.FirstOrDefault(t => t.Id == tagId);
-        if (tag == null)
-            return false;
+        if (tag is null)
+            throw new NotFoundException(nameof(TaskTag), tagId.ToString());
 
         task.Tags.Remove(tag);
         await _tasks.UpdateAsync(task);
-        return true;
     }
 
     public async Task<Paging<TaskDto>> GetByTagsAsync(IEnumerable<int> tagIds, string userId, IGridifyQuery query)
@@ -161,17 +161,16 @@ public class TaskService(
         return subtasks;
     }
 
-    public async Task<bool> DetachSubTaskAsync(int parentTaskId, int subTaskId, string userId)
+    public async Task DetachSubTaskAsync(int parentTaskId, int subTaskId, string userId)
     {
         var subTask = await _tasks.QueryForUser(userId)
             .FirstOrDefaultAsync(t => t.Id == subTaskId && t.ParentTaskId == parentTaskId);
-        if (subTask == null)
-            return false;
+        if (subTask is null)
+            throw new NotFoundException(nameof(AppTask), subTaskId.ToString());
 
         subTask.ParentTaskId = null;
         subTask.UpdateTimestamps();
         await _tasks.UpdateAsync(subTask);
-        return true;
     }
 
     private Task<bool> HasAccessToTaskAsync(int taskId, string userId)

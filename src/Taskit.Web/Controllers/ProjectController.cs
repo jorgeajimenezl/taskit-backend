@@ -27,7 +27,7 @@ public class ProjectController(ProjectService projectService, IMapper mapper) : 
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var project = await _projectService.GetByIdAsync(id, userId);
-        return project is null ? NotFound() : Ok(project);
+        return Ok(project);
     }
 
     [HttpPost]
@@ -42,15 +42,8 @@ public class ProjectController(ProjectService projectService, IMapper mapper) : 
     public async Task<IActionResult> UpdateProject(int id, UpdateProjectRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var project = await _projectService.GetByIdAsync(id, userId);
-
-        if (project is null)
-        {
-            return NotFound();
-        }
-
-        var success = await _projectService.UpdateAsync(id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _projectService.UpdateAsync(id, dto, userId);
+        return NoContent();
     }
 
     [HttpPatch("{id:int}")]
@@ -58,12 +51,6 @@ public class ProjectController(ProjectService projectService, IMapper mapper) : 
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var project = await _projectService.GetByIdAsync(id, userId);
-
-        if (project is null)
-        {
-            return NotFound();
-        }
-
         var dto = _mapper.Map<UpdateProjectRequest>(project);
         patch.ApplyTo(dto, ModelState);
 
@@ -72,22 +59,15 @@ public class ProjectController(ProjectService projectService, IMapper mapper) : 
             return ValidationProblem(ModelState);
         }
 
-        var success = await _projectService.UpdateAsync(id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _projectService.UpdateAsync(id, dto, userId);
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteProject(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var project = await _projectService.GetByIdAsync(id, userId);
-
-        if (project is null)
-        {
-            return NotFound();
-        }
-
-        var success = await _projectService.DeleteAsync(id, userId);
-        return success ? NoContent() : Forbid();
+        await _projectService.DeleteAsync(id, userId);
+        return NoContent();
     }
 }
