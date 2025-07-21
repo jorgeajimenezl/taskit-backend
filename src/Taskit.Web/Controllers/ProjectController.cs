@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using AutoMapper;
 using Taskit.Application.DTOs;
+using Taskit.Application.Common.Models;
 using Taskit.Application.Services;
 
 namespace Taskit.Web.Controllers;
@@ -16,10 +17,11 @@ public class ProjectController(ProjectService projectService, IMapper mapper) : 
     private readonly IMapper _mapper = mapper;
 
     [HttpGet]
-    public async Task<IActionResult> GetProjects([FromQuery] GridifyQuery query)
+    public async Task<ActionResult<Paging<ProjectDto>>> GetProjects([FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        return Ok(await _projectService.GetAllForUserAsync(userId, query));
+        var projects = await _projectService.GetAllForUserAsync(userId, query);
+        return Ok(projects);
     }
 
     [HttpGet("{id:int}")]
