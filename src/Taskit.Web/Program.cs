@@ -35,7 +35,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseExceptionHandler();
+app.UseExceptionHandler(options => { });
 
 // Set up authentication and authorization
 app.UseAuthentication();
