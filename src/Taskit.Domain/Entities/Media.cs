@@ -25,7 +25,6 @@ public class Media : BaseEntity<int>
 
     public ulong Size { get; set; }
 
-    [Column(TypeName = "jsonb")]
     public IDictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
 
     public int? ModelId { get; set; }
