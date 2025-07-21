@@ -27,7 +27,7 @@ public class TaskCommentService(
     public async Task<IEnumerable<TaskCommentDto>> GetAllAsync(int taskId, string userId)
     {
         if (!await HasAccessToTask(taskId, userId))
-            throw new InvalidOperationException("Task not found or access denied");
+            throw new ForbiddenAccessException();
 
         return await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
@@ -44,15 +44,14 @@ public class TaskCommentService(
             .Include(c => c.Author)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (comment is null)
-            throw new NotFoundException(nameof(TaskComment), id.ToString());
+        Guard.Against.NotFound(id, comment);
         return _mapper.Map<TaskCommentDto>(comment);
     }
 
     public async Task<TaskCommentDto> CreateAsync(int taskId, CreateTaskCommentRequest dto, string userId)
     {
         if (!await HasAccessToTask(taskId, userId))
-            throw new InvalidOperationException("Task not found or access denied");
+            throw new ForbiddenAccessException();
 
         var comment = _mapper.Map<TaskComment>(dto);
         comment.TaskId = taskId;
@@ -66,8 +65,8 @@ public class TaskCommentService(
     {
         var comment = await _comments.QueryForTask(taskId)
             .FirstOrDefaultAsync(c => c.Id == id);
-        if (comment is null)
-            throw new NotFoundException(nameof(TaskComment), id.ToString());
+        Guard.Against.NotFound(id, comment);
+
         if (comment.AuthorId != userId || !await HasAccessToTask(taskId, userId))
             throw new ForbiddenAccessException();
 
@@ -80,8 +79,8 @@ public class TaskCommentService(
     {
         var comment = await _comments.QueryForTask(taskId)
             .FirstOrDefaultAsync(c => c.Id == id);
-        if (comment is null)
-            throw new NotFoundException(nameof(TaskComment), id.ToString());
+        Guard.Against.NotFound(id, comment);
+
         if (comment.AuthorId != userId || !await HasAccessToTask(taskId, userId))
             throw new ForbiddenAccessException();
 
