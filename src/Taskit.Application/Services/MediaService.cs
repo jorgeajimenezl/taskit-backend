@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Collections.Generic;
 using AutoMapper;
+using Ardalis.GuardClauses;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
 
@@ -38,7 +40,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return media is null ? null : _mapper.Map<MediaDto>(media);
     }
 
-    public async Task<MediaDto?> UploadAsync(
+    public async Task<MediaDto> UploadAsync(
         IFormFile file,
         string userId,
         int? modelId = null,
@@ -47,7 +49,9 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     )
     {
         if (!IsValidFile(file))
-            return null;
+            throw new ValidationException(
+                new Dictionary<string, string[]> { { "file", new[] { "Invalid file" } } }
+            );
 
         var extension = Path.GetExtension(file.FileName);
         var storedName = $"{Guid.NewGuid()}{extension}";
@@ -61,8 +65,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         }
         catch (IOException ex)
         {
-            Console.WriteLine($"File operation failed: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"File operation failed: {ex.Message}");
         }
 
         var media = new Media
@@ -116,13 +119,13 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return await query.FirstOrDefaultAsync();
     }
 
-    public async Task<bool> DeleteAsync(int id, string userId)
+    public async Task DeleteAsync(int id, string userId)
     {
         var media = await _mediaRepository.GetByIdAsync(id);
-        if (media is null)
-            return false;
+        Guard.Against.NotFound(id, media);
+
         if (media.UploadedById != userId)
-            return false;
+            throw new ForbiddenAccessException();
 
         var sanitizedFileName = Path.GetFileName(media.FileName);
         var path = Path.Combine(UploadsPath, sanitizedFileName);
@@ -130,7 +133,6 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             File.Delete(path);
 
         await _mediaRepository.DeleteAsync(id);
-        return true;
     }
 
     public async Task ClearMediaCollectionAsync(string modelType, int modelId, string collectionName)

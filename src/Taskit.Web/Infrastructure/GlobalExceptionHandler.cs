@@ -19,7 +19,21 @@ public class GlobalExceptionHandler : IExceptionHandler
                 { typeof(NotFoundException), HandleNotFoundException },
                 { typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException },
                 { typeof(ForbiddenAccessException), HandleForbiddenAccessException },
+                { typeof(RuleViolationException), HandleRuleViolationException }
             };
+    }
+
+    private async Task HandleRuleViolationException(HttpContext context, Exception exception)
+    {
+        context.Response.StatusCode = StatusCodes.Status409Conflict;
+
+        await context.Response.WriteAsJsonAsync(new ProblemDetails
+        {
+            Status = StatusCodes.Status409Conflict,
+            Title = "Rule Violation",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+            Detail = exception.Message
+        });
     }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)

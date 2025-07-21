@@ -34,7 +34,7 @@ public class TaskController : ApiControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var task = await _taskService.GetByIdAsync(id, userId);
-        return task is null ? NotFound() : Ok(task);
+        return Ok(task);
     }
 
     [HttpPost]
@@ -49,12 +49,8 @@ public class TaskController : ApiControllerBase
     public async Task<IActionResult> UpdateTask(int id, UpdateTaskRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var existing = await _taskService.GetByIdAsync(id, userId);
-        if (existing is null)
-            return NotFound();
-
-        var success = await _taskService.UpdateAsync(id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _taskService.UpdateAsync(id, dto, userId);
+        return NoContent();
     }
 
     [HttpPatch("{id:int}")]
@@ -62,9 +58,6 @@ public class TaskController : ApiControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var existing = await _taskService.GetByIdAsync(id, userId);
-        if (existing is null)
-            return NotFound();
-
         var dto = _mapper.Map<UpdateTaskRequest>(existing);
 
         patch.ApplyTo(dto, ModelState);
@@ -72,36 +65,32 @@ public class TaskController : ApiControllerBase
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 
-        var success = await _taskService.UpdateAsync(id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _taskService.UpdateAsync(id, dto, userId);
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteTask(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var existing = await _taskService.GetByIdAsync(id, userId);
-        if (existing is null)
-            return NotFound();
-
-        var success = await _taskService.DeleteAsync(id, userId);
-        return success ? NoContent() : Forbid();
+        await _taskService.DeleteAsync(id, userId);
+        return NoContent();
     }
 
     [HttpPost("{id:int}/tags/{tagId:int}")]
     public async Task<IActionResult> AddTag(int id, int tagId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var success = await _taskService.AddTagAsync(id, tagId, userId);
-        return success ? NoContent() : NotFound();
+        await _taskService.AddTagAsync(id, tagId, userId);
+        return NoContent();
     }
 
     [HttpDelete("{id:int}/tags/{tagId:int}")]
     public async Task<IActionResult> RemoveTag(int id, int tagId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var success = await _taskService.RemoveTagAsync(id, tagId, userId);
-        return success ? NoContent() : NotFound();
+        await _taskService.RemoveTagAsync(id, tagId, userId);
+        return NoContent();
     }
 
     [HttpGet("{id:int}/subtasks")]
@@ -116,8 +105,8 @@ public class TaskController : ApiControllerBase
     public async Task<IActionResult> DetachSubTask(int parentId, int subTaskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var success = await _taskService.DetachSubTaskAsync(parentId, subTaskId, userId);
-        return success ? NoContent() : NotFound();
+        await _taskService.DetachSubTaskAsync(parentId, subTaskId, userId);
+        return NoContent();
     }
 
     [HttpGet("by-tags")]
@@ -131,14 +120,8 @@ public class TaskController : ApiControllerBase
     public async Task<IActionResult> AddAttachment(int taskId, AddTaskAttachmentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await _taskService.AttachMediaAsync(taskId, dto.MediaId, userId);
-        return result switch
-        {
-            AttachMediaResult.Success => NoContent(),
-            AttachMediaResult.TaskNotFound => NotFound(),
-            AttachMediaResult.InvalidMedia => BadRequest(),
-            _ => StatusCode(500)
-        };
+        await _taskService.AttachMediaAsync(taskId, dto.MediaId, userId);
+        return NoContent();
     }
 
     [HttpGet("{taskId:int}/attachments")]

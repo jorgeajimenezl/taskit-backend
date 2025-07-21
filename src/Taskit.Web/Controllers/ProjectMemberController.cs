@@ -27,7 +27,7 @@ public class ProjectMemberController(ProjectMemberService service, IMapper mappe
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var member = await _service.GetByIdAsync(projectId, id, userId);
-        return member is null ? NotFound() : Ok(member);
+        return Ok(member);
     }
 
     [HttpPost]
@@ -42,15 +42,15 @@ public class ProjectMemberController(ProjectMemberService service, IMapper mappe
     public async Task<IActionResult> UpdateMember(int projectId, int id, UpdateProjectMemberRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var success = await _service.UpdateAsync(projectId, id, dto, userId);
-        return success ? NoContent() : Forbid();
+        await _service.UpdateAsync(projectId, id, dto, userId);
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> RemoveMember(int projectId, int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var success = await _service.DeleteAsync(projectId, id, userId);
-        return success ? NoContent() : Forbid();
+        await _service.DeleteAsync(projectId, id, userId);
+        return NoContent();
     }
 }

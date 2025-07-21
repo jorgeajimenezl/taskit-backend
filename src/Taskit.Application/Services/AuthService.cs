@@ -10,6 +10,7 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Microsoft.AspNetCore.Http;
+using Ardalis.GuardClauses;
 using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
@@ -35,15 +36,15 @@ public class AuthService(
             throw new ValidationException(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
     }
 
-    public async Task<LoginResponse?> LoginAsync(LoginRequest dto)
+    public async Task<LoginResponse> LoginAsync(LoginRequest dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null)
-            return null;
+            throw new UnauthorizedAccessException("Invalid email or password");
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!result.Succeeded)
-            return null;
+            throw new UnauthorizedAccessException();
 
         var token = GenerateJwtToken(user);
         var refreshToken = await CreateRefreshTokenAsync(user);
@@ -81,17 +82,17 @@ public class AuthService(
         _httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken");
     }
 
-    public async Task<RefreshResponse?> RefreshAsync(string? providedRefreshToken)
+    public async Task<RefreshResponse> RefreshAsync(string? providedRefreshToken)
     {
         var http = _httpContextAccessor.HttpContext;
         var refreshToken = providedRefreshToken ?? http?.Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
-            return null;
+            throw new UnauthorizedAccessException("Refresh token is required");
 
         var tokenHash = ComputeSha256Hash(refreshToken);
         var stored = await _refreshTokens.GetByTokenAsync(tokenHash);
         if (stored == null || stored.RevokedAt != null || stored.ExpiresAt <= DateTime.UtcNow)
-            return null;
+            throw new UnauthorizedAccessException();
 
         stored.RevokedAt = DateTime.UtcNow;
         await _refreshTokens.UpdateAsync(stored);

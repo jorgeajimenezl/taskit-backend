@@ -2,10 +2,12 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Ardalis.GuardClauses;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
 
@@ -42,9 +44,11 @@ public class ProjectMemberService(
 
     public async Task<IEnumerable<ProjectMemberDto>> GetAllAsync(int projectId, string userId)
     {
-        var project = await GetProjectAsync(projectId) ?? throw new InvalidOperationException("Project not found");
+        var project = await GetProjectAsync(projectId);
+        Guard.Against.NotFound(projectId, project);
+
         if (!CanRead(project, userId))
-            throw new InvalidOperationException("Access denied");
+            throw new ForbiddenAccessException();
 
         return await _members.QueryForProject(projectId)
             .Include(m => m.User)
@@ -52,30 +56,35 @@ public class ProjectMemberService(
             .ToListAsync();
     }
 
-    public async Task<ProjectMemberDto?> GetByIdAsync(int projectId, int id, string userId)
+    public async Task<ProjectMemberDto> GetByIdAsync(int projectId, int id, string userId)
     {
         var project = await GetProjectAsync(projectId);
-        if (project == null || !CanRead(project, userId))
-            return null;
+        Guard.Against.NotFound(projectId, project);
+
+        if (!CanRead(project, userId))
+            throw new ForbiddenAccessException();
 
         var member = await _members.QueryForProject(projectId)
             .Include(m => m.User)
             .FirstOrDefaultAsync(m => m.Id == id);
-        return member is null ? null : _mapper.Map<ProjectMemberDto>(member);
+
+        Guard.Against.NotFound(id, member);
+        return _mapper.Map<ProjectMemberDto>(member);
     }
 
     public async Task<ProjectMemberDto> AddAsync(int projectId, AddProjectMemberRequest dto, string userId)
     {
-        var project = await GetProjectAsync(projectId) ?? throw new InvalidOperationException("Project not found");
+        var project = await GetProjectAsync(projectId);
+        Guard.Against.NotFound(projectId, project);
+
         if (!CanManage(project, userId))
-            throw new InvalidOperationException("Access denied");
+            throw new ForbiddenAccessException();
 
         if (project.Members.Any(m => m.UserId == dto.UserId))
-            throw new InvalidOperationException("User is already a member of this project");
+            throw new RuleViolationException("User is already a member of this project");
 
         var user = await _users.FindByIdAsync(dto.UserId);
-        if (user == null)
-            throw new InvalidOperationException("User not found");
+        Guard.Against.NotFound(dto.UserId, user);
 
         var member = _mapper.Map<ProjectMember>(dto);
         member.ProjectId = projectId;
@@ -85,35 +94,33 @@ public class ProjectMemberService(
         return _mapper.Map<ProjectMemberDto>(member);
     }
 
-    public async Task<bool> UpdateAsync(int projectId, int id, UpdateProjectMemberRequest dto, string userId)
+    public async Task UpdateAsync(int projectId, int id, UpdateProjectMemberRequest dto, string userId)
     {
         var member = await _members.Query()
             .Include(m => m.Project)
-                .ThenInclude(p => p.Members)
+            .ThenInclude(p => p.Members)
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
-        if (member == null)
-            return false;
+        Guard.Against.NotFound(id, member);
+
         if (!CanManage(member.Project, userId))
-            return false;
+            throw new ForbiddenAccessException();
 
         _mapper.Map(dto, member);
         member.UpdateTimestamps();
         await _members.UpdateAsync(member);
-        return true;
     }
 
-    public async Task<bool> DeleteAsync(int projectId, int id, string userId)
+    public async Task DeleteAsync(int projectId, int id, string userId)
     {
         var member = await _members.Query()
             .Include(m => m.Project)
                 .ThenInclude(p => p.Members)
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
-        if (member == null)
-            return false;
+        Guard.Against.NotFound(id, member);
+
         if (!CanManage(member.Project, userId))
-            return false;
+            throw new ForbiddenAccessException();
 
         await _members.DeleteAsync(id);
-        return true;
     }
 }

@@ -1,9 +1,11 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Ardalis.GuardClauses;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
 
@@ -25,7 +27,7 @@ public class TaskCommentService(
     public async Task<IEnumerable<TaskCommentDto>> GetAllAsync(int taskId, string userId)
     {
         if (!await HasAccessToTask(taskId, userId))
-            throw new InvalidOperationException("Task not found or access denied");
+            throw new ForbiddenAccessException();
 
         return await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
@@ -33,21 +35,23 @@ public class TaskCommentService(
             .ToListAsync();
     }
 
-    public async Task<TaskCommentDto?> GetByIdAsync(int taskId, int id, string userId)
+    public async Task<TaskCommentDto> GetByIdAsync(int taskId, int id, string userId)
     {
         if (!await HasAccessToTask(taskId, userId))
-            return null;
+            throw new ForbiddenAccessException();
 
         var comment = await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
             .FirstOrDefaultAsync(c => c.Id == id);
-        return comment is null ? null : _mapper.Map<TaskCommentDto>(comment);
+
+        Guard.Against.NotFound(id, comment);
+        return _mapper.Map<TaskCommentDto>(comment);
     }
 
     public async Task<TaskCommentDto> CreateAsync(int taskId, CreateTaskCommentRequest dto, string userId)
     {
         if (!await HasAccessToTask(taskId, userId))
-            throw new InvalidOperationException("Task not found or access denied");
+            throw new ForbiddenAccessException();
 
         var comment = _mapper.Map<TaskComment>(dto);
         comment.TaskId = taskId;
@@ -57,31 +61,29 @@ public class TaskCommentService(
         return _mapper.Map<TaskCommentDto>(comment);
     }
 
-    public async Task<bool> UpdateAsync(int taskId, int id, UpdateTaskCommentRequest dto, string userId)
+    public async Task UpdateAsync(int taskId, int id, UpdateTaskCommentRequest dto, string userId)
     {
         var comment = await _comments.QueryForTask(taskId)
             .FirstOrDefaultAsync(c => c.Id == id);
-        if (comment == null)
-            return false;
+        Guard.Against.NotFound(id, comment);
+
         if (comment.AuthorId != userId || !await HasAccessToTask(taskId, userId))
-            return false;
+            throw new ForbiddenAccessException();
 
         _mapper.Map(dto, comment);
         comment.UpdateTimestamps();
         await _comments.UpdateAsync(comment);
-        return true;
     }
 
-    public async Task<bool> DeleteAsync(int taskId, int id, string userId)
+    public async Task DeleteAsync(int taskId, int id, string userId)
     {
         var comment = await _comments.QueryForTask(taskId)
             .FirstOrDefaultAsync(c => c.Id == id);
-        if (comment == null)
-            return false;
+        Guard.Against.NotFound(id, comment);
+
         if (comment.AuthorId != userId || !await HasAccessToTask(taskId, userId))
-            return false;
+            throw new ForbiddenAccessException();
 
         await _comments.DeleteAsync(id);
-        return true;
     }
 }
