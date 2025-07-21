@@ -50,7 +50,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     {
         if (!IsValidFile(file))
             throw new ValidationException(
-                new Dictionary<string, string[]> { { "file", new[] { "Invalid file" } } }
+                new Dictionary<string, string[]> { { "file", ["Invalid file"] } }
             );
 
         var extension = Path.GetExtension(file.FileName);
