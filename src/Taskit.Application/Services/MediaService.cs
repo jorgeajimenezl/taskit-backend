@@ -49,7 +49,9 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     )
     {
         if (!IsValidFile(file))
-            throw new ValidationException(new Dictionary<string, string[]> { { "file", new[] { "Invalid file" } } });
+            throw new ValidationException(
+                new Dictionary<string, string[]> { { "file", new[] { "Invalid file" } } }
+            );
 
         var extension = Path.GetExtension(file.FileName);
         var storedName = $"{Guid.NewGuid()}{extension}";
@@ -120,8 +122,8 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     public async Task DeleteAsync(int id, string userId)
     {
         var media = await _mediaRepository.GetByIdAsync(id);
-        if (media is null)
-            throw new NotFoundException(nameof(Media), id.ToString());
+        Guard.Against.NotFound(id, media);
+
         if (media.UploadedById != userId)
             throw new ForbiddenAccessException();
 
@@ -141,7 +143,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
                         m.CollectionName == collectionName)
             .ToListAsync();
 
-        if (mediaItems.Any())
+        if (mediaItems.Count != 0)
             await _mediaRepository.DeleteRangeAsync(mediaItems);
     }
 
