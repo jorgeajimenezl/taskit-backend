@@ -29,8 +29,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
             .Where(p => p.Id == id && (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)))
             .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
-        if (project is null)
-            throw new NotFoundException(nameof(ProjectDto), id.ToString());
+        Guard.Against.NotFound(id, project);
         return project;
     }
 
@@ -46,8 +45,8 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
     public async Task UpdateAsync(int id, UpdateProjectRequest dto, string userId)
     {
         var project = await _projects.GetByIdAsync(id);
-        if (project is null)
-            throw new NotFoundException(nameof(Project), id.ToString());
+        Guard.Against.NotFound(id, project);
+
         if (project.OwnerId != userId)
             throw new ForbiddenAccessException();
 
@@ -59,8 +58,8 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
     public async Task DeleteAsync(int id, string userId)
     {
         var project = await _projects.GetByIdAsync(id);
-        if (project is null)
-            throw new NotFoundException(nameof(Project), id.ToString());
+        Guard.Against.NotFound(id, project);
+
         if (project.OwnerId != userId)
             throw new ForbiddenAccessException();
 
