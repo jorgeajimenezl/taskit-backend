@@ -120,14 +120,8 @@ public class TaskController : ApiControllerBase
     public async Task<IActionResult> AddAttachment(int taskId, AddTaskAttachmentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await _taskService.AttachMediaAsync(taskId, dto.MediaId, userId);
-        return result switch
-        {
-            AttachMediaResult.Success => NoContent(),
-            AttachMediaResult.TaskNotFound => NotFound(),
-            AttachMediaResult.InvalidMedia => BadRequest(),
-            _ => StatusCode(500)
-        };
+        await _taskService.AttachMediaAsync(taskId, dto.MediaId, userId);
+        return NoContent();
     }
 
     [HttpGet("{taskId:int}/attachments")]

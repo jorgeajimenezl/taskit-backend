@@ -1,7 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Gridify;
-using Gridify.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Ardalis.GuardClauses;
 using Taskit.Application.Common.Mappings;
@@ -56,7 +55,7 @@ public class TaskService(
                 .AnyAsync(p => p.Id == dto.ProjectId &&
                     (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)));
             if (!projectAllowed)
-                throw new InvalidOperationException("Project not found or access denied");
+                throw new ForbiddenAccessException();
         }
 
         if (dto.ParentTaskId is not null)
@@ -64,7 +63,7 @@ public class TaskService(
             var parentAllowed = await _tasks.QueryForUser(userId)
                 .AnyAsync(t => t.Id == dto.ParentTaskId);
             if (!parentAllowed)
-                throw new InvalidOperationException("Parent task not found or access denied");
+                throw new ForbiddenAccessException();
         }
 
         var task = _mapper.Map<AppTask>(dto);
@@ -79,15 +78,14 @@ public class TaskService(
         var task = await _tasks.QueryForUser(userId)
             .Where(t => t.Id == id)
             .FirstOrDefaultAsync();
-        if (task is null)
-            throw new NotFoundException(nameof(AppTask), id.ToString());
+        Guard.Against.NotFound(id, task);
 
         if (dto.ParentTaskId is not null)
         {
             var parentAllowed = await _tasks.QueryForUser(userId)
                 .AnyAsync(t => t.Id == dto.ParentTaskId);
             if (!parentAllowed)
-                throw new InvalidOperationException("Parent task not found or access denied");
+                throw new ForbiddenAccessException();
         }
 
         _mapper.Map(dto, task);
@@ -98,8 +96,8 @@ public class TaskService(
     public async Task DeleteAsync(int id, string userId)
     {
         var task = await _tasks.GetByIdAsync(id);
-        if (task is null)
-            throw new NotFoundException(nameof(AppTask), id.ToString());
+        Guard.Against.NotFound(id, task);
+
         if (task.AuthorId != userId)
             throw new ForbiddenAccessException();
 
@@ -109,15 +107,13 @@ public class TaskService(
     public async Task AddTagAsync(int taskId, int tagId, string userId)
     {
         var task = await GetAccessibleTaskWithTagsAsync(taskId, userId);
-        if (task is null)
-            throw new NotFoundException(nameof(AppTask), taskId.ToString());
+        Guard.Against.NotFound(taskId, task);
 
         if (task.Tags.Any(t => t.Id == tagId))
             return;
 
         var tag = await _tagsRepo.GetByIdAsync(tagId);
-        if (tag is null)
-            throw new NotFoundException(nameof(TaskTag), tagId.ToString());
+        Guard.Against.NotFound(tagId, tag);
 
         task.Tags.Add(tag);
         await _tasks.UpdateAsync(task);
@@ -126,12 +122,10 @@ public class TaskService(
     public async Task RemoveTagAsync(int taskId, int tagId, string userId)
     {
         var task = await GetAccessibleTaskWithTagsAsync(taskId, userId);
-        if (task is null)
-            throw new NotFoundException(nameof(AppTask), taskId.ToString());
+        Guard.Against.NotFound(taskId, task);
 
         var tag = task.Tags.FirstOrDefault(t => t.Id == tagId);
-        if (tag is null)
-            throw new NotFoundException(nameof(TaskTag), tagId.ToString());
+        Guard.Against.NotFound(tagId, tag);
 
         task.Tags.Remove(tag);
         await _tasks.UpdateAsync(task);
@@ -156,7 +150,7 @@ public class TaskService(
             .ToListAsync();
 
         if (subtasks.Count == 0)
-            throw new InvalidOperationException("Task not found or access denied");
+            throw new ForbiddenAccessException();
 
         return subtasks;
     }
@@ -165,8 +159,7 @@ public class TaskService(
     {
         var subTask = await _tasks.QueryForUser(userId)
             .FirstOrDefaultAsync(t => t.Id == subTaskId && t.ParentTaskId == parentTaskId);
-        if (subTask is null)
-            throw new NotFoundException(nameof(AppTask), subTaskId.ToString());
+        Guard.Against.NotFound(subTaskId, subTask);
 
         subTask.ParentTaskId = null;
         subTask.UpdateTimestamps();
@@ -178,25 +171,26 @@ public class TaskService(
         return _tasks.QueryForUser(userId).AnyAsync(t => t.Id == taskId);
     }
 
-    public async Task<AttachMediaResult> AttachMediaAsync(int taskId, int mediaId, string userId)
+    public async Task AttachMediaAsync(int taskId, int mediaId, string userId)
     {
         if (!await HasAccessToTaskAsync(taskId, userId))
-            return AttachMediaResult.TaskNotFound;
+            throw new ForbiddenAccessException();
 
         var media = await _mediaRepository.GetByIdAsync(mediaId);
-        if (media is null || media.UploadedById != userId)
-            return AttachMediaResult.InvalidMedia;
+        Guard.Against.NotFound(mediaId, media);
+
+        if (media.UploadedById != userId)
+            throw new ForbiddenAccessException();
 
         media.ModelId = taskId;
         media.ModelType = nameof(AppTask);
         await _mediaRepository.UpdateAsync(media);
-        return AttachMediaResult.Success;
     }
 
     public async Task<IEnumerable<MediaDto>> GetAttachmentsAsync(int taskId, string userId)
     {
         if (!await HasAccessToTaskAsync(taskId, userId))
-            throw new InvalidOperationException("Task not found or access denied");
+            throw new ForbiddenAccessException();
 
         var media = await _mediaRepository.Query()
             .Where(m => m.ModelType == nameof(AppTask) && m.ModelId == taskId)
