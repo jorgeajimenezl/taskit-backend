@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.OpenApi.Models;
+using Taskit.Web.Infrastructure;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +16,7 @@ public static class DependencyInjection
 {
     public static void AddWebServices(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddOpenApi();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
         builder.Services.AddControllers(options =>
         {
@@ -23,6 +24,7 @@ public static class DependencyInjection
         })
         .AddNewtonsoftJson();
 
+        builder.Services.AddOpenApi();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
