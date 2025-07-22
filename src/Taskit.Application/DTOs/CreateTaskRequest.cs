@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Taskit.Domain.Entities;
-
+using TaskStatus = Taskit.Domain.Enums.TaskStatus;
 
 namespace Taskit.Application.DTOs;
 
@@ -16,7 +16,7 @@ public record CreateTaskRequest
 
     public DateTime? DueDate { get; init; }
 
-    public Taskit.Domain.Enums.TaskStatus Status { get; init; } = Taskit.Domain.Enums.TaskStatus.Created;
+    public TaskStatus Status { get; init; } = TaskStatus.Created;
 
     public int Priority { get; init; } = 0;
 
@@ -25,7 +25,7 @@ public record CreateTaskRequest
     [Range(0, 100)]
     public int CompletedPercentage { get; init; } = 0;
 
-    public int? ProjectId { get; init; }
+    public int ProjectId { get; init; }
 
     public string? AssignedUserId { get; init; }
 

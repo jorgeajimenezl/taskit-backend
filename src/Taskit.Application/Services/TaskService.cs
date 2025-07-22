@@ -48,15 +48,12 @@ public class TaskService(
 
     public async Task<TaskDto> CreateAsync(CreateTaskRequest dto, string userId)
     {
-        if (dto.ProjectId is not null)
-        {
-            var projectAllowed = await _projects.Query()
-                .Include(p => p.Members)
-                .AnyAsync(p => p.Id == dto.ProjectId &&
-                    (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)));
-            if (!projectAllowed)
-                throw new ForbiddenAccessException();
-        }
+        var projectAllowed = await _projects.Query()
+            .Include(p => p.Members)
+            .AnyAsync(p => p.Id == dto.ProjectId &&
+                (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)));
+        if (!projectAllowed)
+            throw new ForbiddenAccessException();
 
         if (dto.ParentTaskId is not null)
         {
