@@ -192,7 +192,7 @@ public class TaskService(
         await _tasks.UpdateAsync(subTask);
         await _activity.RecordAsync(ActivityEventType.TaskUpdated, userId, subTask.ProjectId, subTask.Id, new Dictionary<string, object>
         {
-            ["parentTaskId"] = null!
+            ["parentTaskId"] = null
         });
     }
 
@@ -212,10 +212,13 @@ public class TaskService(
         if (media.UploadedById != userId)
             throw new ForbiddenAccessException();
 
+        var task = await _tasks.QueryForUser(userId).FirstOrDefaultAsync(t => t.Id == taskId);
+        Guard.Against.NotFound(taskId, task);
+
         media.ModelId = taskId;
         media.ModelType = nameof(AppTask);
         await _mediaRepository.UpdateAsync(media);
-        await _activity.RecordAsync(ActivityEventType.FileAttached, userId, null, taskId, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.FileAttached, userId, task.ProjectId, taskId, new Dictionary<string, object>
         {
             ["mediaId"] = mediaId
         });
