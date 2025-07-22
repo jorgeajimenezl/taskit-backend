@@ -1,4 +1,6 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Taskit.Web.Infrastructure;
 
@@ -35,6 +37,23 @@ public static class DependencyInjection
                 Type = SecuritySchemeType.Http,
                 Scheme = "Bearer"
             });
+        });
+
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
+                    factory: partition => new FixedWindowRateLimiterOptions
+                    {
+                        AutoReplenishment = true,
+                        PermitLimit = 60,
+                        QueueLimit = 0,
+                        Window = TimeSpan.FromMinutes(1)
+                    }
+                )
+            );
         });
     }
 }

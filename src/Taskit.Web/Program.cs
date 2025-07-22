@@ -3,7 +3,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -30,6 +29,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler(options => { });
+app.UseRateLimiter();
 
 // Set up authentication and authorization
 app.UseAuthentication();
