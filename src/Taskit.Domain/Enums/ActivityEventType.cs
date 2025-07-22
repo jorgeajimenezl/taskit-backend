@@ -4,6 +4,8 @@ public enum ActivityEventType
 {
     TaskCreated,
     TaskAssigned,
+    TaskUpdated,
+    TaskDeleted,
     TaskStatusChanged,
     CommentAdded,
     UserJoinedProject,
@@ -13,4 +15,5 @@ public enum ActivityEventType
     FileDeleted,
     ProjectCreated,
     ProjectUpdated,
+    ProjectDeleted,
 }

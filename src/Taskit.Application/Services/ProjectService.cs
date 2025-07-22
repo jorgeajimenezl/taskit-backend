@@ -8,11 +8,13 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class ProjectService(IProjectRepository projectRepository, IMapper mapper)
+public class ProjectService(IProjectRepository projectRepository, IMapper mapper, ActivityService activityService)
 {
+    private readonly ActivityService _activity = activityService;
     private readonly IProjectRepository _projects = projectRepository;
     private readonly IMapper _mapper = mapper;
 
@@ -39,6 +41,12 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         project.OwnerId = ownerId;
 
         await _projects.AddAsync(project);
+        await _activity.RecordAsync(ActivityEventType.ProjectCreated, ownerId, null, null, new Dictionary<string, object>
+        {
+            ["projectId"] = project.Id,
+            ["name"] = project.Name
+        });
+
         return _mapper.Map<ProjectDto>(project);
     }
 
@@ -53,6 +61,11 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         _mapper.Map(dto, project);
         project.UpdateTimestamps();
         await _projects.UpdateAsync(project);
+        await _activity.RecordAsync(ActivityEventType.ProjectUpdated, userId, null, null, new Dictionary<string, object>
+        {
+            ["projectId"] = id,
+            ["name"] = project.Name
+        });
     }
 
     public async Task DeleteAsync(int id, string userId)
@@ -64,5 +77,10 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
             throw new ForbiddenAccessException();
 
         await _projects.DeleteAsync(id);
+        await _activity.RecordAsync(ActivityEventType.ProjectDeleted, userId, null, null, new Dictionary<string, object>
+        {
+            ["projectId"] = id,
+            ["name"] = project.Name
+        });
     }
 }
