@@ -41,7 +41,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         project.OwnerId = ownerId;
 
         await _projects.AddAsync(project);
-        await _activity.RecordAsync(ActivityEventType.ProjectCreated, ownerId, project.Id, null, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.ProjectCreated, ownerId, project.Id, null, new Dictionary<string, object?>
         {
             ["projectId"] = project.Id,
             ["name"] = project.Name
@@ -62,7 +62,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         project.UpdateTimestamps();
 
         await _projects.UpdateAsync(project);
-        await _activity.RecordAsync(ActivityEventType.ProjectUpdated, userId, id, null, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.ProjectUpdated, userId, id, null, new Dictionary<string, object?>
         {
             ["projectId"] = id,
             ["name"] = project.Name
@@ -78,7 +78,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
             throw new ForbiddenAccessException();
 
         await _projects.DeleteAsync(id);
-        await _activity.RecordAsync(ActivityEventType.ProjectDeleted, userId, id, null, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.ProjectDeleted, userId, id, null, new Dictionary<string, object?>
         {
             ["projectId"] = id,
             ["name"] = project.Name

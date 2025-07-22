@@ -62,7 +62,7 @@ public class TaskCommentService(
 
         await _comments.AddAsync(comment);
         var projectId = await _tasks.Query().Where(t => t.Id == taskId).Select(t => t.ProjectId).FirstOrDefaultAsync();
-        await _activity.RecordAsync(ActivityEventType.CommentAdded, userId, projectId, taskId, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.CommentAdded, userId, projectId, taskId, new Dictionary<string, object?>
         {
             ["commentId"] = comment.Id
         });

@@ -100,7 +100,7 @@ public class TaskService(
 
         if (task.AssignedUserId != oldAssigned && task.AssignedUserId != null)
         {
-            await _activity.RecordAsync(ActivityEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object>
+            await _activity.RecordAsync(ActivityEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
             {
                 ["assignedTo"] = task.AssignedUserId!
             });
@@ -108,7 +108,7 @@ public class TaskService(
 
         if (task.Status != oldStatus)
         {
-            await _activity.RecordAsync(ActivityEventType.TaskStatusChanged, userId, task.ProjectId, task.Id, new Dictionary<string, object>
+            await _activity.RecordAsync(ActivityEventType.TaskStatusChanged, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
             {
                 ["status"] = task.Status.ToString()
             });
@@ -216,7 +216,7 @@ public class TaskService(
         media.ModelId = taskId;
         media.ModelType = nameof(AppTask);
         await _mediaRepository.UpdateAsync(media);
-        await _activity.RecordAsync(ActivityEventType.FileAttached, userId, task.ProjectId, taskId, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.FileAttached, userId, task.ProjectId, taskId, new Dictionary<string, object?>
         {
             ["mediaId"] = mediaId
         });

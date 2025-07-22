@@ -88,7 +88,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
 
         var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
         var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
-        await _activity.RecordAsync(ActivityEventType.FileUploaded, userId, projectId, taskId, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.FileUploaded, userId, projectId, taskId, new Dictionary<string, object?>
         {
             ["mediaId"] = media.Id,
             ["collectionName"] = collectionName ?? "default",
@@ -149,7 +149,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
         var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
 
-        await _activity.RecordAsync(ActivityEventType.FileDeleted, userId, projectId, taskId, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.FileDeleted, userId, projectId, taskId, new Dictionary<string, object?>
         {
             ["mediaId"] = id,
             ["collectionName"] = media.CollectionName,

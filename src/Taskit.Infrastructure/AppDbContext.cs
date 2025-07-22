@@ -88,7 +88,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .Property(a => a.Data)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-                v => JsonSerializer.Deserialize<IDictionary<string, object>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object>()
+                v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
             );
     }
 }

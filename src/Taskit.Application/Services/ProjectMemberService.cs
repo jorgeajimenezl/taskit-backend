@@ -93,7 +93,7 @@ public class ProjectMemberService(
         member.User = user;
 
         await _members.AddAsync(member);
-        await _activity.RecordAsync(ActivityEventType.UserJoinedProject, userId, projectId, null, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.UserJoinedProject, userId, projectId, null, new Dictionary<string, object?>
         {
             ["memberId"] = member.Id,
             ["addedUserId"] = dto.UserId
@@ -129,7 +129,7 @@ public class ProjectMemberService(
             throw new ForbiddenAccessException();
 
         await _members.DeleteAsync(id);
-        await _activity.RecordAsync(ActivityEventType.UserLeftProject, userId, projectId, null, new Dictionary<string, object>
+        await _activity.RecordAsync(ActivityEventType.UserLeftProject, userId, projectId, null, new Dictionary<string, object?>
         {
             ["memberId"] = id
         });
