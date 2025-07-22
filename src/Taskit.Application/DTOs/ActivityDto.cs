@@ -12,7 +12,7 @@ public record ActivityDto
     public string? UserId { get; init; }
     public int? ProjectId { get; init; }
     public int? TaskId { get; init; }
-    public IDictionary<string, object> Data { get; init; } = new Dictionary<string, object>();
+    public IDictionary<string, object?> Data { get; init; } = new Dictionary<string, object?>();
 
     private class Mapping : Profile
     {

@@ -25,7 +25,7 @@ public class ActivityService(IActivityRepository activityRepository, IMapper map
         return await q.GridifyToAsync<Activity, ActivityDto>(_mapper, query);
     }
 
-    public async Task RecordAsync(ActivityEventType eventType, string userId, int? projectId = null, int? taskId = null, IDictionary<string, object>? data = null)
+    public async Task RecordAsync(ActivityEventType eventType, string userId, int? projectId = null, int? taskId = null, IDictionary<string, object?>? data = null)
     {
         var activity = new Activity
         {
@@ -33,7 +33,7 @@ public class ActivityService(IActivityRepository activityRepository, IMapper map
             UserId = userId,
             ProjectId = projectId,
             TaskId = taskId,
-            Data = data ?? new Dictionary<string, object>(),
+            Data = data ?? new Dictionary<string, object?>(),
             Timestamp = DateTime.UtcNow
         };
         await _activities.AddAsync(activity);

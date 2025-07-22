@@ -21,5 +21,5 @@ public class Activity : BaseEntity<int>
     public int? TaskId { get; set; }
     public AppTask? Task { get; set; }
 
-    public IDictionary<string, object> Data { get; set; } = new Dictionary<string, object>();
+    public IDictionary<string, object?> Data { get; set; } = new Dictionary<string, object?>();
 }
