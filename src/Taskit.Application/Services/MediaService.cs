@@ -9,11 +9,13 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment environment, IMapper mapper)
+public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment environment, IMapper mapper, ActivityService activityService)
 {
+    private readonly ActivityService _activity = activityService;
     private readonly IMediaRepository _mediaRepository = mediaRepository;
     private readonly IWebHostEnvironment _environment = environment;
     private readonly IMapper _mapper = mapper;
@@ -83,6 +85,13 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         };
 
         await _mediaRepository.AddAsync(media);
+        await _activity.RecordAsync(ActivityEventType.FileUploaded, userId, modelId, null, new Dictionary<string, object>
+        {
+            ["mediaId"] = media.Id,
+            ["collectionName"] = collectionName ?? "default",
+            ["size"] = media.Size,
+            ["fileName"] = media.FileName
+        });
         return _mapper.Map<MediaDto>(media);
     }
 
