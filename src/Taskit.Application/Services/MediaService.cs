@@ -142,6 +142,16 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             File.Delete(path);
 
         await _mediaRepository.DeleteAsync(id);
+
+        var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
+        var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
+
+        await _activity.RecordAsync(ActivityEventType.FileDeleted, userId, projectId, taskId, new Dictionary<string, object>
+        {
+            ["mediaId"] = id,
+            ["collectionName"] = media.CollectionName,
+            ["fileName"] = sanitizedFileName
+        });
     }
 
     public async Task ClearMediaCollectionAsync(string modelType, int modelId, string collectionName)
