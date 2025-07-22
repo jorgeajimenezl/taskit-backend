@@ -85,7 +85,10 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         };
 
         await _mediaRepository.AddAsync(media);
-        await _activity.RecordAsync(ActivityEventType.FileUploaded, userId, modelId, null, new Dictionary<string, object>
+
+        var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
+        var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
+        await _activity.RecordAsync(ActivityEventType.FileUploaded, userId, projectId, taskId, new Dictionary<string, object>
         {
             ["mediaId"] = media.Id,
             ["collectionName"] = collectionName ?? "default",
