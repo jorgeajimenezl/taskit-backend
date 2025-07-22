@@ -9,6 +9,8 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
+using Taskit.Domain.Enums;
+using TaskStatus = Taskit.Domain.Enums.TaskStatus;
 
 namespace Taskit.Application.Services;
 
@@ -17,12 +19,14 @@ public class TaskService(
     IProjectRepository projectRepository,
     ITagRepository tagRepository,
     IMediaRepository mediaRepository,
+    ActivityService activityService,
     IMapper mapper)
 {
     private readonly ITaskRepository _tasks = taskRepository;
     private readonly IProjectRepository _projects = projectRepository;
     private readonly ITagRepository _tagsRepo = tagRepository;
     private readonly IMediaRepository _mediaRepository = mediaRepository;
+    private readonly ActivityService _activity = activityService;
     private readonly IMapper _mapper = mapper;
 
     private async Task<AppTask?> GetAccessibleTaskWithTagsAsync(int taskId, string userId)
@@ -70,6 +74,7 @@ public class TaskService(
         task.AuthorId = userId;
 
         await _tasks.AddAsync(task);
+        await _activity.RecordAsync(ActivityEventType.TaskCreated, userId, task.ProjectId, task.Id);
         return _mapper.Map<TaskDto>(task);
     }
 
@@ -88,9 +93,29 @@ public class TaskService(
                 throw new ForbiddenAccessException();
         }
 
+        var oldAssigned = task.AssignedUserId;
+        var oldStatus = task.Status;
+
         _mapper.Map(dto, task);
         task.UpdateTimestamps();
         await _tasks.UpdateAsync(task);
+
+        if (task.AssignedUserId != oldAssigned && task.AssignedUserId != null)
+        {
+            await _activity.RecordAsync(ActivityEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object>
+            {
+                ["assignedTo"] = task.AssignedUserId!
+            });
+        }
+
+        if (task.Status != oldStatus)
+        {
+            var eventType = task.Status == TaskStatus.Completed ? ActivityEventType.TaskCompleted : ActivityEventType.TaskStatusChanged;
+            await _activity.RecordAsync(eventType, userId, task.ProjectId, task.Id, new Dictionary<string, object>
+            {
+                ["status"] = task.Status.ToString()
+            });
+        }
     }
 
     public async Task DeleteAsync(int id, string userId)
@@ -185,6 +210,10 @@ public class TaskService(
         media.ModelId = taskId;
         media.ModelType = nameof(AppTask);
         await _mediaRepository.UpdateAsync(media);
+        await _activity.RecordAsync(ActivityEventType.FileAttached, userId, null, taskId, new Dictionary<string, object>
+        {
+            ["mediaId"] = mediaId
+        });
     }
 
     public async Task<IEnumerable<MediaDto>> GetAttachmentsAsync(int taskId, string userId)

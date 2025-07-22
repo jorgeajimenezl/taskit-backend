@@ -14,6 +14,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<TaskTag> TaskTags { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Media> Media { get; set; }
+    public DbSet<Activity> Activities { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) :
         base(options)
@@ -78,6 +79,13 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<Media>()
             .Property(m => m.Metadata)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<IDictionary<string, object>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object>()
+            );
+
+        modelBuilder.Entity<Activity>()
+            .Property(a => a.Data)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
                 v => JsonSerializer.Deserialize<IDictionary<string, object>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object>()

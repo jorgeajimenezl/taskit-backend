@@ -6,17 +6,20 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
 public class TaskCommentService(
     ITaskCommentRepository commentRepository,
     ITaskRepository taskRepository,
-    IMapper mapper)
+    IMapper mapper,
+    ActivityService activityService)
 {
     private readonly ITaskCommentRepository _comments = commentRepository;
     private readonly ITaskRepository _tasks = taskRepository;
     private readonly IMapper _mapper = mapper;
+    private readonly ActivityService _activity = activityService;
 
     private async Task<bool> HasAccessToTask(int taskId, string userId)
     {
@@ -58,6 +61,11 @@ public class TaskCommentService(
         comment.AuthorId = userId;
 
         await _comments.AddAsync(comment);
+        var projectId = await _tasks.Query().Where(t => t.Id == taskId).Select(t => t.ProjectId).FirstOrDefaultAsync();
+        await _activity.RecordAsync(ActivityEventType.CommentAdded, userId, projectId, taskId, new Dictionary<string, object>
+        {
+            ["commentId"] = comment.Id
+        });
         return _mapper.Map<TaskCommentDto>(comment);
     }
 
