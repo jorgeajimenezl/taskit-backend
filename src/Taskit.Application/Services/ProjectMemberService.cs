@@ -16,13 +16,13 @@ public class ProjectMemberService(
     IProjectRepository projectRepository,
     UserManager<AppUser> userManager,
     IMapper mapper,
-    ActivityService activityService)
+    ProjectActivityLogService activityService)
 {
     private readonly IProjectMemberRepository _members = memberRepository;
     private readonly IProjectRepository _projects = projectRepository;
     private readonly UserManager<AppUser> _users = userManager;
     private readonly IMapper _mapper = mapper;
-    private readonly ActivityService _activity = activityService;
+    private readonly ProjectActivityLogService _activity = activityService;
 
     private static bool CanRead(Project project, string userId)
     {
@@ -93,7 +93,7 @@ public class ProjectMemberService(
         member.User = user;
 
         await _members.AddAsync(member);
-        await _activity.RecordAsync(ActivityEventType.UserJoinedProject, userId, projectId, null, new Dictionary<string, object?>
+        await _activity.RecordAsync(ProjectActivityLogEventType.UserJoinedProject, userId, projectId, null, new Dictionary<string, object?>
         {
             ["memberId"] = member.Id,
             ["addedUserId"] = dto.UserId
@@ -129,7 +129,7 @@ public class ProjectMemberService(
             throw new ForbiddenAccessException();
 
         await _members.DeleteAsync(id);
-        await _activity.RecordAsync(ActivityEventType.UserLeftProject, userId, projectId, null, new Dictionary<string, object?>
+        await _activity.RecordAsync(ProjectActivityLogEventType.UserLeftProject, userId, projectId, null, new Dictionary<string, object?>
         {
             ["memberId"] = id
         });

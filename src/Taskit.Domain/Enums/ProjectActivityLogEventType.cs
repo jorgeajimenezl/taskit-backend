@@ -1,6 +1,6 @@
 namespace Taskit.Domain.Enums;
 
-public enum ActivityEventType
+public enum ProjectActivityLogEventType
 {
     TaskCreated,
     TaskAssigned,

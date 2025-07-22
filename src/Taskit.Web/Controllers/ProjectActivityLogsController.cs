@@ -7,13 +7,14 @@ using Taskit.Application.Services;
 
 namespace Taskit.Web.Controllers;
 
+
 [Authorize]
-public class ActivitiesController(ActivityService service) : ApiControllerBase
+public class ProjectActivityLogsController(ProjectActivityLogService service) : ApiControllerBase
 {
-    private readonly ActivityService _service = service;
+    private readonly ProjectActivityLogService _service = service;
 
     [HttpGet]
-    public async Task<ActionResult<Paging<ActivityDto>>> GetActivities([FromQuery] GridifyQuery query, [FromQuery] int? projectId)
+    public async Task<ActionResult<Paging<ProjectActivityLogDto>>> GetProjectActivityLogs([FromQuery] GridifyQuery query, [FromQuery] int? projectId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var activities = await _service.GetForUserAsync(userId, query, projectId);

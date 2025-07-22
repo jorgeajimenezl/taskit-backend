@@ -12,9 +12,9 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class ProjectService(IProjectRepository projectRepository, IMapper mapper, ActivityService activityService)
+public class ProjectService(IProjectRepository projectRepository, IMapper mapper, ProjectActivityLogService activityService)
 {
-    private readonly ActivityService _activity = activityService;
+    private readonly ProjectActivityLogService _activity = activityService;
     private readonly IProjectRepository _projects = projectRepository;
     private readonly IMapper _mapper = mapper;
 
@@ -41,7 +41,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         project.OwnerId = ownerId;
 
         await _projects.AddAsync(project);
-        await _activity.RecordAsync(ActivityEventType.ProjectCreated, ownerId, project.Id, null, new Dictionary<string, object?>
+        await _activity.RecordAsync(ProjectActivityLogEventType.ProjectCreated, ownerId, project.Id, null, new Dictionary<string, object?>
         {
             ["projectId"] = project.Id,
             ["name"] = project.Name
@@ -62,7 +62,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         project.UpdateTimestamps();
 
         await _projects.UpdateAsync(project);
-        await _activity.RecordAsync(ActivityEventType.ProjectUpdated, userId, id, null, new Dictionary<string, object?>
+        await _activity.RecordAsync(ProjectActivityLogEventType.ProjectUpdated, userId, id, null, new Dictionary<string, object?>
         {
             ["projectId"] = id,
             ["name"] = project.Name
@@ -78,7 +78,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
             throw new ForbiddenAccessException();
 
         await _projects.DeleteAsync(id);
-        await _activity.RecordAsync(ActivityEventType.ProjectDeleted, userId, id, null, new Dictionary<string, object?>
+        await _activity.RecordAsync(ProjectActivityLogEventType.ProjectDeleted, userId, id, null, new Dictionary<string, object?>
         {
             ["projectId"] = id,
             ["name"] = project.Name
