@@ -9,11 +9,13 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment environment, IMapper mapper)
+public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment environment, IMapper mapper, ActivityService activityService)
 {
+    private readonly ActivityService _activity = activityService;
     private readonly IMediaRepository _mediaRepository = mediaRepository;
     private readonly IWebHostEnvironment _environment = environment;
     private readonly IMapper _mapper = mapper;
@@ -83,6 +85,16 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         };
 
         await _mediaRepository.AddAsync(media);
+
+        var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
+        var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
+        await _activity.RecordAsync(ActivityEventType.FileUploaded, userId, projectId, taskId, new Dictionary<string, object>
+        {
+            ["mediaId"] = media.Id,
+            ["collectionName"] = collectionName ?? "default",
+            ["size"] = media.Size,
+            ["fileName"] = media.FileName
+        });
         return _mapper.Map<MediaDto>(media);
     }
 
@@ -133,6 +145,16 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             File.Delete(path);
 
         await _mediaRepository.DeleteAsync(id);
+
+        var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
+        var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
+
+        await _activity.RecordAsync(ActivityEventType.FileDeleted, userId, projectId, taskId, new Dictionary<string, object>
+        {
+            ["mediaId"] = id,
+            ["collectionName"] = media.CollectionName,
+            ["fileName"] = sanitizedFileName
+        });
     }
 
     public async Task ClearMediaCollectionAsync(string modelType, int modelId, string collectionName)
