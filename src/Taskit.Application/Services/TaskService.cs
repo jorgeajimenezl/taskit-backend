@@ -192,7 +192,7 @@ public class TaskService(
         await _tasks.UpdateAsync(subTask);
         await _activity.RecordAsync(ActivityEventType.TaskUpdated, userId, subTask.ProjectId, subTask.Id, new Dictionary<string, object>
         {
-            ["parentTaskId"] = null!
+            ["parentTaskId"] = null
         });
     }
 
