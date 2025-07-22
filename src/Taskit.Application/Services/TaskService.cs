@@ -110,8 +110,7 @@ public class TaskService(
 
         if (task.Status != oldStatus)
         {
-            var eventType = task.Status == TaskStatus.Completed ? ActivityEventType.TaskCompleted : ActivityEventType.TaskStatusChanged;
-            await _activity.RecordAsync(eventType, userId, task.ProjectId, task.Id, new Dictionary<string, object>
+            await _activity.RecordAsync(ActivityEventType.TaskStatusChanged, userId, task.ProjectId, task.Id, new Dictionary<string, object>
             {
                 ["status"] = task.Status.ToString()
             });
