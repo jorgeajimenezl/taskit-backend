@@ -3,6 +3,6 @@ using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure.Repositories;
 
-public class NotificationRepository(AppDbContext context) : Repository<Media, int>(context), INotificationRepository
+public class NotificationRepository(AppDbContext context) : Repository<Notification, int>(context), INotificationRepository
 {
 }
