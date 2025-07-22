@@ -75,6 +75,7 @@ public class TaskService(
 
         await _tasks.AddAsync(task);
         await _activity.RecordAsync(ActivityEventType.TaskCreated, userId, task.ProjectId, task.Id);
+
         return _mapper.Map<TaskDto>(task);
     }
 
@@ -126,6 +127,7 @@ public class TaskService(
             throw new ForbiddenAccessException();
 
         await _tasks.DeleteAsync(id);
+        await _activity.RecordAsync(ActivityEventType.TaskDeleted, userId, task.ProjectId, id);
     }
 
     public async Task AddTagAsync(int taskId, int tagId, string userId)
@@ -188,6 +190,10 @@ public class TaskService(
         subTask.ParentTaskId = null;
         subTask.UpdateTimestamps();
         await _tasks.UpdateAsync(subTask);
+        await _activity.RecordAsync(ActivityEventType.TaskUpdated, userId, subTask.ProjectId, subTask.Id, new Dictionary<string, object>
+        {
+            ["parentTaskId"] = null!
+        });
     }
 
     private Task<bool> HasAccessToTaskAsync(int taskId, string userId)
