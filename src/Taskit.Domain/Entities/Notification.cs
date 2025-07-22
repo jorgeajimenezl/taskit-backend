@@ -17,7 +17,7 @@ namespace Taskit.Domain.Entities
         public IDictionary<string, object?>? Data { get; set; }
 
         [Required, ForeignKey(nameof(User))]
-        public int UserId { get; set; }
-        public required AppUser User { get; set; }
+        public required string UserId { get; set; }
+        public AppUser? User { get; set; }
     }
 }

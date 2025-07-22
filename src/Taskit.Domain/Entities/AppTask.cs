@@ -32,8 +32,8 @@ public class AppTask : BaseEntity<int>
     public AppUser? AssignedUser { get; set; }
 
     [Required, ForeignKey(nameof(Project))]
-    public int ProjectId { get; set; }
-    public required Project Project { get; set; }
+    public required int ProjectId { get; set; }
+    public Project? Project { get; set; }
 
     [ForeignKey(nameof(ParentTask))]
     public int? ParentTaskId { get; set; }
