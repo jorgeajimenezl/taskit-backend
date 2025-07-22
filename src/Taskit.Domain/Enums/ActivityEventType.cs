@@ -8,5 +8,9 @@ public enum ActivityEventType
     CommentAdded,
     UserJoinedProject,
     UserLeftProject,
-    FileAttached
+    FileAttached,
+    FileUploaded,
+    FileDeleted,
+    ProjectCreated,
+    ProjectUpdated,
 }
