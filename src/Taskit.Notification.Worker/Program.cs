@@ -17,9 +17,8 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddMassTransit(x =>
         {
-            // var entryAssembly = Assembly.GetEntryAssembly();
-            // x.AddConsumers(entryAssembly);
-            x.AddConsumer<RealtimeNotificationConsumer>();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            x.AddConsumers(entryAssembly);
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
