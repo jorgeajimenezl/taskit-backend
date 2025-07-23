@@ -1,5 +1,5 @@
 using MassTransit;
-using Taskit.Application.Events;
+using Taskit.Domain.Events;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;

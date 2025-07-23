@@ -1,6 +1,6 @@
 using Taskit.Domain.Enums;
 
-namespace Taskit.Application.Events;
+namespace Taskit.Domain.Events;
 
 public record NotificationCreated
 (

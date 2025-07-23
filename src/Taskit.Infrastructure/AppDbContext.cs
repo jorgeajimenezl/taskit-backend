@@ -15,6 +15,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Media> Media { get; set; }
     public DbSet<ProjectActivityLog> ProjectActivityLogs { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) :
         base(options)
@@ -86,6 +87,19 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<ProjectActivityLog>()
             .Property(a => a.Data)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
+            );
+
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Data)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
                 v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
