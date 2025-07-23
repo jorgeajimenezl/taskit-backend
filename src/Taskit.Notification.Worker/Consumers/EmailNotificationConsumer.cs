@@ -6,9 +6,10 @@ namespace Taskit.Notification.Worker.Consumers;
 
 public class EmailNotificationConsumer() : IConsumer<NotificationCreated>
 {
-    public async Task Consume(ConsumeContext<NotificationCreated> context)
+    public Task Consume(ConsumeContext<NotificationCreated> context)
     {
         var msg = context.Message;
         Console.WriteLine($"Notification Created: {msg.NotificationId}, User: {msg.UserId}, Title: {msg.Title}, Type: {msg.Type}");
+        return Task.CompletedTask;
     }
 }
