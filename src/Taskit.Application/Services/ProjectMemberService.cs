@@ -121,7 +121,7 @@ public class ProjectMemberService(
     {
         var member = await _members.Query()
             .Include(m => m.Project)
-            .ThenInclude(p => p.Members)
+            .ThenInclude(p => p!.Members)
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
         Guard.Against.NotFound(id, member);
 
