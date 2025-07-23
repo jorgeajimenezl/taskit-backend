@@ -6,10 +6,9 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class NotificationService(INotificationRepository notificationRepository, IPublishEndpoint publisher)
+public class NotificationService(INotificationRepository notificationRepository)
 {
     private readonly INotificationRepository _notificationRepository = notificationRepository;
-    private readonly IPublishEndpoint _publisher = publisher;
 
     public async Task CreateAsync(string userId, string title, NotificationType type, string? message = null, IDictionary<string, object?>? data = null)
     {
