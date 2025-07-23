@@ -25,7 +25,7 @@ public class Media : BaseEntity<int>
 
     public ulong Size { get; set; }
 
-    public IDictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
+    public IDictionary<string, object?>? Metadata { get; set; }
 
     public int? ModelId { get; set; }
     public string? ModelType { get; set; }

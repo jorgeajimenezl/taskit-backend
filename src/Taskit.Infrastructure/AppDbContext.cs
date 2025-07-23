@@ -83,7 +83,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .Property(m => m.Metadata)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-                v => JsonSerializer.Deserialize<IDictionary<string, object>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object>()
+                v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
             );
 
         modelBuilder.Entity<ProjectActivityLog>()
