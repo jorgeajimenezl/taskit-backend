@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure;
@@ -6,14 +7,17 @@ namespace Taskit.Infrastructure;
 public class DataSeeder(
     AppDbContext context,
     RoleManager<IdentityRole> roleManager,
-    UserManager<AppUser> userManager)
+    UserManager<AppUser> userManager,
+    ILogger<DataSeeder> logger)
 {
     private readonly AppDbContext _context = context;
     private readonly RoleManager<IdentityRole> _roles = roleManager;
     private readonly UserManager<AppUser> _users = userManager;
+    private readonly ILogger<DataSeeder> _logger = logger;
 
     public async Task SeedAsync()
     {
+        _logger.LogInformation("Starting database seeding");
         string[] defaultRoles = ["Admin", "UserManager", "User"];
         foreach (var role in defaultRoles)
         {
@@ -45,6 +49,8 @@ public class DataSeeder(
             if (!await _users.IsInRoleAsync(admin, role))
                 await _users.AddToRoleAsync(admin, role);
         }
+
+        _logger.LogInformation("Database seeding completed");
     }
 
     public void Seed()
