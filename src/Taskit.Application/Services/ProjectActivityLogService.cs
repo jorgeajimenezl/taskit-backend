@@ -8,12 +8,17 @@ using Taskit.Application.Interfaces;
 using Taskit.Application.DTOs;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
+using MassTransit;
+using Taskit.Domain.Events;
 
 namespace Taskit.Application.Services;
 
-public class ProjectActivityLogService(IProjectActivityLogRepository activityRepository, IMapper mapper, NotificationService notificationService)
+public class ProjectActivityLogService(
+    IProjectActivityLogRepository activityRepository,
+    IMapper mapper,
+    IPublishEndpoint publisher)
 {
-    private readonly NotificationService _notificationService = notificationService;
+    private readonly IPublishEndpoint _publisher = publisher;
     private readonly IProjectActivityLogRepository _activityLogs = activityRepository;
     private readonly IMapper _mapper = mapper;
 
@@ -42,24 +47,16 @@ public class ProjectActivityLogService(IProjectActivityLogRepository activityRep
             Data = data ?? new Dictionary<string, object?>(),
             Timestamp = DateTime.UtcNow
         };
-        await _activityLogs.AddAsync(activity);
 
-        switch (eventType)
-        {
-            case ProjectActivityLogEventType.TaskCreated:
-                await _notificationService.CreateAsync(
-                    userId,
-                    "Task Created",
-                    NotificationType.Info,
-                    data: new Dictionary<string, object?>
-                    {
-                        { "taskId", taskId },
-                        { "projectId", projectId }
-                    });
-                break;
-            default:
-                // Handle other event types as needed
-                break;
-        }
+        await _activityLogs.AddAsync(activity, saveChanges: false);
+        await _publisher.Publish(new ProjectActivityLogCreated(
+            activity.Id,
+            eventType,
+            userId,
+            projectId,
+            taskId,
+            activity.Data,
+            activity.Timestamp));
+        await _activityLogs.SaveChangesAsync();
     }
 }

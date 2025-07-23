@@ -4,12 +4,12 @@ using Taskit.Domain.Interfaces;
 
 namespace Taskit.Notification.Worker.Consumers;
 
-public class EmailNotificationConsumer() : IConsumer<NotificationCreated>
+public class EmailNotificationConsumer() : IConsumer<ProjectActivityLogCreated>
 {
-    public Task Consume(ConsumeContext<NotificationCreated> context)
+    public Task Consume(ConsumeContext<ProjectActivityLogCreated> context)
     {
         var msg = context.Message;
-        Console.WriteLine($"Notification Created: {msg.NotificationId}, User: {msg.UserId}, Title: {msg.Title}, Type: {msg.Type}");
+        Console.WriteLine($"Email Notification: {msg.Id}, User: {msg.UserId}, Event: {msg.EventType}, ProjectId: {msg.ProjectId}, TaskId: {msg.TaskId}");
         return Task.CompletedTask;
     }
 }

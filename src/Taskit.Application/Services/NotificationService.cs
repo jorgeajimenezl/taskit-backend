@@ -22,8 +22,6 @@ public class NotificationService(INotificationRepository notificationRepository,
             UserId = userId
         };
 
-        await _notificationRepository.AddAsync(notification, saveChanges: false);
-        await _publisher.Publish(new NotificationCreated(notification.Id, userId, title, message, type, data));
-        await _notificationRepository.SaveChangesAsync();
+        await _notificationRepository.AddAsync(notification);
     }
 }
