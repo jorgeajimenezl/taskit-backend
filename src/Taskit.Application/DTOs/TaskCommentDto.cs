@@ -15,7 +15,7 @@ public record TaskCommentDto
         public Mapping()
         {
             CreateMap<TaskComment, TaskCommentDto>()
-                .ForMember(d => d.AuthorUsername, o => o.MapFrom(s => s.Author.UserName));
+                .ForMember(d => d.AuthorUsername, o => o.MapFrom(s => s.Author!.UserName));
         }
     }
 }
