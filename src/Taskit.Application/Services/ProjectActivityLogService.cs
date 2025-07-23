@@ -11,8 +11,9 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class ProjectActivityLogService(IProjectActivityLogRepository activityRepository, IMapper mapper)
+public class ProjectActivityLogService(IProjectActivityLogRepository activityRepository, IMapper mapper, NotificationService notificationService)
 {
+    private readonly NotificationService _notificationService = notificationService;
     private readonly IProjectActivityLogRepository _activityLogs = activityRepository;
     private readonly IMapper _mapper = mapper;
 
@@ -25,7 +26,12 @@ public class ProjectActivityLogService(IProjectActivityLogRepository activityRep
         return await q.GridifyToAsync<ProjectActivityLog, ProjectActivityLogDto>(_mapper, query);
     }
 
-    public async Task RecordAsync(ProjectActivityLogEventType eventType, string userId, int? projectId = null, int? taskId = null, IDictionary<string, object?>? data = null)
+    public async Task RecordAsync(
+        ProjectActivityLogEventType eventType,
+        string userId,
+        int? projectId = null,
+        int? taskId = null,
+        IDictionary<string, object?>? data = null)
     {
         var activity = new ProjectActivityLog
         {
@@ -37,5 +43,23 @@ public class ProjectActivityLogService(IProjectActivityLogRepository activityRep
             Timestamp = DateTime.UtcNow
         };
         await _activityLogs.AddAsync(activity);
+
+        switch (eventType)
+        {
+            case ProjectActivityLogEventType.TaskCreated:
+                await _notificationService.CreateAsync(
+                    userId,
+                    "Task Created",
+                    NotificationType.Info,
+                    data: new Dictionary<string, object?>
+                    {
+                        { "taskId", taskId },
+                        { "projectId", projectId }
+                    });
+                break;
+            default:
+                // Handle other event types as needed
+                break;
+        }
     }
 }

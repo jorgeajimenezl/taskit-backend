@@ -4,6 +4,7 @@ using Taskit.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
+using Taskit.Notification.Worker.Consumers;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -16,12 +17,23 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddMassTransit(x =>
         {
-            var entryAssembly = Assembly.GetEntryAssembly();
-            x.AddConsumers(entryAssembly);
+            // var entryAssembly = Assembly.GetEntryAssembly();
+            // x.AddConsumers(entryAssembly);
+            x.AddConsumer<RealtimeNotificationConsumer>();
 
-            x.UsingInMemory((context, cfg) =>
+            x.UsingRabbitMq((ctx, cfg) =>
             {
-                cfg.ConfigureEndpoints(context);
+                var host = context.Configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
+                var username = context.Configuration.GetValue<string>("RabbitMQ:Username") ?? "guest";
+                var password = context.Configuration.GetValue<string>("RabbitMQ:Password") ?? "guest";
+
+                cfg.Host(host, "/", h =>
+                {
+                    h.Username(username);
+                    h.Password(password);
+                });
+
+                cfg.ConfigureEndpoints(ctx);
             });
         });
     })

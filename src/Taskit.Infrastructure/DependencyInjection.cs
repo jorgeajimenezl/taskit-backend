@@ -81,12 +81,24 @@ public static class DependencyInjection
         {
             options.AddEntityFrameworkOutbox<AppDbContext>(cfg =>
             {
-                // cfg.QueryDelay = TimeSpan.FromSeconds(1);
                 cfg.UseSqlite();
                 cfg.UseBusOutbox();
             });
 
-            options.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+            var host = builder.Configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
+            var username = builder.Configuration.GetValue<string>("RabbitMQ:Username") ?? "guest";
+            var password = builder.Configuration.GetValue<string>("RabbitMQ:Password") ?? "guest";
+
+            options.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(host, "/", h =>
+                {
+                    h.Username(username);
+                    h.Password(password);
+                });
+
+                cfg.ConfigureEndpoints(ctx);
+            });
         });
 
         // Custom services

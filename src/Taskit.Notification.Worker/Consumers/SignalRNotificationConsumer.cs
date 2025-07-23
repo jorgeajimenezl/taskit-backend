@@ -6,7 +6,7 @@ using Taskit.Domain.Entities;
 using Taskit.Domain.Events;
 using Taskit.Infrastructure;
 
-namespace Taskit.Notification.Worker;
+namespace Taskit.Notification.Worker.Consumers;
 
 public class RealtimeNotificationConsumer(INotificationRepository notificationRepository)
     : IConsumer<NotificationCreated>
