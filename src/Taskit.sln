@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Infrastructure", "Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Application", "Taskit.Application\Taskit.Application.csproj", "{6D96622D-F76A-44AC-AEEE-2AFD4302994D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Notification.Worker", "Taskit.Notification.Worker\Taskit.Notification.Worker.csproj", "{97E1A20E-F28D-4C49-B437-57BB4F3F348A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{6D96622D-F76A-44AC-AEEE-2AFD4302994D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D96622D-F76A-44AC-AEEE-2AFD4302994D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D96622D-F76A-44AC-AEEE-2AFD4302994D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +50,7 @@ Global
 		{BBC51BC1-80E2-2CB5-2AE4-88E6D1825D32} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 		{462FE568-4A5B-4D78-B4F9-B1C294762FCC} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 		{6D96622D-F76A-44AC-AEEE-2AFD4302994D} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
+		{97E1A20E-F28D-4C49-B437-57BB4F3F348A} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE9325F6-E848-4A70-8464-D029E0E0899A}
