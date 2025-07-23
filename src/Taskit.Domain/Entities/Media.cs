@@ -36,5 +36,5 @@ public class Media : BaseEntity<int>, ISoftDeletable
     public AppUser? UploadedBy { get; set; }
 
     public bool IsDeleted { get; set; } = false;
-    public DateTimeOffset? DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 }
