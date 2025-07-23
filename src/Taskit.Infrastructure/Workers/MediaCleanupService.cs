@@ -65,6 +65,7 @@ public class MediaCleanupService(
                 {
                     File.Delete(path);
                     media.IsDeleted = true;
+                    media.DeletedAt = DateTime.UtcNow;
                     context.Media.Update(media);
                 }
                 catch (IOException ex)
