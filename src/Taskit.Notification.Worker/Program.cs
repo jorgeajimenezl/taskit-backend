@@ -4,7 +4,6 @@ using Taskit.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
-using Taskit.Notification.Worker.Consumers;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
