@@ -45,7 +45,7 @@ public class MediaCleanupService(
 
         var orphans = await context.Media
             .Where(m => !m.IsDeleted) // Only consider non-deleted media
-            .Where(m => (m.ModelId == null || m.ModelType == null) && m.CreatedAt.Add(_interval) <= DateTime.UtcNow)
+            .Where(m => m.ModelId == null && m.ModelType == null && m.CreatedAt.Add(_interval) <= DateTime.UtcNow)
             .ToListAsync(cancellationToken);
 
         if (orphans.Count == 0)
