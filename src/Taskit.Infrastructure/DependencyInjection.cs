@@ -11,6 +11,7 @@ using Taskit.Infrastructure;
 using Taskit.Infrastructure.Services;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
+using MassTransit;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -76,6 +77,30 @@ public static class DependencyInjection
 
         builder.Services.AddAuthorization();
 
+        builder.Services.AddMassTransit(options =>
+        {
+            options.AddEntityFrameworkOutbox<AppDbContext>(cfg =>
+            {
+                cfg.UseSqlite();
+                cfg.UseBusOutbox();
+            });
+
+            var host = builder.Configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
+            var username = builder.Configuration.GetValue<string>("RabbitMQ:Username") ?? "guest";
+            var password = builder.Configuration.GetValue<string>("RabbitMQ:Password") ?? "guest";
+
+            options.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(host, "/", h =>
+                {
+                    h.Username(username);
+                    h.Password(password);
+                });
+
+                cfg.ConfigureEndpoints(ctx);
+            });
+        });
+
         // Custom services
         builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
         builder.Services.AddScoped<ITaskRepository, TaskRepository>();
@@ -85,6 +110,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IMediaRepository, MediaRepository>();
         builder.Services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
         builder.Services.AddScoped<ITagRepository, TagRepository>();
-        builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+        builder.Services.AddScoped<IProjectActivityLogRepository, ProjectActivityLogRepository>();
+        builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
     }
 }

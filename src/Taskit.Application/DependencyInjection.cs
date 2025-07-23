@@ -26,6 +26,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<MediaService>();
         builder.Services.AddScoped<TaskCommentService>();
         builder.Services.AddScoped<TagService>();
-        builder.Services.AddScoped<ActivityService>();
+        builder.Services.AddScoped<ProjectActivityLogService>();
+        builder.Services.AddScoped<NotificationService>();
     }
 }

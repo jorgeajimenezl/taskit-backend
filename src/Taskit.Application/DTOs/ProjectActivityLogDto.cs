@@ -4,11 +4,11 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Application.DTOs;
 
-public record ActivityDto
+public record ProjectActivityLogDto
 {
     public int Id { get; init; }
     public DateTime Timestamp { get; init; }
-    public ActivityEventType EventType { get; init; }
+    public ProjectActivityLogEventType EventType { get; init; }
     public string? UserId { get; init; }
     public int? ProjectId { get; init; }
     public int? TaskId { get; init; }
@@ -18,7 +18,7 @@ public record ActivityDto
     {
         public Mapping()
         {
-            CreateMap<Activity, ActivityDto>();
+            CreateMap<ProjectActivityLog, ProjectActivityLogDto>();
         }
     }
 }

@@ -4,3 +4,4 @@
 - Feat: add notification service
 - Feat: handle orphaned files created by the file upload service (if there are not attached to any model)
 - Feat: add email service to send emails
+- Fix: make the metadata field in the Media entity nullable

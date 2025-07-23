@@ -13,7 +13,7 @@ public class Project : BaseEntity<int>
 
     [Required, ForeignKey(nameof(Owner))]
     public required string OwnerId { get; set; }
-    public AppUser Owner { get; set; } = null!;
+    public AppUser? Owner { get; set; }
 
     // Navigation properties
     public ICollection<AppTask> Tasks { get; set; } = [];

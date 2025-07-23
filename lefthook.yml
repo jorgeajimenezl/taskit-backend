@@ -44,7 +44,7 @@ pre-commit:
   parallel: true
   jobs:
     - name: Format
-      run: dotnet format --verify-no-changes src/Taskit.sln
+      run: dotnet format --verify-no-changes --no-restore src/Taskit.sln --include {staged_files}
     
     - name: Build
       cwd: ./src/

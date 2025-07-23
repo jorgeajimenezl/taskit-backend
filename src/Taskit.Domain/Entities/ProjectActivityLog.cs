@@ -4,10 +4,10 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Domain.Entities;
 
-public class Activity : BaseEntity<int>
+public class ProjectActivityLog : BaseEntity<int>
 {
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-    public ActivityEventType EventType { get; set; }
+    public ProjectActivityLogEventType EventType { get; set; }
 
     [ForeignKey(nameof(User))]
     public string? UserId { get; set; }
@@ -21,5 +21,5 @@ public class Activity : BaseEntity<int>
     public int? TaskId { get; set; }
     public AppTask? Task { get; set; }
 
-    public IDictionary<string, object?> Data { get; set; } = new Dictionary<string, object?>();
+    public IDictionary<string, object?>? Data { get; set; }
 }

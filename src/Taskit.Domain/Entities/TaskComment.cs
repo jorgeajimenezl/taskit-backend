@@ -10,9 +10,9 @@ public class TaskComment : BaseEntity<int>
 
     [Required, ForeignKey(nameof(Task))]
     public required int TaskId { get; set; }
-    public required AppTask Task { get; set; }
+    public AppTask? Task { get; set; }
 
     [Required, ForeignKey(nameof(Author))]
     public required string AuthorId { get; set; }
-    public required AppUser Author { get; set; }
+    public AppUser? Author { get; set; }
 }

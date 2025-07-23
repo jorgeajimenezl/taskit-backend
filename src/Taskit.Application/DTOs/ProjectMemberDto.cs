@@ -17,8 +17,8 @@ public record ProjectMemberDto
         public Mapping()
         {
             CreateMap<ProjectMember, ProjectMemberDto>()
-                .ForMember(d => d.Username, o => o.MapFrom(s => s.User.UserName))
-                .ForMember(d => d.FullName, o => o.MapFrom(s => s.User.FullName));
+                .ForMember(d => d.Username, o => o.MapFrom(s => s.User!.UserName))
+                .ForMember(d => d.FullName, o => o.MapFrom(s => s.User!.FullName));
         }
     }
 }

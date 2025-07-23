@@ -14,12 +14,12 @@ public class TaskCommentService(
     ITaskCommentRepository commentRepository,
     ITaskRepository taskRepository,
     IMapper mapper,
-    ActivityService activityService)
+    ProjectActivityLogService activityService)
 {
     private readonly ITaskCommentRepository _comments = commentRepository;
     private readonly ITaskRepository _tasks = taskRepository;
     private readonly IMapper _mapper = mapper;
-    private readonly ActivityService _activity = activityService;
+    private readonly ProjectActivityLogService _activity = activityService;
 
     private async Task<bool> HasAccessToTask(int taskId, string userId)
     {
@@ -62,7 +62,7 @@ public class TaskCommentService(
 
         await _comments.AddAsync(comment);
         var projectId = await _tasks.Query().Where(t => t.Id == taskId).Select(t => t.ProjectId).FirstOrDefaultAsync();
-        await _activity.RecordAsync(ActivityEventType.CommentAdded, userId, projectId, taskId, new Dictionary<string, object?>
+        await _activity.RecordAsync(ProjectActivityLogEventType.CommentAdded, userId, projectId, taskId, new Dictionary<string, object?>
         {
             ["commentId"] = comment.Id
         });
