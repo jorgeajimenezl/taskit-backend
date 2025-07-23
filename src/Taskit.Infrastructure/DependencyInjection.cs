@@ -13,6 +13,7 @@ using Taskit.Infrastructure.Services;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
 using MassTransit;
+using Taskit.Infrastructure.Workers;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -115,5 +116,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITagRepository, TagRepository>();
         builder.Services.AddScoped<IProjectActivityLogRepository, ProjectActivityLogRepository>();
         builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        // Background services
+        builder.Services.AddHostedService<MediaCleanupService>();
     }
 }
