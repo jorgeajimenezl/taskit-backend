@@ -2,5 +2,4 @@
 - Test: add unit test for the whole suite
 - Feat: realtime notifications for task updates
 - Feat: add notification service
-- Feat: handle orphaned files created by the file upload service (if there are not attached to any model)
 - Feat: add email service to send emails
