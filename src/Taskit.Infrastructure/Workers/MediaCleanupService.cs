@@ -73,7 +73,6 @@ public class MediaCleanupService(
                     _logger.LogWarning(ex, "Failed to delete orphan file {File}", path);
                 }
 
-                await context.SaveChangesAsync(cancellationToken);
             }
         }
 
