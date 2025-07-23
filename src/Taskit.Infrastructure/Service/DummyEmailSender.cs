@@ -1,25 +1,28 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure.Services;
 
-public class DummyEmailSender : IEmailSender<AppUser>
+public class DummyEmailSender(ILogger<DummyEmailSender> logger) : IEmailSender<AppUser>
 {
+    private readonly ILogger<DummyEmailSender> _logger = logger;
+
     public Task SendConfirmationLinkAsync(AppUser user, string email, string confirmationLink)
     {
-        Console.WriteLine($"Confirmation link: {confirmationLink}");
+        _logger.LogInformation("Confirmation link: {Link}", confirmationLink);
         return Task.CompletedTask;
     }
 
     public Task SendPasswordResetLinkAsync(AppUser user, string email, string resetLink)
     {
-        Console.WriteLine($"Password reset link: {resetLink}");
+        _logger.LogInformation("Password reset link: {Link}", resetLink);
         return Task.CompletedTask;
     }
 
     public Task SendPasswordResetCodeAsync(AppUser user, string email, string resetCode)
     {
-        Console.WriteLine($"Password reset code: {resetCode}");
+        _logger.LogInformation("Password reset code: {Code}", resetCode);
         return Task.CompletedTask;
     }
 }

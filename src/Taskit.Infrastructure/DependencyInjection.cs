@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -26,20 +27,24 @@ public static class DependencyInjection
             options.UseSqlite(connectionString)
                 .UseAsyncSeeding(async (context, _, cancellationToken) =>
                 {
-                    Console.WriteLine("Seeding database...");
+                    var logger = sp.GetRequiredService<ILogger<DataSeeder>>();
+                    logger.LogInformation("Seeding database...");
                     var seeder = new DataSeeder(
                         (AppDbContext)context,
                         sp.GetRequiredService<RoleManager<IdentityRole>>(),
-                        sp.GetRequiredService<UserManager<AppUser>>());
+                        sp.GetRequiredService<UserManager<AppUser>>(),
+                        logger);
                     await seeder.SeedAsync();
                 })
                 .UseSeeding((context, _) =>
                 {
-                    Console.WriteLine("Seeding database...");
+                    var logger = sp.GetRequiredService<ILogger<DataSeeder>>();
+                    logger.LogInformation("Seeding database...");
                     var seeder = new DataSeeder(
                         (AppDbContext)context,
                         sp.GetRequiredService<RoleManager<IdentityRole>>(),
-                        sp.GetRequiredService<UserManager<AppUser>>());
+                        sp.GetRequiredService<UserManager<AppUser>>(),
+                        logger);
                     seeder.Seed();
                 });
         });
