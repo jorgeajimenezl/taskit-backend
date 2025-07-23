@@ -11,6 +11,7 @@ using Taskit.Infrastructure;
 using Taskit.Infrastructure.Services;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
+using MassTransit;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -75,6 +76,18 @@ public static class DependencyInjection
         });
 
         builder.Services.AddAuthorization();
+
+        builder.Services.AddMassTransit(options =>
+        {
+            options.AddEntityFrameworkOutbox<AppDbContext>(cfg =>
+            {
+                // cfg.QueryDelay = TimeSpan.FromSeconds(1);
+                cfg.UseSqlite();
+                cfg.UseBusOutbox();
+            });
+
+            options.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
+        });
 
         // Custom services
         builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
