@@ -8,7 +8,7 @@ public class NotificationService(INotificationRepository notificationRepository)
 {
     private readonly INotificationRepository _notificationRepository = notificationRepository;
 
-    public async Task AddNotificationAsync(string userId, string title, NotificationType type, string? message = null, IDictionary<string, object?>? data = null)
+    public async Task CreateAsync(string userId, string title, NotificationType type, string? message = null, IDictionary<string, object?>? data = null)
     {
         var notification = new Notification
         {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Taskit.Web.Infrastructure;
+using Taskit.Web.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -55,5 +56,7 @@ public static class DependencyInjection
                 )
             );
         });
+
+        builder.Services.AddScoped<NotificationService>();
     }
 }

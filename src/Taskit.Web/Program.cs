@@ -1,8 +1,18 @@
+using MassTransit;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
 builder.AddWebServices();
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingInMemory((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 
