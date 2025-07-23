@@ -43,9 +43,10 @@ public class MediaCleanupService(
         using var scope = _services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        var threshold = DateTime.UtcNow.Add(-_interval);
         var orphans = await context.Media
             .Where(m => !m.IsDeleted) // Only consider non-deleted media
-            .Where(m => m.ModelId == null && m.ModelType == null && m.CreatedAt.Add(_interval) <= DateTime.UtcNow)
+            .Where(m => m.ModelId == null && m.ModelType == null && m.CreatedAt <= threshold)
             .ToListAsync(cancellationToken);
 
         if (orphans.Count == 0)
