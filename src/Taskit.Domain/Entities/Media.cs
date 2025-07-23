@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Taskit.Domain.Interfaces;
 
 namespace Taskit.Domain.Entities;
 
-public class Media : BaseEntity<int>
+public class Media : BaseEntity<int>, ISoftDeletable
 {
     [Required]
     public Guid Uuid { get; set; }
@@ -33,4 +34,7 @@ public class Media : BaseEntity<int>
     [ForeignKey(nameof(UploadedBy))]
     public string? UploadedById { get; set; }
     public AppUser? UploadedBy { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 }
