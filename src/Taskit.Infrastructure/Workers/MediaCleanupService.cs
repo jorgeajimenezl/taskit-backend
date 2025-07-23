@@ -25,14 +25,21 @@ public class MediaCleanupService(
         using var timer = new PeriodicTimer(_interval);
         do
         {
-            await CleanupAsync(stoppingToken);
+            try
+            {
+                await CleanupAsync(stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during media cleanup");
+            }
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 
     private async Task CleanupAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting media cleanup routine");
+        _logger.LogDebug("Starting media cleanup routine");
 
         using var scope = _services.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IMediaRepository>();
