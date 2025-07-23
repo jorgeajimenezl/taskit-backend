@@ -99,5 +99,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
         builder.Services.AddScoped<ITagRepository, TagRepository>();
         builder.Services.AddScoped<IProjectActivityLogRepository, ProjectActivityLogRepository>();
+        builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
     }
 }
