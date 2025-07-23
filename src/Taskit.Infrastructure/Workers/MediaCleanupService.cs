@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Hosting;
-using Taskit.Application.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Taskit.Infrastructure.Workers;
@@ -42,9 +41,10 @@ public class MediaCleanupService(
         _logger.LogDebug("Starting media cleanup routine");
 
         using var scope = _services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IMediaRepository>();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var orphans = await repository.Query()
+        var orphans = await context.Media
+            .Where(m => !m.IsDeleted) // Only consider non-deleted media
             .Where(m => (m.ModelId == null || m.ModelType == null) && m.CreatedAt.Add(_interval) <= DateTime.UtcNow)
             .ToListAsync(cancellationToken);
 
@@ -64,15 +64,19 @@ public class MediaCleanupService(
                 try
                 {
                     File.Delete(path);
+                    media.IsDeleted = true;
+                    context.Media.Update(media);
                 }
                 catch (IOException ex)
                 {
                     _logger.LogWarning(ex, "Failed to delete orphan file {File}", path);
                 }
+
+                await context.SaveChangesAsync(cancellationToken);
             }
         }
 
-        await repository.DeleteRangeAsync(orphans);
+        await context.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Deleted {Count} orphaned media records", orphans.Count);
     }
 }
