@@ -44,7 +44,7 @@ public class ProjectActivityLogService(
             UserId = userId,
             ProjectId = projectId,
             TaskId = taskId,
-            Data = data ?? new Dictionary<string, object?>(),
+            Data = data,
             Timestamp = DateTime.UtcNow
         };
 
