@@ -28,7 +28,6 @@ public static class DependencyInjection
                 .UseAsyncSeeding(async (context, _, cancellationToken) =>
                 {
                     var logger = sp.GetRequiredService<ILogger<DataSeeder>>();
-                    logger.LogInformation("Seeding database...");
                     var seeder = new DataSeeder(
                         (AppDbContext)context,
                         sp.GetRequiredService<RoleManager<IdentityRole>>(),
@@ -39,7 +38,6 @@ public static class DependencyInjection
                 .UseSeeding((context, _) =>
                 {
                     var logger = sp.GetRequiredService<ILogger<DataSeeder>>();
-                    logger.LogInformation("Seeding database...");
                     var seeder = new DataSeeder(
                         (AppDbContext)context,
                         sp.GetRequiredService<RoleManager<IdentityRole>>(),

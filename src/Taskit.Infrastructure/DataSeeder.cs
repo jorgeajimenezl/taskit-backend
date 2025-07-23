@@ -55,8 +55,6 @@ public class DataSeeder(
 
     public void Seed()
     {
-        _logger.LogInformation("Starting database seeding");
         SeedAsync().GetAwaiter().GetResult();
-        _logger.LogInformation("Database seeding completed");
     }
 }
