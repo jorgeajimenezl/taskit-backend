@@ -65,6 +65,8 @@ public class MediaCleanupService(
                 try
                 {
                     File.Delete(path);
+
+                    // Mark media as deleted in the database
                     media.IsDeleted = true;
                     media.DeletedAt = DateTime.UtcNow;
                     context.Media.Update(media);
