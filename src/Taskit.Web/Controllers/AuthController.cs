@@ -34,23 +34,21 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
         var ipAddress = Request.HttpContext.Connection.RemoteIpAddress;
         var result = await _auth.LoginAsync(dto, userAgent, ipAddress);
 
-        if (Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) && noCookie == "true")
+        if (!Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) || noCookie != "true")
         {
             Response.Cookies.Append(
                 "refreshToken",
                 result.RefreshToken!,
                 RefreshCookieOptions
             );
-
-            return Ok(new LoginResponse
-            {
-                AccessToken = result.AccessToken,
-                RefreshToken = null,
-                User = result.User
-            });
         }
 
-        return Ok(result);
+        return Ok(new LoginResponse
+        {
+            AccessToken = result.AccessToken,
+            RefreshToken = noCookie == "true" ? null : result.RefreshToken,
+            User = result.User
+        });
     }
 
     [Authorize]
