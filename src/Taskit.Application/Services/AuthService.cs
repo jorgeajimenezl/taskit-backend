@@ -12,21 +12,22 @@ using Taskit.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Ardalis.GuardClauses;
 using Taskit.Application.Common.Exceptions;
+using Microsoft.Extensions.Options;
+using Taskit.Application.Common.Settings;
+using System.Net;
 
 namespace Taskit.Application.Services;
 
 public class AuthService(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
-    IConfiguration configuration,
-    IRefreshTokenRepository refreshTokenRepository,
-    IHttpContextAccessor httpContextAccessor)
+    IOptions<JwtSettings> jwtSettings,
+    IRefreshTokenRepository refreshTokenRepository)
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
-    private readonly IConfiguration _configuration = configuration;
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task RegisterAsync(RegisterRequest dto)
     {
@@ -36,35 +37,20 @@ public class AuthService(
             throw new ValidationException(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
     }
 
-    public async Task<LoginResponse> LoginAsync(LoginRequest dto)
+    public async Task<LoginResponse> LoginAsync(LoginRequest dto, string? userAgent = null, IPAddress? ipAddress = null)
     {
-        var user = await _userManager.FindByEmailAsync(dto.Email);
-        if (user == null)
-            throw new UnauthorizedAccessException("Invalid email or password");
-
+        var user = await _userManager.FindByEmailAsync(dto.Email) ?? throw new UnauthorizedAccessException();
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!result.Succeeded)
-            throw new UnauthorizedAccessException();
+            throw new UnauthorizedAccessException("Invalid email or password");
 
         var token = GenerateJwtToken(user);
-        var refreshToken = await CreateRefreshTokenAsync(user);
-
-        var http = _httpContextAccessor.HttpContext;
-        http?.Response.Cookies.Append(
-            "refreshToken",
-            refreshToken,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
-            });
+        var refreshToken = await CreateRefreshTokenAsync(user, userAgent, ipAddress);
 
         var response = new LoginResponse
         {
             AccessToken = token,
-            RefreshToken = http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true" ? refreshToken : null,
+            RefreshToken = refreshToken,
             User = new AppUserDto
             {
                 UserName = user.UserName!,
@@ -79,13 +65,10 @@ public class AuthService(
     public async Task LogoutAsync()
     {
         await _signInManager.SignOutAsync();
-        _httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken");
     }
 
-    public async Task<RefreshResponse> RefreshAsync(string? providedRefreshToken)
+    public async Task<RefreshResponse> RefreshAsync(string refreshToken, string? userAgent = null, IPAddress? ipAddress = null)
     {
-        var http = _httpContextAccessor.HttpContext;
-        var refreshToken = providedRefreshToken ?? http?.Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
             throw new UnauthorizedAccessException("Refresh token is required");
 
@@ -97,26 +80,13 @@ public class AuthService(
         stored.RevokedAt = DateTime.UtcNow;
         await _refreshTokens.UpdateAsync(stored);
 
-        var newRefreshToken = await CreateRefreshTokenAsync(stored.User!);
+        var newRefreshToken = await CreateRefreshTokenAsync(stored.User!, userAgent, ipAddress);
         var token = GenerateJwtToken(stored.User!);
-
-        http?.Response.Cookies.Append(
-            "refreshToken",
-            newRefreshToken,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
-            });
 
         var response = new RefreshResponse
         {
             AccessToken = token,
-            RefreshToken = providedRefreshToken is not null || (http?.Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) == true && noCookie == "true")
-                ? newRefreshToken
-                : null
+            RefreshToken = newRefreshToken
         };
 
         return response;
@@ -124,16 +94,7 @@ public class AuthService(
 
     private string GenerateJwtToken(AppUser user)
     {
-        var jwtKey = _configuration["JWT:Key"];
-        var jwtAudience = _configuration["JWT:Audience"];
-        var jwtIssuer = _configuration["JWT:Issuer"];
-
-        if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtAudience) || string.IsNullOrEmpty(jwtIssuer))
-        {
-            throw new InvalidOperationException("JWT settings are not configured");
-        }
-
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -146,17 +107,17 @@ public class AuthService(
         };
 
         var token = new JwtSecurityToken(
-            issuer: jwtIssuer,
-            audience: jwtAudience,
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddHours(_jwtSettings.AccessTokenExpirationMinutes),
             signingCredentials: credentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private async Task<string> CreateRefreshTokenAsync(AppUser user)
+    private async Task<string> CreateRefreshTokenAsync(AppUser user, string? userAgent = null, IPAddress? ipAddress = null)
     {
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var tokenHash = ComputeSha256Hash(token);
@@ -166,9 +127,9 @@ public class AuthService(
             TokenHash = tokenHash,
             UserId = user.Id,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString(),
-            IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+            UserAgent = userAgent,
+            IpAddress = ipAddress,
         };
 
         await _refreshTokens.AddAsync(refresh);

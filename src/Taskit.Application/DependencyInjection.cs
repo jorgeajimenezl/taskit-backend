@@ -1,6 +1,7 @@
 using System.Reflection;
 using Gridify;
 using Microsoft.Extensions.Hosting;
+using Taskit.Application.Common.Settings;
 using Taskit.Application.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,9 @@ public static class DependencyInjection
     {
         // Configure Gridify global settings
         GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+
+        // Register settings
+        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
         builder.Services.AddAutoMapper(cfg =>
         {

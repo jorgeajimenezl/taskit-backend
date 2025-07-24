@@ -3,3 +3,4 @@
 - Feat: realtime notifications for task updates
 - Feat: add notification service
 - Feat: add email service to send emails
+- Fix: Use DateTimeOffset instead of DateTime for consistency in timestamps
