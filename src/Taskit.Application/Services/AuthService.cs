@@ -119,7 +119,7 @@ public class AuthService(
 
     private async Task<string> CreateRefreshTokenAsync(AppUser user, string? userAgent = null, IPAddress? ipAddress = null)
     {
-        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(256));
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var tokenHash = ComputeSha256Hash(token);
 
         var refresh = new RefreshToken
