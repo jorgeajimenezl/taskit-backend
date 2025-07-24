@@ -45,7 +45,7 @@ public class AuthService(
             throw new UnauthorizedAccessException("Invalid email or password");
 
         var token = GenerateJwtToken(user);
-        var refreshToken = await CreateRefreshTokenAsync(user);
+        var refreshToken = await CreateRefreshTokenAsync(user, userAgent, ipAddress);
 
         var response = new LoginResponse
         {

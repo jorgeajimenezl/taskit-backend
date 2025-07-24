@@ -72,21 +72,19 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
 
         var result = await _auth.RefreshAsync(refreshToken, userAgent, ipAddress);
 
-        if (Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) && noCookie == "true")
+        if (!Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) || noCookie != "true")
         {
             Response.Cookies.Append(
                 "refreshToken",
                 result.RefreshToken!,
                 RefreshCookieOptions
             );
-
-            return Ok(new RefreshResponse
-            {
-                AccessToken = result.AccessToken,
-                RefreshToken = null
-            });
         }
 
-        return Ok(result);
+        return Ok(new RefreshResponse
+        {
+            AccessToken = result.AccessToken,
+            RefreshToken = noCookie == "true" ? null : result.RefreshToken
+        });
     }
 }
