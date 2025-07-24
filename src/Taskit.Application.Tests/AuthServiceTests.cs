@@ -18,25 +18,19 @@ public class AuthServiceTests
     private static Mock<UserManager<AppUser>> MockUserManager()
     {
         var store = new Mock<IUserStore<AppUser>>();
-        var passwordHasher = new Mock<IPasswordHasher<AppUser>>().Object;
-        var userValidators = new List<IUserValidator<AppUser>> { new Mock<IUserValidator<AppUser>>().Object };
-        var passwordValidators = new List<IPasswordValidator<AppUser>> { new Mock<IPasswordValidator<AppUser>>().Object };
-        var keyNormalizer = new Mock<ILookupNormalizer>().Object;
-        var errors = new Mock<IdentityErrorDescriber>().Object;
-        var services = new Mock<IServiceProvider>().Object;
-        var logger = new Mock<ILogger<UserManager<AppUser>>>().Object;
-        return new Mock<UserManager<AppUser>>(store.Object, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger);
+#pragma warning disable CS8625
+        return new Mock<UserManager<AppUser>>(store.Object, null, null, null, null, null, null, null, null);
+#pragma warning restore CS8625
     }
 
     private static Mock<SignInManager<AppUser>> MockSignInManager(Mock<UserManager<AppUser>> userManager)
     {
-        var contextAccessor = new Mock<IHttpContextAccessor>().Object;
-        var claimsFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>().Object;
-        var options = new Mock<IOptions<IdentityOptions>>().Object;
-        var logger = new Mock<ILogger<SignInManager<AppUser>>>().Object;
-        var schemes = new Mock<IAuthenticationSchemeProvider>().Object;
-        var tokenProvider = new Mock<IUserConfirmation<AppUser>>().Object;
-        return new Mock<SignInManager<AppUser>>(userManager.Object, contextAccessor, claimsFactory, options, logger, schemes, tokenProvider);
+#pragma warning disable CS8625
+        return new Mock<SignInManager<AppUser>>(userManager.Object,
+            new Mock<IHttpContextAccessor>().Object,
+            new Mock<IUserClaimsPrincipalFactory<AppUser>>().Object,
+            null, null, null, null);
+#pragma warning restore CS8625
     }
 
     private static AuthService CreateService(Mock<UserManager<AppUser>> userManager,
