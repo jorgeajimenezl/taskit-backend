@@ -23,8 +23,7 @@ public class ProjectActivityLogRecipientResolver(AppDbContext db) : IRecipientRe
         if (evt.EventType == ProjectActivityLogEventType.TaskAssigned &&
             evt.Data?.TryGetValue("assignedTo", out var assignedUserIdObj) == true)
         {
-            var assignedUserId = assignedUserIdObj?.ToString();
-            if (assignedUserId is null)
+            if (assignedUserIdObj is not string assignedUserId)
                 return [];
 
             var email = await _db.Users
