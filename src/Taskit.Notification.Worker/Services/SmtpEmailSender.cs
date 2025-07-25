@@ -3,6 +3,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Taskit.Notification.Worker.Interfaces;
+using Taskit.Notification.Worker.Settings;
 
 namespace Taskit.Notification.Worker.Services;
 

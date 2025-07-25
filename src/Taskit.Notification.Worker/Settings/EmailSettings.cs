@@ -1,4 +1,4 @@
-namespace Taskit.Notification.Worker.Services;
+namespace Taskit.Notification.Worker.Settings;
 
 public class EmailSettings
 {

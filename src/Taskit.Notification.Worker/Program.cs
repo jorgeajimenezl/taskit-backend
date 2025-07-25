@@ -8,6 +8,7 @@ using Taskit.Notification.Worker.Services;
 using Taskit.Notification.Worker.Interfaces;
 using Taskit.Domain.Events;
 using Taskit.Notification.Worker.Consumers;
+using Taskit.Notification.Worker.Settings;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
