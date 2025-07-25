@@ -18,6 +18,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.Configure<EmailSettings>(context.Configuration.GetSection("Email"));
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IEmailMessageGenerator, DefaultEmailMessageGenerator>();
+        services.AddScoped<IRecipientResolver, DefaultRecipientResolver>();
 
         services.AddMassTransit(x =>
         {
