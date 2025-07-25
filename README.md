@@ -1,5 +1,7 @@
 # TaskIt Backend
 
+[![.NET](https://github.com/jorgeajimenezl/taskit-backend/actions/workflows/dotnet.yml/badge.svg)](https://github.com/jorgeajimenezl/taskit-backend/actions/workflows/dotnet.yml)
+
 TaskIt is a backend service for managing projects and tasks. It is built with **.NET 9** and uses **RabbitMQ** for message processing. A background worker handles notifications alongside the main HTTP API.
 
 ## Features
