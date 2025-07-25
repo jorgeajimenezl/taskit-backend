@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Taskit.Infrastructure;
 using Taskit.Web.Infrastructure;
+using Taskit.Web.Settings;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -40,6 +41,10 @@ public static class DependencyInjection
             });
         });
 
+        var githubOAuthSettings = builder.Configuration.GetSection("OAuth:GitHub")
+            .Get<GithubOAuthSettings>()
+            ?? throw new InvalidOperationException("GitHub OAuth settings are not configured.");
+
         builder.Services.AddOpenIddict()
             .AddCore(options =>
             {
@@ -64,9 +69,9 @@ public static class DependencyInjection
                 options.UseWebProviders()
                     .AddGitHub(gh =>
                     {
-                        gh.SetClientId(builder.Configuration["Authentication:GitHub:ClientId"]!);
-                        gh.SetClientSecret(builder.Configuration["Authentication:GitHub:ClientSecret"]!);
-                        gh.SetRedirectUri(builder.Configuration["Authentication:GitHub:RedirectUri"]!);
+                        gh.SetClientId(githubOAuthSettings.ClientId);
+                        gh.SetClientSecret(githubOAuthSettings.ClientSecret);
+                        gh.SetRedirectUri(githubOAuthSettings.RedirectUri);
                         gh.AddScopes("read:user", "user:email");
                     });
             });
