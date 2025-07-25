@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using Taskit.Web.Infrastructure;
+using Taskit.Web.GitHub;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -55,5 +56,30 @@ public static class DependencyInjection
                 )
             );
         });
+
+        builder.Services.AddHttpClient<GitHubAuthService>();
+
+        builder.Services.AddOpenIddict()
+            .AddClient(options =>
+            {
+                options.AllowAuthorizationCodeFlow();
+
+                options.AddDevelopmentEncryptionCertificate()
+                       .AddDevelopmentSigningCertificate();
+
+                options.UseSystemNetHttp();
+                options.UseAspNetCore()
+                       .EnableStatusCodePagesIntegration()
+                       .EnableRedirectionEndpointPassthrough();
+
+                options.UseWebProviders()
+                    .AddGitHub(github =>
+                    {
+                        var configuration = builder.Configuration.GetSection("GitHub");
+                        github.SetClientId(configuration["ClientId"]!)
+                              .SetClientSecret(configuration["ClientSecret"]!)
+                              .SetRedirectUri(configuration["RedirectUri"]!);
+                    });
+            });
     }
 }

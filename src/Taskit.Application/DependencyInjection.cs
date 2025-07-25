@@ -15,6 +15,7 @@ public static class DependencyInjection
 
         // Register settings
         builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+        builder.Services.Configure<GitHubOAuthSettings>(builder.Configuration.GetSection("GitHub"));
 
         builder.Services.AddAutoMapper(cfg =>
         {
