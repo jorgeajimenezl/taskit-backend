@@ -11,6 +11,7 @@ using Taskit.Domain.Enums;
 using MassTransit;
 using TaskStatusEnum = Taskit.Domain.Enums.TaskStatus;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace Taskit.Application.Tests.Services;
 
@@ -18,7 +19,15 @@ public class TaskServiceTests
 {
     private static IMapper CreateMapper()
     {
-        var config = new global::AutoMapper.MapperConfiguration(cfg =>
+        var mockLogger = new Mock<ILogger<TaskService>>();
+
+        var mockLoggerFactory = new Mock<ILoggerFactory>();
+        mockLoggerFactory
+            .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
+            .Returns(mockLogger.Object);
+
+
+        var config = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<AppTask, TaskDto>();
             cfg.CreateMap<CreateTaskRequest, AppTask>();
@@ -27,7 +36,7 @@ public class TaskServiceTests
             cfg.CreateMap<Media, MediaDto>()
                 .ForMember(d => d.Url, opt => opt.MapFrom(s => $"/media/{s.FileName}"));
             cfg.CreateMap<TaskTag, TagDto>();
-        });
+        }, mockLoggerFactory.Object);
         return config.CreateMapper();
     }
 
