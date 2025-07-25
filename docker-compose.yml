@@ -9,6 +9,11 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     networks:
       - taskit
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
 
   api:
     build:
@@ -18,15 +23,17 @@ services:
       - '5152:5152'
     environment:
       ASPNETCORE_URLS: http://+:5152
-      ConnectionStrings__DefaultConnection: 'Data Source=taskit.db'
+      ConnectionStrings__DefaultConnection: 'Data Source=/app/taskit.db'
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
     volumes:
-      - taskit-db:/app/taskit.db
+      - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
-      - rabbitmq
-      - worker
+      rabbitmq:
+        condition: service_healthy
+      worker:
+        condition: service_started
     networks:
       - taskit
 
@@ -35,19 +42,18 @@ services:
       context: .
       dockerfile: src/Taskit.Notification.Worker/Dockerfile
     environment:
-      ConnectionStrings__DefaultConnection: 'Data Source=taskit.db'
+      ConnectionStrings__DefaultConnection: 'Data Source=/app/taskit.db'
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
     volumes:
-      - taskit-db:/app/taskit.db
+      - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       - taskit
 
-volumes:
-  taskit-db: {}
 networks:
   taskit:
     driver: bridge
