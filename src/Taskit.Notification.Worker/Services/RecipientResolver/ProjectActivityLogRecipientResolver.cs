@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
 using Taskit.Domain.Events;
 using Taskit.Infrastructure;
@@ -20,42 +21,40 @@ public class ProjectActivityLogRecipientResolver(AppDbContext db) : IRecipientRe
             .Select(u => u.Email)
             .FirstOrDefaultAsync(ct);
 
-        if (evt.EventType == ProjectActivityLogEventType.TaskAssigned &&
-            evt.Data?.TryGetValue("assignedTo", out var assignedUserIdObj) == true)
+        switch (evt.EventType)
         {
-            if (assignedUserIdObj is not string assignedUserId)
+            case ProjectActivityLogEventType.TaskCreated:
+            case ProjectActivityLogEventType.TaskUpdated:
+            case ProjectActivityLogEventType.TaskDeleted:
+            case ProjectActivityLogEventType.TaskStatusChanged:
                 return [];
 
-            var email = await _db.Users
-                .Where(u => u.Id == assignedUserId)
-                .Select(u => u.Email)
-                .FirstOrDefaultAsync(ct);
+            case ProjectActivityLogEventType.CommentAdded:
+            case ProjectActivityLogEventType.FileAttached:
+            case ProjectActivityLogEventType.TaskAssigned:
+                AppTask? task = await _db.Tasks
+                        .Include(t => t.Project)
+                        .FirstOrDefaultAsync(t => t.Id == evt.TaskId, ct);
 
-            if (string.IsNullOrWhiteSpace(email) || email == actorEmail)
+                if (task is null || task.ProjectId != evt.ProjectId)
+                    return [];
+
+                var emails = await _db.Users
+                    .Where(u => u.Id == task.AssignedUserId || u.Id == task.AuthorId)
+                    .Select(u => u.Email!)
+                    .ToListAsync(ct);
+
+                var distinctEmails = emails
+                    .Where(e => !string.IsNullOrWhiteSpace(e) && e != actorEmail)
+                    .Distinct();
+
+                return distinctEmails;
+            case ProjectActivityLogEventType.ProjectCreated:
+            case ProjectActivityLogEventType.ProjectUpdated:
+            case ProjectActivityLogEventType.ProjectDeleted:
                 return [];
-
-            return [email];
+            default:
+                return [];
         }
-
-        var projectId = evt.ProjectId.Value;
-
-        var memberEmails = await _db.ProjectMembers
-            .Where(pm => pm.ProjectId == projectId)
-            .Include(pm => pm.User)
-            .Select(pm => pm.User!.Email)
-            .ToListAsync(ct);
-
-        var ownerEmail = await _db.Projects
-            .Where(p => p.Id == projectId)
-            .Select(p => p.Owner!.Email)
-            .FirstOrDefaultAsync(ct);
-
-        if (ownerEmail != null)
-            memberEmails.Add(ownerEmail);
-
-        return [.. memberEmails
-            .Where(e => !string.IsNullOrWhiteSpace(e) && e != actorEmail)
-            .Select(e => e!)
-            .Distinct()];
     }
 }
