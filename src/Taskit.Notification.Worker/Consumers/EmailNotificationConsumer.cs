@@ -21,8 +21,14 @@ public class EmailNotificationConsumer<TEvent>(
         var evt = context.Message;
         var recipients = await _recipientResolver.GetRecipientsAsync(evt, context.CancellationToken);
 
-        foreach (var email in recipients)
+        foreach (var recipientUser in recipients)
         {
+            var email = recipientUser.Email;
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                _logger.LogWarning("User {UserId} has no email address, skipping notification for event {EventId}", recipientUser.Id, evt.Id);
+                continue;
+            }
             var message = await _messageGenerator.GenerateAsync(evt, email, context.CancellationToken);
             await _emailSender.SendAsync(message, context.CancellationToken);
         }
