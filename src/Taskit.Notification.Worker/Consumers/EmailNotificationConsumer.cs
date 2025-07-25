@@ -26,7 +26,7 @@ public class EmailNotificationConsumer<TEvent>(
             .Select(async recipientUser =>
             {
                 var email = recipientUser.Email;
-                var message = await _messageGenerator.GenerateAsync(evt, email, context.CancellationToken);
+                var message = await _messageGenerator.GenerateAsync(evt, email!, context.CancellationToken);
                 await _emailSender.SendAsync(message, context.CancellationToken);
             })
             .ToList();
