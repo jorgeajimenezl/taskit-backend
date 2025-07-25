@@ -7,6 +7,7 @@ builder.AddWebServices();
 var app = builder.Build();
 
 app.UseHealthChecks("/health");
+app.UseForwardedHeaders();
 app.UseRouting();
 
 if (app.Environment.IsDevelopment())
