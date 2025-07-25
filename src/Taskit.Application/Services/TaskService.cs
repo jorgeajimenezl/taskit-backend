@@ -117,7 +117,8 @@ public class TaskService(
         {
             await _activity.RecordAsync(ProjectActivityLogEventType.TaskStatusChanged, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
             {
-                ["status"] = task.Status.ToString()
+                ["status"] = task.Status.ToString(),
+                ["assignedTo"] = task.AssignedUserId
             });
         }
     }

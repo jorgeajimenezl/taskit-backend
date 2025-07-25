@@ -1,24 +1,46 @@
 using MassTransit;
 using Taskit.Domain.Events;
-using Taskit.Domain.Interfaces;
-using Microsoft.Extensions.Logging;
+using Taskit.Notification.Worker.Interfaces;
 
 namespace Taskit.Notification.Worker.Consumers;
 
-public class EmailNotificationConsumer(ILogger<EmailNotificationConsumer> logger) : IConsumer<ProjectActivityLogCreated>
+public class EmailNotificationConsumer<TEvent>(
+    IRecipientResolver<TEvent> recipientResolver,
+    IEmailSender emailSender,
+    IEmailMessageGenerator<TEvent> messageGenerator,
+    ILogger<EmailNotificationConsumer<TEvent>> logger) : IConsumer<TEvent>
+    where TEvent : class, IEvent<TEvent>
 {
-    private readonly ILogger<EmailNotificationConsumer> _logger = logger;
+    private readonly ILogger<EmailNotificationConsumer<TEvent>> _logger = logger;
+    private readonly IRecipientResolver<TEvent> _recipientResolver = recipientResolver;
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly IEmailMessageGenerator<TEvent> _messageGenerator = messageGenerator;
 
-    public Task Consume(ConsumeContext<ProjectActivityLogCreated> context)
+    public async Task Consume(ConsumeContext<TEvent> context)
     {
-        var msg = context.Message;
-        _logger.LogInformation(
-            "Email Notification: {Id}, User: {UserId}, Event: {EventType}, ProjectId: {ProjectId}, TaskId: {TaskId}",
-            msg.Id,
-            msg.UserId,
-            msg.EventType,
-            msg.ProjectId,
-            msg.TaskId);
-        return Task.CompletedTask;
+        var evt = context.Message;
+        var recipients = await _recipientResolver.GetRecipientsAsync(evt, context.CancellationToken);
+
+        var emailTasks = recipients
+            .Where(recipientUser => !string.IsNullOrWhiteSpace(recipientUser.Email))
+            .Select(async recipientUser =>
+            {
+                var email = recipientUser.Email;
+                var message = await _messageGenerator.GenerateAsync(evt, email!, context.CancellationToken);
+                await _emailSender.SendAsync(message, context.CancellationToken);
+            })
+            .ToList();
+
+        recipients
+            .Where(recipientUser => string.IsNullOrWhiteSpace(recipientUser.Email))
+            .ToList()
+            .ForEach(recipientUser =>
+                _logger.LogWarning("User {UserId} has no email address, skipping notification for event {EventId}",
+                    recipientUser.Id, evt.Id)
+            );
+
+        await Task.WhenAll(emailTasks);
+        _logger.LogInformation("Processed email notification for event {Id}", evt.Id);
     }
+
 }

@@ -4,6 +4,13 @@ using Taskit.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
+using Taskit.Notification.Worker.Services;
+using Taskit.Notification.Worker.Interfaces;
+using Taskit.Domain.Events;
+using Taskit.Notification.Worker.Consumers;
+using Taskit.Notification.Worker.Settings;
+using Taskit.Notification.Worker.Services.MessageGenerators.Email;
+using Taskit.Notification.Worker.Services.RecipientResolver;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -14,10 +21,16 @@ var host = Host.CreateDefaultBuilder(args)
         // Register repositories
         services.AddScoped<INotificationRepository, NotificationRepository>();
 
+        services.Configure<EmailSettings>(context.Configuration.GetSection("Email"));
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+        // Register message generators
+        services.AddScoped<IEmailMessageGenerator<ProjectActivityLogCreated>, ProjectActivityLogEmailMessageGenerator>();
+        services.AddScoped<IRecipientResolver<ProjectActivityLogCreated>, ProjectActivityLogRecipientResolver>();
+
         services.AddMassTransit(x =>
         {
-            var entryAssembly = Assembly.GetEntryAssembly();
-            x.AddConsumers(entryAssembly);
+            x.AddConsumer<EmailNotificationConsumer<ProjectActivityLogCreated>>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
