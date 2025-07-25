@@ -45,6 +45,8 @@ public static class DependencyInjection
                         logger);
                     seeder.Seed();
                 });
+
+            options.UseOpenIddict();
         });
 
         builder.Services.AddHealthChecks()

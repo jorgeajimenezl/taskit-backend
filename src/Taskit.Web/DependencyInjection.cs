@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
+using Taskit.Infrastructure;
 using Taskit.Web.Infrastructure;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -38,6 +39,37 @@ public static class DependencyInjection
                 Scheme = "Bearer"
             });
         });
+
+        builder.Services.AddOpenIddict()
+            .AddCore(options =>
+            {
+                options.UseEntityFrameworkCore()
+                    .UseDbContext<AppDbContext>();
+            })
+            .AddClient(options =>
+            {
+                options.AllowAuthorizationCodeFlow();
+                options.UseAspNetCore()
+                    .EnableRedirectionEndpointPassthrough()
+                    .EnablePostLogoutRedirectionEndpointPassthrough();
+
+                options.AddDevelopmentEncryptionCertificate()
+                    .AddDevelopmentSigningCertificate();
+
+                options.UseAspNetCore()
+                    .EnableRedirectionEndpointPassthrough();
+
+                options.UseSystemNetHttp();
+
+                options.UseWebProviders()
+                    .AddGitHub(gh =>
+                    {
+                        gh.SetClientId(builder.Configuration["Authentication:GitHub:ClientId"]!);
+                        gh.SetClientSecret(builder.Configuration["Authentication:GitHub:ClientSecret"]!);
+                        gh.SetRedirectUri(builder.Configuration["Authentication:GitHub:RedirectUri"]!);
+                        gh.AddScopes("read:user", "user:email");
+                    });
+            });
 
         builder.Services.AddRateLimiter(options =>
         {
