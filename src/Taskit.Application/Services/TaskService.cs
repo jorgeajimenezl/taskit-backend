@@ -72,6 +72,13 @@ public class TaskService(
 
         await _tasks.AddAsync(task);
         await _activity.RecordAsync(ProjectActivityLogEventType.TaskCreated, userId, task.ProjectId, task.Id);
+        if (task.AssignedUserId != null)
+        {
+            await _activity.RecordAsync(ProjectActivityLogEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+            {
+                ["assignedTo"] = task.AssignedUserId!
+            });
+        }
 
         return _mapper.Map<TaskDto>(task);
     }
