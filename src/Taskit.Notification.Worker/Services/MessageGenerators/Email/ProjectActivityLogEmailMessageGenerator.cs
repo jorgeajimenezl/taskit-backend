@@ -5,9 +5,9 @@ using Taskit.Domain.Events;
 using Taskit.Notification.Worker.Interfaces;
 using Taskit.Notification.Worker.Settings;
 
-namespace Taskit.Notification.Worker.Services;
+namespace Taskit.Notification.Worker.Services.MessageGenerators.Email;
 
-public class DefaultEmailMessageGenerator(IOptions<EmailSettings> options) : IEmailMessageGenerator<ProjectActivityLogCreated>
+public class ProjectActivityLogEmailMessageGenerator(IOptions<EmailSettings> options) : IEmailMessageGenerator<ProjectActivityLogCreated>
 {
     private readonly EmailSettings _settings = options.Value;
 

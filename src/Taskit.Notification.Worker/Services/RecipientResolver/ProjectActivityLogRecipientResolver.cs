@@ -4,9 +4,9 @@ using Taskit.Domain.Events;
 using Taskit.Infrastructure;
 using Taskit.Notification.Worker.Interfaces;
 
-namespace Taskit.Notification.Worker.Services;
+namespace Taskit.Notification.Worker.Services.RecipientResolver;
 
-public class DefaultRecipientResolver(AppDbContext db) : IRecipientResolver<ProjectActivityLogCreated>
+public class ProjectActivityLogRecipientResolver(AppDbContext db) : IRecipientResolver<ProjectActivityLogCreated>
 {
     private readonly AppDbContext _db = db;
 
@@ -35,7 +35,7 @@ public class DefaultRecipientResolver(AppDbContext db) : IRecipientResolver<Proj
             if (string.IsNullOrWhiteSpace(email) || email == actorEmail)
                 return [];
 
-            return new[] { email };
+            return [email];
         }
 
         var projectId = evt.ProjectId.Value;
@@ -54,10 +54,9 @@ public class DefaultRecipientResolver(AppDbContext db) : IRecipientResolver<Proj
         if (ownerEmail != null)
             memberEmails.Add(ownerEmail);
 
-        return memberEmails
+        return [.. memberEmails
             .Where(e => !string.IsNullOrWhiteSpace(e) && e != actorEmail)
             .Select(e => e!)
-            .Distinct()
-            .ToList();
+            .Distinct()];
     }
 }

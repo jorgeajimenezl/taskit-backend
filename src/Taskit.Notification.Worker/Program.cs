@@ -9,6 +9,8 @@ using Taskit.Notification.Worker.Interfaces;
 using Taskit.Domain.Events;
 using Taskit.Notification.Worker.Consumers;
 using Taskit.Notification.Worker.Settings;
+using Taskit.Notification.Worker.Services.MessageGenerators.Email;
+using Taskit.Notification.Worker.Services.RecipientResolver;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -21,8 +23,10 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.Configure<EmailSettings>(context.Configuration.GetSection("Email"));
         services.AddScoped<IEmailSender, SmtpEmailSender>();
-        services.AddScoped<IEmailMessageGenerator<ProjectActivityLogCreated>, DefaultEmailMessageGenerator>();
-        services.AddScoped<IRecipientResolver<ProjectActivityLogCreated>, DefaultRecipientResolver>();
+
+        // Register message generators
+        services.AddScoped<IEmailMessageGenerator<ProjectActivityLogCreated>, ProjectActivityLogEmailMessageGenerator>();
+        services.AddScoped<IRecipientResolver<ProjectActivityLogCreated>, ProjectActivityLogRecipientResolver>();
 
         services.AddMassTransit(x =>
         {
