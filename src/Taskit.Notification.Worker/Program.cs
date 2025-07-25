@@ -4,6 +4,7 @@ using Taskit.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
+using Taskit.Notification.Worker.Services;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -13,6 +14,10 @@ var host = Host.CreateDefaultBuilder(args)
 
         // Register repositories
         services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        services.Configure<EmailSettings>(context.Configuration.GetSection("Email"));
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<IEmailMessageGenerator, DefaultEmailMessageGenerator>();
 
         services.AddMassTransit(x =>
         {
