@@ -35,7 +35,8 @@ public class AuthServiceTests
 
     private static AuthService CreateService(Mock<UserManager<AppUser>> userManager,
         Mock<SignInManager<AppUser>> signInManager,
-        Mock<IRefreshTokenRepository> repo)
+        Mock<IRefreshTokenRepository>? refreshTokenRepo = null,
+        Mock<IExternalLoginRepository>? externalLoginRepo = null)
     {
         var settings = Options.Create(new JwtSettings
         {
@@ -45,7 +46,17 @@ public class AuthServiceTests
             AccessTokenExpirationMinutes = 1,
             RefreshTokenExpirationDays = 7
         });
-        return new AuthService(userManager.Object, signInManager.Object, settings, repo.Object);
+
+        var refreshTokenRepoObject = refreshTokenRepo ?? new Mock<IRefreshTokenRepository>();
+        var externalLoginRepoObject = externalLoginRepo ?? new Mock<IExternalLoginRepository>();
+
+        return new AuthService(
+            userManager.Object,
+            signInManager.Object,
+            settings,
+            refreshTokenRepoObject.Object,
+            externalLoginRepoObject.Object
+        );
     }
 
     private static string ComputeSha256(string raw)
