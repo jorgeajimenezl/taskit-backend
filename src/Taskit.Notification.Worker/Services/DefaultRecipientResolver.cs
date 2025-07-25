@@ -2,10 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Enums;
 using Taskit.Domain.Events;
 using Taskit.Infrastructure;
+using Taskit.Notification.Worker.Interfaces;
 
 namespace Taskit.Notification.Worker.Services;
 
-public class DefaultRecipientResolver(AppDbContext db) : IRecipientResolver
+public class DefaultRecipientResolver(AppDbContext db) : IRecipientResolver<ProjectActivityLogCreated>
 {
     private readonly AppDbContext _db = db;
 

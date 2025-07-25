@@ -1,23 +1,22 @@
 using MassTransit;
 using Taskit.Domain.Events;
-using Taskit.Domain.Interfaces;
-using Microsoft.Extensions.Logging;
-using Taskit.Notification.Worker.Services;
+using Taskit.Notification.Worker.Interfaces;
 
 namespace Taskit.Notification.Worker.Consumers;
 
-public class EmailNotificationConsumer(
-    IRecipientResolver recipientResolver,
+public class EmailNotificationConsumer<TEvent>(
+    IRecipientResolver<TEvent> recipientResolver,
     IEmailSender emailSender,
-    IEmailMessageGenerator messageGenerator,
-    ILogger<EmailNotificationConsumer> logger) : IConsumer<ProjectActivityLogCreated>
+    IEmailMessageGenerator<TEvent> messageGenerator,
+    ILogger<EmailNotificationConsumer<TEvent>> logger) : IConsumer<TEvent>
+    where TEvent : class, IEvent<TEvent>
 {
-    private readonly ILogger<EmailNotificationConsumer> _logger = logger;
-    private readonly IRecipientResolver _recipientResolver = recipientResolver;
+    private readonly ILogger<EmailNotificationConsumer<TEvent>> _logger = logger;
+    private readonly IRecipientResolver<TEvent> _recipientResolver = recipientResolver;
     private readonly IEmailSender _emailSender = emailSender;
-    private readonly IEmailMessageGenerator _messageGenerator = messageGenerator;
+    private readonly IEmailMessageGenerator<TEvent> _messageGenerator = messageGenerator;
 
-    public async Task Consume(ConsumeContext<ProjectActivityLogCreated> context)
+    public async Task Consume(ConsumeContext<TEvent> context)
     {
         var evt = context.Message;
         var recipients = await _recipientResolver.GetRecipientsAsync(evt, context.CancellationToken);

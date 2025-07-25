@@ -2,10 +2,11 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using Taskit.Domain.Enums;
 using Taskit.Domain.Events;
+using Taskit.Notification.Worker.Interfaces;
 
 namespace Taskit.Notification.Worker.Services;
 
-public class DefaultEmailMessageGenerator(IOptions<EmailSettings> options) : IEmailMessageGenerator
+public class DefaultEmailMessageGenerator(IOptions<EmailSettings> options) : IEmailMessageGenerator<ProjectActivityLogCreated>
 {
     private readonly EmailSettings _settings = options.Value;
 

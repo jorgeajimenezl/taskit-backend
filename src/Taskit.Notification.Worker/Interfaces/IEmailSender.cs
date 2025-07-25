@@ -1,6 +1,6 @@
 using MimeKit;
 
-namespace Taskit.Notification.Worker.Services;
+namespace Taskit.Notification.Worker.Interfaces;
 
 public interface IEmailSender
 {
