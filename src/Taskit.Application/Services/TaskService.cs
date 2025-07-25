@@ -67,6 +67,16 @@ public class TaskService(
                 throw new ForbiddenAccessException();
         }
 
+        if (dto.AssignedUserId is not null)
+        {
+            var assignedAllowed = await _projects.Query()
+                .Include(p => p.Members)
+                .AnyAsync(p => p.Id == dto.ProjectId &&
+                    p.Members.Any(m => m.UserId == dto.AssignedUserId));
+            if (!assignedAllowed)
+                throw new ForbiddenAccessException();
+        }
+
         var task = _mapper.Map<AppTask>(dto);
         task.AuthorId = userId;
 
@@ -95,6 +105,15 @@ public class TaskService(
             var parentAllowed = await _tasks.QueryForUser(userId)
                 .AnyAsync(t => t.Id == dto.ParentTaskId);
             if (!parentAllowed)
+                throw new ForbiddenAccessException();
+        }
+
+        if (dto.AssignedUserId is not null)
+        {
+            var assignedAllowed = await _projects.Query()
+                .Include(p => p.Members)
+                .AnyAsync(p => p.Members.Any(m => m.UserId == dto.AssignedUserId));
+            if (!assignedAllowed)
                 throw new ForbiddenAccessException();
         }
 
