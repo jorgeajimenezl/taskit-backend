@@ -1,0 +1,53 @@
+services:
+  rabbitmq:
+    image: masstransit/rabbitmq:latest
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - taskit
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Taskit.Web/Dockerfile
+    ports:
+      - '5152:5152'
+    environment:
+      ASPNETCORE_URLS: http://+:5152
+      ConnectionStrings__DefaultConnection: 'Data Source=taskit.db'
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+    volumes:
+      - taskit-db:/app/taskit.db
+    depends_on:
+      - rabbitmq
+      - worker
+    networks:
+      - taskit
+
+  worker:
+    build:
+      context: .
+      dockerfile: src/Taskit.Notification.Worker/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: 'Data Source=taskit.db'
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Username: guest
+      RabbitMQ__Password: guest
+    volumes:
+      - taskit-db:/app/taskit.db
+    depends_on:
+      - rabbitmq
+    networks:
+      - taskit
+
+volumes:
+  taskit-db: {}
+networks:
+  taskit:
+    driver: bridge

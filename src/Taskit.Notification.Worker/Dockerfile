@@ -10,7 +10,7 @@ COPY . .
 WORKDIR /src/src/Taskit.Notification.Worker
 RUN dotnet publish Taskit.Notification.Worker.csproj -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/runtime:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 ENV DOTNET_ENVIRONMENT=Production
 COPY --from=build /app/publish .
