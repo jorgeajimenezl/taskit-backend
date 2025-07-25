@@ -50,7 +50,7 @@ public class ProjectActivityLogService(
 
         await _activityLogs.AddAsync(activity, saveChanges: false);
         await _publisher.Publish(new ProjectActivityLogCreated(
-            activity.Id,
+            Guid.NewGuid(),
             eventType,
             userId,
             projectId,
