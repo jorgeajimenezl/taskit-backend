@@ -22,7 +22,15 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddScoped<INotificationRepository, NotificationRepository>();
 
         services.Configure<EmailSettings>(context.Configuration.GetSection("Email"));
-        services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+        if (context.HostingEnvironment.IsDevelopment())
+        {
+            services.AddSingleton<IEmailSender, DummyEmailSender>();
+        }
+        else
+        {
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
+        }
 
         // Register message generators
         services.AddScoped<IEmailMessageGenerator<ProjectActivityLogCreated>, ProjectActivityLogEmailMessageGenerator>();

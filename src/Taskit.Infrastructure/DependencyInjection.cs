@@ -9,7 +9,6 @@ using System.Text;
 
 using Taskit.Domain.Entities;
 using Taskit.Infrastructure;
-using Taskit.Infrastructure.Services;
 using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
 using MassTransit;
@@ -106,7 +105,6 @@ public static class DependencyInjection
         });
 
         // Custom services
-        builder.Services.AddSingleton<IEmailSender<AppUser>, DummyEmailSender>();
         builder.Services.AddScoped<ITaskRepository, TaskRepository>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
         builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
