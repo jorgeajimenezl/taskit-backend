@@ -58,6 +58,14 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         if (project.OwnerId != userId)
             throw new ForbiddenAccessException();
 
+        if (dto.Name != null)
+        {
+            var exists = await _projects.Query()
+                .AnyAsync(p => p.OwnerId == userId && p.Name == dto.Name && p.Id != id);
+            if (exists)
+                throw new RuleViolationException("A project with this name already exists");
+        }
+
         _mapper.Map(dto, project);
         project.UpdateTimestamps();
 

@@ -154,6 +154,25 @@ public class ProjectServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_DuplicateName_ThrowsRuleViolation()
+    {
+        var mapper = CreateMapper();
+        var project = new Project { Id = 1, Name = "Old", OwnerId = "u" };
+        var repo = new Mock<IProjectRepository>();
+        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
+        repo.Setup(r => r.Query()).Returns(new List<Project>
+        {
+            project,
+            new Project { Id = 2, Name = "New", OwnerId = "u" }
+        }.AsQueryable().BuildMock());
+        var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
+
+        var dto = new UpdateProjectRequest { Name = "New" };
+
+        await Assert.ThrowsAsync<RuleViolationException>(() => service.UpdateAsync(1, dto, "u"));
+    }
+
+    [Fact]
     public async Task DeleteAsync_DeletesProject()
     {
         var mapper = CreateMapper();

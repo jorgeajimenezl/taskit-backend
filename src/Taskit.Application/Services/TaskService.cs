@@ -117,10 +117,19 @@ public class TaskService(
                 throw new ForbiddenAccessException();
         }
 
+        if (dto.CompletedPercentage == 100 && dto.Status is not TaskStatus.Completed && task.Status != TaskStatus.Completed)
+            throw new RuleViolationException("Status must be Completed when progress reaches 100%");
+
         var oldAssigned = task.AssignedUserId;
         var oldStatus = task.Status;
 
         _mapper.Map(dto, task);
+
+        if (task.Status == TaskStatus.Completed && task.CompletedAt == null)
+            task.CompletedAt = DateTime.UtcNow;
+        else if (task.Status != TaskStatus.Completed)
+            task.CompletedAt = null;
+
         task.UpdateTimestamps();
         await _tasks.UpdateAsync(task);
 
