@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Client.AspNetCore;
 using Taskit.Application.Common.Exceptions;
@@ -10,7 +11,7 @@ namespace Taskit.Web.Controllers;
 public class OAuthController(AuthService authService) : ApiControllerBase
 {
     private readonly AuthService _authService = authService;
-    private static Dictionary<string, string> ProvidersMapping = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> ProvidersMapping = new()
     {
         ["github"] = "GitHub",
     };
@@ -63,5 +64,16 @@ public class OAuthController(AuthService authService) : ApiControllerBase
         var providerName = GetProviderName(provider);
         var loginResponse = await _authService.ExternalLoginAsync(providerName, providerUserId);
         return Ok(loginResponse);
+    }
+
+    [Authorize]
+    [HttpGet("disconnect/{provider}")]
+    public async Task<IActionResult> Disconnect(string provider)
+    {
+        var providerName = GetProviderName(provider);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        await _authService.DisconnectExternalLoginAsync(userId!, providerName);
+        return NoContent();
     }
 }

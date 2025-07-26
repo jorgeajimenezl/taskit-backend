@@ -131,6 +131,45 @@ public class AuthService(
         };
     }
 
+    public async Task LinkExternalLoginAsync(
+        string userId,
+        string provider,
+        string providerUserId)
+    {
+        Guard.Against.NullOrWhiteSpace(userId, nameof(userId));
+        Guard.Against.NullOrWhiteSpace(provider, nameof(provider));
+        Guard.Against.NullOrWhiteSpace(providerUserId, nameof(providerUserId));
+
+        var existingLogin = await _externalLoginRepository.GetByProviderAsync(provider, providerUserId);
+        if (existingLogin != null)
+            throw new ValidationException(
+                new Dictionary<string, string[]>
+                {
+                    ["provider"] = ["This external login is already linked to another account."]
+                }
+            );
+
+        var externalLogin = new ExternalLogin
+        {
+            UserId = userId,
+            Provider = provider,
+            ProviderUserId = providerUserId
+        };
+
+        await _externalLoginRepository.AddAsync(externalLogin);
+    }
+
+    public async Task DisconnectExternalLoginAsync(string userId, string provider)
+    {
+        Guard.Against.NullOrWhiteSpace(userId, nameof(userId));
+        Guard.Against.NullOrWhiteSpace(provider, nameof(provider));
+
+        var externalLogin = await _externalLoginRepository.GetByProviderAsync(provider, userId)
+            ?? throw new UnauthorizedAccessException();
+
+        await _externalLoginRepository.DeleteAsync(externalLogin.Id);
+    }
+
     private string GenerateJwtToken(AppUser user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
