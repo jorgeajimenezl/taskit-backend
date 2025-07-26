@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Client.AspNetCore;
 using Taskit.Application.Common.Exceptions;
+using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
 namespace Taskit.Web.Controllers;
@@ -44,7 +45,7 @@ public class OAuthController(AuthService authService) : ApiControllerBase
     }
 
     [HttpGet("callback/{provider}")]
-    public async Task<IActionResult> ExternalLoginCallback(string provider)
+    public async Task<ActionResult<LoginResponse>> ExternalLoginCallback(string provider)
     {
         var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
 
