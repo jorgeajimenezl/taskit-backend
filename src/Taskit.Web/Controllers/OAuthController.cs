@@ -45,7 +45,7 @@ public class OAuthController(AuthService authService) : ApiControllerBase
     }
 
     [HttpGet("callback/{provider}")]
-    public async Task<ActionResult<LoginResponse>> ExternalLoginCallback(string provider)
+    public async Task<IActionResult> ExternalLoginCallback(string provider)
     {
         var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
 
@@ -63,6 +63,15 @@ public class OAuthController(AuthService authService) : ApiControllerBase
             return BadRequest();
 
         var providerName = GetProviderName(provider);
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            // User is already authenticated, link the external login
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            await _authService.LinkExternalLoginAsync(userId!, providerName, providerUserId);
+            return NoContent();
+        }
+
         var loginResponse = await _authService.ExternalLoginAsync(providerName, providerUserId);
         return Ok(loginResponse);
     }
