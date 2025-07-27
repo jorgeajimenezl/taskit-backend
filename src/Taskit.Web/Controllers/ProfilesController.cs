@@ -8,7 +8,7 @@ using Taskit.Domain.Entities;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class ProfilesController(UserManager<AppUser> userManager) : ApiControllerBase
+public class ProfileController(UserManager<AppUser> userManager) : ApiControllerBase
 {
     private readonly UserManager<AppUser> _userManager = userManager;
 
