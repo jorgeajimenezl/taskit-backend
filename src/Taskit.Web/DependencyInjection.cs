@@ -62,7 +62,9 @@ public static class DependencyInjection
                     .AddDevelopmentSigningCertificate();
 
                 options.UseAspNetCore()
-                    .EnableRedirectionEndpointPassthrough();
+                    .EnableRedirectionEndpointPassthrough()
+                    // TODO: Enable this when the frontend is ready
+                    .DisableTransportSecurityRequirement();
 
                 options.UseSystemNetHttp();
 
