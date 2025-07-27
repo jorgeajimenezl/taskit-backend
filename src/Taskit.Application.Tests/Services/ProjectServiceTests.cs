@@ -79,7 +79,7 @@ public class ProjectServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "P", OwnerId = "u" };
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.Query()).Returns(new List<Project> { project }.AsQueryable().BuildMock());
+        repo.Setup(r => r.Query()).Returns(new List<Project> { project }.AsQueryable().BuildMockDbSet().Object);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         var result = await service.GetByIdAsync(1, "u");
@@ -121,6 +121,7 @@ public class ProjectServiceTests
         var repo = new Mock<IProjectRepository>();
         repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
         repo.Setup(r => r.UpdateAsync(project, It.IsAny<bool>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.Query()).Returns(new List<Project> { project }.AsQueryable().BuildMockDbSet().Object);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         var dto = new UpdateProjectRequest { Name = "New" };
@@ -163,8 +164,8 @@ public class ProjectServiceTests
         repo.Setup(r => r.Query()).Returns(new List<Project>
         {
             project,
-            new Project { Id = 2, Name = "New", OwnerId = "u" }
-        }.AsQueryable().BuildMock());
+            new() { Id = 2, Name = "New", OwnerId = "u" }
+        }.AsQueryable().BuildMockDbSet().Object);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         var dto = new UpdateProjectRequest { Name = "New" };
