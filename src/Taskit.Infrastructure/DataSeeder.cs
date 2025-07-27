@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
 
 namespace Taskit.Infrastructure;
@@ -52,6 +53,8 @@ public class DataSeeder(
 
         await AddSampleUsersAsync();
 
+        await AddSampleDataAsync();
+
         _logger.LogInformation("Database seeding completed");
     }
 
@@ -73,6 +76,210 @@ public class DataSeeder(
                     throw new InvalidOperationException(string.Join(";", result.Errors.Select(e => e.Description)));
             }
         }
+    }
+
+    public async Task AddSampleDataAsync()
+    {
+        if (await _context.Projects.AnyAsync())
+            return;
+
+        var user1 = await _users.FindByNameAsync("user1");
+        var user2 = await _users.FindByNameAsync("user2");
+        var user3 = await _users.FindByNameAsync("user3");
+        var user4 = await _users.FindByNameAsync("user4");
+
+        if (user1 == null || user2 == null || user3 == null || user4 == null)
+            return;
+
+        var tags = new List<TaskTag>
+        {
+            new() { Name = "bug", Color = "#dc2626" },
+            new() { Name = "feature", Color = "#16a34a" },
+            new() { Name = "docs", Color = "#2563eb" }
+        };
+        _context.TaskTags.AddRange(tags);
+        await _context.SaveChangesAsync();
+
+        var project1 = new Project
+        {
+            Name = "Demo project",
+            Description = "Sample project created by seed data",
+            OwnerId = user1.Id
+        };
+
+        var project2 = new Project
+        {
+            Name = "Secondary project",
+            Description = "Another sample project",
+            OwnerId = user2.Id
+        };
+
+        _context.Projects.AddRange(project1, project2);
+        await _context.SaveChangesAsync();
+
+        var members = new List<ProjectMember>
+        {
+            new() { ProjectId = project1.Id, UserId = user2.Id, Role = Domain.Enums.ProjectRole.Admin },
+            new() { ProjectId = project1.Id, UserId = user3.Id, Role = Domain.Enums.ProjectRole.Member },
+            new() { ProjectId = project2.Id, UserId = user1.Id, Role = Domain.Enums.ProjectRole.Member }
+        };
+
+        _context.ProjectMembers.AddRange(members);
+        await _context.SaveChangesAsync();
+
+        var task1 = new AppTask
+        {
+            Title = "Set up environment",
+            Description = "Install dependencies and configure the project.",
+            ProjectId = project1.Id,
+            AuthorId = user1.Id,
+            AssignedUserId = user2.Id
+        };
+
+        var task2 = new AppTask
+        {
+            Title = "Fix login bug",
+            Description = "Users cannot login with correct credentials.",
+            ProjectId = project1.Id,
+            AuthorId = user2.Id,
+            AssignedUserId = user3.Id
+        };
+
+        var task3 = new AppTask
+        {
+            Title = "Write documentation",
+            Description = "Create user guide",
+            ProjectId = project2.Id,
+            AuthorId = user2.Id,
+            AssignedUserId = user4.Id
+        };
+
+        var task4 = new AppTask
+        {
+            Title = "Implement user profile",
+            Description = "Allow users to edit their profile details.",
+            ProjectId = project1.Id,
+            AuthorId = user3.Id,
+            AssignedUserId = user1.Id
+        };
+
+        var task5 = new AppTask
+        {
+            Title = "Add authentication tests",
+            Description = "Cover login and registration with integration tests.",
+            ProjectId = project1.Id,
+            AuthorId = user1.Id,
+            AssignedUserId = user3.Id
+        };
+
+        var task6 = new AppTask
+        {
+            Title = "Design landing page",
+            Description = "Create layout for the marketing page.",
+            ProjectId = project2.Id,
+            AuthorId = user4.Id,
+            AssignedUserId = user2.Id
+        };
+
+        var task7 = new AppTask
+        {
+            Title = "Setup CI pipeline",
+            Description = "Automate builds and tests on push.",
+            ProjectId = project1.Id,
+            AuthorId = user2.Id,
+            AssignedUserId = user1.Id
+        };
+
+        var task8 = new AppTask
+        {
+            Title = "Optimize database queries",
+            Description = "Improve performance on heavy endpoints.",
+            ProjectId = project1.Id,
+            AuthorId = user3.Id,
+            AssignedUserId = user2.Id
+        };
+
+        var task9 = new AppTask
+        {
+            Title = "Create marketing materials",
+            Description = "Prepare brochures and slides.",
+            ProjectId = project2.Id,
+            AuthorId = user1.Id,
+            AssignedUserId = user4.Id
+        };
+
+        var task10 = new AppTask
+        {
+            Title = "Refactor task module",
+            Description = "Clean up task management components.",
+            ProjectId = project1.Id,
+            AuthorId = user4.Id,
+            AssignedUserId = user3.Id
+        };
+
+        _context.Tasks.AddRange(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10);
+        await _context.SaveChangesAsync();
+
+        task1.Tags.Add(tags[1]);
+        task2.Tags.Add(tags[0]);
+        task3.Tags.Add(tags[2]);
+        task4.Tags.Add(tags[1]);
+        task5.Tags.Add(tags[2]);
+        task6.Tags.Add(tags[1]);
+        task7.Tags.Add(tags[1]);
+        task8.Tags.Add(tags[0]);
+        task9.Tags.Add(tags[2]);
+        task10.Tags.Add(tags[1]);
+        await _context.SaveChangesAsync();
+
+        var comments = new List<TaskComment>
+        {
+            new() { TaskId = task1.Id, AuthorId = user2.Id, Content = "I'll start with the backend setup." },
+            new() { TaskId = task2.Id, AuthorId = user3.Id, Content = "Working on fix." },
+            new() { TaskId = task3.Id, AuthorId = user4.Id, Content = "First draft ready." },
+            new() { TaskId = task4.Id, AuthorId = user1.Id, Content = "Looking forward to implementing this." },
+            new() { TaskId = task5.Id, AuthorId = user3.Id, Content = "Tests are crucial." },
+            new() { TaskId = task6.Id, AuthorId = user2.Id, Content = "Need some inspiration." },
+            new() { TaskId = task7.Id, AuthorId = user1.Id, Content = "CI pipeline will use GitHub Actions." },
+            new() { TaskId = task8.Id, AuthorId = user4.Id, Content = "Investigating slow queries." },
+            new() { TaskId = task9.Id, AuthorId = user2.Id, Content = "Marketing assets in progress." },
+            new() { TaskId = task10.Id, AuthorId = user3.Id, Content = "Refactoring for better maintainability." }
+        };
+        _context.TaskComments.AddRange(comments);
+        await _context.SaveChangesAsync();
+
+        var media1 = new Media
+        {
+            Uuid = Guid.NewGuid(),
+            CollectionName = "attachments",
+            Name = "design.png",
+            FileName = "design.png",
+            MimeType = "image/png",
+            Disk = "local",
+            Size = 2048,
+            ModelId = task1.Id,
+            ModelType = nameof(AppTask),
+            UploadedById = user1.Id
+        };
+
+        _context.Media.Add(media1);
+        await _context.SaveChangesAsync();
+
+
+        var log1 = new ProjectActivityLog
+        {
+            EventType = Domain.Enums.ProjectActivityLogEventType.ProjectCreated,
+            UserId = user1.Id,
+            ProjectId = project1.Id,
+            Data = new Dictionary<string, object?>
+            {
+                ["projectId"] = project1.Id,
+                ["name"] = project1.Name
+            }
+        };
+
+        _context.ProjectActivityLogs.Add(log1);
+        await _context.SaveChangesAsync();
     }
 
     public void Seed()
