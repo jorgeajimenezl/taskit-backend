@@ -429,16 +429,6 @@ public class DataSeeder(
             new() { TaskId = task8.Id, AuthorId = user4.Id, Content = "Investigating slow queries." },
             new() { TaskId = task9.Id, AuthorId = user2.Id, Content = "Marketing assets in progress." },
             new() { TaskId = task10.Id, AuthorId = user3.Id, Content = "Refactoring for better maintainability." },
-            new() { TaskId = task11.Id, AuthorId = user2.Id, Content = "Initial code review notes added." },
-            new() { TaskId = task12.Id, AuthorId = user3.Id, Content = "Caching implementation started." },
-            new() { TaskId = task13.Id, AuthorId = user4.Id, Content = "Database schema draft available." },
-            new() { TaskId = task14.Id, AuthorId = user1.Id, Content = "Monitoring integrated successfully." },
-            new() { TaskId = task15.Id, AuthorId = user2.Id, Content = "Dependencies updated without errors." },
-            new() { TaskId = task16.Id, AuthorId = user3.Id, Content = "API docs published." },
-            new() { TaskId = task17.Id, AuthorId = user4.Id, Content = "File upload service is live." },
-            new() { TaskId = task18.Id, AuthorId = user1.Id, Content = "UI bugs fixed and tested." },
-            new() { TaskId = task19.Id, AuthorId = user2.Id, Content = "Image optimization complete." },
-            new() { TaskId = task20.Id, AuthorId = user3.Id, Content = "Release notes finalized." },
         };
         _context.TaskComments.AddRange(comments);
         await _context.SaveChangesAsync();
