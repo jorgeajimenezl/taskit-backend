@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Client.AspNetCore;
+using OpenIddict.Client.WebIntegration;
 using Taskit.Application.Common.Exceptions;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
@@ -28,23 +29,20 @@ public class OAuthController(AuthService authService) : ApiControllerBase
         });
     }
 
-    [HttpGet("login/{provider}")]
+    [HttpGet("{provider}/login")]
     public IActionResult Login(string provider)
     {
         var providerName = GetProviderName(provider);
 
-        var properties = new AuthenticationProperties(new Dictionary<string, string?>
+        var properties = new AuthenticationProperties
         {
-            [OpenIddictClientAspNetCoreConstants.Properties.ProviderName] = providerName,
-        })
-        {
-            RedirectUri = Url.Action(nameof(ExternalLoginCallback), providerName)
+            RedirectUri = Url.Action(nameof(ExternalLoginCallback), "OAuth", new { provider })
         };
 
-        return Challenge(properties, OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+        return Challenge(properties, OpenIddictClientWebIntegrationConstants.Providers.GitHub);
     }
 
-    [HttpGet("callback/{provider}")]
+    [HttpGet("{provider}/callback")]
     public async Task<IActionResult> ExternalLoginCallback(string provider)
     {
         var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
@@ -77,7 +75,7 @@ public class OAuthController(AuthService authService) : ApiControllerBase
     }
 
     [Authorize]
-    [HttpGet("disconnect/{provider}")]
+    [HttpGet("{provider}/disconnect")]
     public async Task<IActionResult> Disconnect(string provider)
     {
         var providerName = GetProviderName(provider);
