@@ -78,6 +78,9 @@ public class TaskCommentService(
         if (comment.AuthorId != userId || !await HasAccessToTask(taskId, userId))
             throw new ForbiddenAccessException();
 
+        if ((DateTime.UtcNow - comment.CreatedAt).TotalMinutes > 30)
+            throw new RuleViolationException("Comment can no longer be edited");
+
         _mapper.Map(dto, comment);
         comment.UpdateTimestamps();
         await _comments.UpdateAsync(comment);

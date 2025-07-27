@@ -209,6 +209,24 @@ public class ProjectMemberServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_SetOwnerRole_ThrowsRuleViolation()
+    {
+        var mapper = CreateMapper();
+        var project = new Project { Id = 1, Name = "P", OwnerId = "owner" };
+        var member = new ProjectMember { Id = 1, ProjectId = 1, Project = project, UserId = "u", Role = ProjectRole.Member };
+        project.Members = new List<ProjectMember> { member };
+        var memberRepo = new Mock<IProjectMemberRepository>();
+        memberRepo.Setup(r => r.Query()).Returns(new List<ProjectMember> { member }.AsQueryable().BuildMock());
+        var projectRepo = new Mock<IProjectRepository>();
+        var userManager = MockUserManager();
+        var service = CreateService(memberRepo, projectRepo, userManager, mapper);
+
+        var dto = new UpdateProjectMemberRequest { Role = ProjectRole.Owner };
+
+        await Assert.ThrowsAsync<RuleViolationException>(() => service.UpdateAsync(1, 1, dto, "owner"));
+    }
+
+    [Fact]
     public async Task DeleteAsync_DeletesMember()
     {
         var mapper = CreateMapper();

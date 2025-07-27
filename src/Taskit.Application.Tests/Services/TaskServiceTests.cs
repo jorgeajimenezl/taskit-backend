@@ -12,6 +12,7 @@ using MassTransit;
 using TaskStatusEnum = Taskit.Domain.Enums.TaskStatus;
 using Xunit;
 using Microsoft.Extensions.Logging;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Tests.Services;
 
@@ -113,6 +114,21 @@ public class TaskServiceTests
 
         Assert.Equal("New", task.Title);
         taskRepo.Verify(r => r.UpdateAsync(task, It.IsAny<bool>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PercentageCompleteWithoutCompletedStatus_ThrowsRuleViolation()
+    {
+        var mapper = CreateMapper();
+        var task = new AppTask { Id = 1, Title = "Old", Description = "D", ProjectId = 1, Status = TaskStatusEnum.Created };
+        var taskRepo = new Mock<ITaskRepository>();
+        taskRepo.Setup(r => r.QueryForUser("u")).Returns(new List<AppTask> { task }.AsQueryable().BuildMock());
+        var service = CreateService(taskRepo, new Mock<IProjectRepository>(), new Mock<ITagRepository>(), new Mock<IMediaRepository>(),
+            CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
+
+        var dto = new UpdateTaskRequest { CompletedPercentage = 100 };
+
+        await Assert.ThrowsAsync<RuleViolationException>(() => service.UpdateAsync(1, dto, "u"));
     }
 
     [Fact]

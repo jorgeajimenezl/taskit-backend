@@ -29,8 +29,11 @@ public class NotificationService(INotificationRepository notificationRepository)
         var notification = await _notificationRepository.GetByIdAsync(notificationId);
         if (notification != null && notification.UserId == userId)
         {
-            notification.IsRead = true;
-            await _notificationRepository.UpdateAsync(notification);
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                await _notificationRepository.UpdateAsync(notification);
+            }
         }
     }
 }

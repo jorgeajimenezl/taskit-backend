@@ -225,6 +225,23 @@ public class TaskCommentServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_TooLate_ThrowsRuleViolation()
+    {
+        var mapper = CreateMapper();
+        var taskRepo = new Mock<ITaskRepository>();
+        taskRepo.Setup(r => r.QueryForUser("u"))
+            .Returns(new List<AppTask> { new() { Id = 1, ProjectId = 1, Title = "T" } }.AsQueryable().BuildMock());
+        var comment = new TaskComment { Id = 1, TaskId = 1, AuthorId = "u", Content = "Old", CreatedAt = DateTime.UtcNow.AddMinutes(-31) };
+        var commentRepo = new Mock<ITaskCommentRepository>();
+        commentRepo.Setup(r => r.QueryForTask(1)).Returns(new List<TaskComment> { comment }.AsQueryable().BuildMock());
+        var service = CreateService(commentRepo, taskRepo, mapper);
+
+        var dto = new UpdateTaskCommentRequest { Content = "New" };
+
+        await Assert.ThrowsAsync<RuleViolationException>(() => service.UpdateAsync(1, 1, dto, "u"));
+    }
+
+    [Fact]
     public async Task DeleteAsync_DeletesComment()
     {
         var mapper = CreateMapper();
