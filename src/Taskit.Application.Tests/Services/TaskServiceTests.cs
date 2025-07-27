@@ -12,6 +12,7 @@ using MassTransit;
 using TaskStatusEnum = Taskit.Domain.Enums.TaskStatus;
 using Xunit;
 using Microsoft.Extensions.Logging;
+using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Tests.Services;
 
