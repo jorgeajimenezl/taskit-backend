@@ -50,7 +50,29 @@ public class DataSeeder(
                 await _users.AddToRoleAsync(admin, role);
         }
 
+        await AddSampleUsersAsync();
+
         _logger.LogInformation("Database seeding completed");
+    }
+
+    public async Task AddSampleUsersAsync()
+    {
+        var sampleUsers = new List<AppUser>
+        {
+            new AppUser { UserName = "user1", Email = "user1@taskit.com", FullName = "User One" },
+            new AppUser { UserName = "user2", Email = "user2@taskit.com", FullName = "User Two" },
+            new AppUser { UserName = "user3", Email = "user3@taskit.com", FullName = "User Three" },
+            new AppUser { UserName = "user4", Email = "user4@taskit.com", FullName = "User Four" },
+        };
+        foreach (var user in sampleUsers)
+        {
+            if (await _users.FindByEmailAsync(user.Email!) == null)
+            {
+                var result = await _users.CreateAsync(user, "User123!");
+                if (!result.Succeeded)
+                    throw new InvalidOperationException(string.Join(";", result.Errors.Select(e => e.Description)));
+            }
+        }
     }
 
     public void Seed()
