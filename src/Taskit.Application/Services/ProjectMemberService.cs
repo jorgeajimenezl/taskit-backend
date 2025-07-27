@@ -112,6 +112,9 @@ public class ProjectMemberService(
         if (!CanManage(member.Project!, userId))
             throw new ForbiddenAccessException();
 
+        if (dto.Role == ProjectRole.Owner)
+            throw new RuleViolationException("Cannot change member role to Owner");
+
         _mapper.Map(dto, member);
         member.UpdateTimestamps();
         await _members.UpdateAsync(member);
