@@ -62,10 +62,10 @@ public class DataSeeder(
     {
         var sampleUsers = new List<AppUser>
         {
-            new AppUser { UserName = "user1", Email = "user1@taskit.com", FullName = "User One" },
-            new AppUser { UserName = "user2", Email = "user2@taskit.com", FullName = "User Two" },
-            new AppUser { UserName = "user3", Email = "user3@taskit.com", FullName = "User Three" },
-            new AppUser { UserName = "user4", Email = "user4@taskit.com", FullName = "User Four" },
+            new() { UserName = "user1", Email = "user1@taskit.com", FullName = "User One" },
+            new() { UserName = "user2", Email = "user2@taskit.com", FullName = "User Two" },
+            new() { UserName = "user3", Email = "user3@taskit.com", FullName = "User Three" },
+            new() { UserName = "user4", Email = "user4@taskit.com", FullName = "User Four" },
         };
         foreach (var user in sampleUsers)
         {
@@ -235,6 +235,7 @@ public class DataSeeder(
         var comments = new List<TaskComment>
         {
             new() { TaskId = task1.Id, AuthorId = user2.Id, Content = "I'll start with the backend setup." },
+            new() { TaskId = task1.Id, AuthorId = user1.Id, Content = "Make sure to document the process." },
             new() { TaskId = task2.Id, AuthorId = user3.Id, Content = "Working on fix." },
             new() { TaskId = task3.Id, AuthorId = user4.Id, Content = "First draft ready." },
             new() { TaskId = task4.Id, AuthorId = user1.Id, Content = "Looking forward to implementing this." },

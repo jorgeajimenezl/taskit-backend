@@ -214,7 +214,7 @@ public class MediaServiceTests
     public async Task DeleteAsync_WrongUser_ThrowsForbidden()
     {
         var repo = new Mock<IMediaRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media { Id = 1, FileName = "f.jpg", UploadedById = "other", CollectionName="c", Name="f.jpg", Disk="d", Uuid=Guid.NewGuid() });
+        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media { Id = 1, FileName = "f.jpg", UploadedById = "other", CollectionName = "c", Name = "f.jpg", Disk = "d", Uuid = Guid.NewGuid() });
         var service = CreateService(repo, Path.GetTempPath());
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.DeleteAsync(1, "u"));
@@ -224,7 +224,7 @@ public class MediaServiceTests
     public async Task ClearMediaCollectionAsync_DeletesRange()
     {
         var repo = new Mock<IMediaRepository>();
-        var items = new List<Media> { new() { Id = 1, ModelType = nameof(AppTask), ModelId = 1, CollectionName = "c", FileName="a.jpg", Name="a", Disk="d", Uuid=Guid.NewGuid() } };
+        var items = new List<Media> { new() { Id = 1, ModelType = nameof(AppTask), ModelId = 1, CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid() } };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
         repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
@@ -238,7 +238,7 @@ public class MediaServiceTests
     public async Task ClearMediaCollection_Generic_DelegatesCall()
     {
         var repo = new Mock<IMediaRepository>();
-        var items = new List<Media> { new() { Id = 1, ModelType = nameof(Project), ModelId = 1, CollectionName = "c", FileName="a.jpg", Name="a", Disk="d", Uuid=Guid.NewGuid() } };
+        var items = new List<Media> { new() { Id = 1, ModelType = nameof(Project), ModelId = 1, CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid() } };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
         repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
