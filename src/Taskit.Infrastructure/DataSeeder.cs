@@ -127,13 +127,18 @@ public class DataSeeder(
         _context.ProjectMembers.AddRange(members);
         await _context.SaveChangesAsync();
 
+        // Seed tasks with varied properties
         var task1 = new AppTask
         {
             Title = "Set up environment",
             Description = "Install dependencies and configure the project.",
             ProjectId = project1.Id,
             AuthorId = user1.Id,
-            AssignedUserId = user2.Id
+            AssignedUserId = user2.Id,
+            Status = Domain.Enums.TaskStatus.InProgress,
+            Priority = 1,
+            Complexity = 2,
+            CompletedPercentage = 50
         };
 
         var task2 = new AppTask
@@ -142,7 +147,11 @@ public class DataSeeder(
             Description = "Users cannot login with correct credentials.",
             ProjectId = project1.Id,
             AuthorId = user2.Id,
-            AssignedUserId = user3.Id
+            AssignedUserId = user3.Id,
+            Status = Domain.Enums.TaskStatus.Overdue,
+            Priority = 2,
+            Complexity = 3,
+            CompletedPercentage = 0
         };
 
         var task3 = new AppTask
@@ -151,7 +160,11 @@ public class DataSeeder(
             Description = "Create user guide",
             ProjectId = project2.Id,
             AuthorId = user2.Id,
-            AssignedUserId = user4.Id
+            AssignedUserId = user4.Id,
+            Status = Domain.Enums.TaskStatus.Pending,
+            Priority = 1,
+            Complexity = 1,
+            CompletedPercentage = 20
         };
 
         var task4 = new AppTask
@@ -160,7 +173,11 @@ public class DataSeeder(
             Description = "Allow users to edit their profile details.",
             ProjectId = project1.Id,
             AuthorId = user3.Id,
-            AssignedUserId = user1.Id
+            AssignedUserId = user1.Id,
+            Status = Domain.Enums.TaskStatus.Created,
+            Priority = 1,
+            Complexity = 2,
+            CompletedPercentage = 0
         };
 
         var task5 = new AppTask
@@ -169,7 +186,11 @@ public class DataSeeder(
             Description = "Cover login and registration with integration tests.",
             ProjectId = project1.Id,
             AuthorId = user1.Id,
-            AssignedUserId = user3.Id
+            AssignedUserId = user3.Id,
+            Status = Domain.Enums.TaskStatus.InProgress,
+            Priority = 2,
+            Complexity = 3,
+            CompletedPercentage = 40
         };
 
         var task6 = new AppTask
@@ -178,7 +199,11 @@ public class DataSeeder(
             Description = "Create layout for the marketing page.",
             ProjectId = project2.Id,
             AuthorId = user4.Id,
-            AssignedUserId = user2.Id
+            AssignedUserId = user2.Id,
+            Status = Domain.Enums.TaskStatus.Completed,
+            Priority = 1,
+            Complexity = 2,
+            CompletedPercentage = 100
         };
 
         var task7 = new AppTask
@@ -187,7 +212,11 @@ public class DataSeeder(
             Description = "Automate builds and tests on push.",
             ProjectId = project1.Id,
             AuthorId = user2.Id,
-            AssignedUserId = user1.Id
+            AssignedUserId = user1.Id,
+            Status = Domain.Enums.TaskStatus.Pending,
+            Priority = 3,
+            Complexity = 3,
+            CompletedPercentage = 10
         };
 
         var task8 = new AppTask
@@ -196,7 +225,11 @@ public class DataSeeder(
             Description = "Improve performance on heavy endpoints.",
             ProjectId = project1.Id,
             AuthorId = user3.Id,
-            AssignedUserId = user2.Id
+            AssignedUserId = user2.Id,
+            Status = Domain.Enums.TaskStatus.InProgress,
+            Priority = 2,
+            Complexity = 4,
+            CompletedPercentage = 60
         };
 
         var task9 = new AppTask
@@ -205,7 +238,11 @@ public class DataSeeder(
             Description = "Prepare brochures and slides.",
             ProjectId = project2.Id,
             AuthorId = user1.Id,
-            AssignedUserId = user4.Id
+            AssignedUserId = user4.Id,
+            Status = Domain.Enums.TaskStatus.Created,
+            Priority = 1,
+            Complexity = 1,
+            CompletedPercentage = 0
         };
 
         var task10 = new AppTask
@@ -214,12 +251,149 @@ public class DataSeeder(
             Description = "Clean up task management components.",
             ProjectId = project1.Id,
             AuthorId = user4.Id,
-            AssignedUserId = user3.Id
+            AssignedUserId = user3.Id,
+            Status = Domain.Enums.TaskStatus.Cancelled,
+            Priority = 1,
+            Complexity = 2,
+            CompletedPercentage = 0
         };
 
-        _context.Tasks.AddRange(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10);
+        // Additional seed tasks
+        var task11 = new AppTask
+        {
+            Title = "Conduct code review",
+            Description = "Review codebase for best practices and consistency.",
+            ProjectId = project1.Id,
+            AuthorId = user3.Id,
+            AssignedUserId = user2.Id,
+            Status = Domain.Enums.TaskStatus.Pending,
+            Priority = 2,
+            Complexity = 2,
+            CompletedPercentage = 20
+        };
+
+        var task12 = new AppTask
+        {
+            Title = "Implement caching layer",
+            Description = "Add Redis caching to improve response times.",
+            ProjectId = project1.Id,
+            AuthorId = user2.Id,
+            AssignedUserId = user3.Id,
+            Status = Domain.Enums.TaskStatus.Created,
+            Priority = 3,
+            Complexity = 3,
+            CompletedPercentage = 0
+        };
+
+        var task13 = new AppTask
+        {
+            Title = "Design database schema",
+            Description = "Create ER diagrams and define tables.",
+            ProjectId = project2.Id,
+            AuthorId = user4.Id,
+            AssignedUserId = user1.Id,
+            Status = Domain.Enums.TaskStatus.InProgress,
+            Priority = 2,
+            Complexity = 4,
+            CompletedPercentage = 50
+        };
+
+        var task14 = new AppTask
+        {
+            Title = "Setup monitoring tools",
+            Description = "Integrate Application Insights and logging.",
+            ProjectId = project2.Id,
+            AuthorId = user1.Id,
+            AssignedUserId = user4.Id,
+            Status = Domain.Enums.TaskStatus.Pending,
+            Priority = 2,
+            Complexity = 2,
+            CompletedPercentage = 10
+        };
+
+        var task15 = new AppTask
+        {
+            Title = "Upgrade dependencies",
+            Description = "Update NuGet packages to latest stable versions.",
+            ProjectId = project1.Id,
+            AuthorId = user1.Id,
+            AssignedUserId = user2.Id,
+            Status = Domain.Enums.TaskStatus.Completed,
+            Priority = 1,
+            Complexity = 1,
+            CompletedPercentage = 100
+        };
+
+        var task16 = new AppTask
+        {
+            Title = "Write API documentation",
+            Description = "Document REST endpoints using Swagger.",
+            ProjectId = project1.Id,
+            AuthorId = user3.Id,
+            AssignedUserId = user1.Id,
+            Status = Domain.Enums.TaskStatus.Created,
+            Priority = 2,
+            Complexity = 2,
+            CompletedPercentage = 0
+        };
+
+        var task17 = new AppTask
+        {
+            Title = "Implement file upload",
+            Description = "Allow users to attach files to tasks.",
+            ProjectId = project2.Id,
+            AuthorId = user4.Id,
+            AssignedUserId = user2.Id,
+            Status = Domain.Enums.TaskStatus.InProgress,
+            Priority = 3,
+            Complexity = 4,
+            CompletedPercentage = 30
+        };
+
+        var task18 = new AppTask
+        {
+            Title = "Fix UI bugs",
+            Description = "Address layout issues in the web client.",
+            ProjectId = project2.Id,
+            AuthorId = user2.Id,
+            AssignedUserId = user3.Id,
+            Status = Domain.Enums.TaskStatus.Overdue,
+            Priority = 2,
+            Complexity = 2,
+            CompletedPercentage = 0
+        };
+
+        var task19 = new AppTask
+        {
+            Title = "Optimize images",
+            Description = "Compress and optimize images in assets.",
+            ProjectId = project1.Id,
+            AuthorId = user3.Id,
+            AssignedUserId = user4.Id,
+            Status = Domain.Enums.TaskStatus.Pending,
+            Priority = 1,
+            Complexity = 1,
+            CompletedPercentage = 0
+        };
+
+        var task20 = new AppTask
+        {
+            Title = "Finalize release notes",
+            Description = "Compile and finalize release notes for deployment.",
+            ProjectId = project2.Id,
+            AuthorId = user2.Id,
+            AssignedUserId = user1.Id,
+            Status = Domain.Enums.TaskStatus.Created,
+            Priority = 1,
+            Complexity = 1,
+            CompletedPercentage = 0
+        };
+
+        _context.Tasks.AddRange(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10,
+            task11, task12, task13, task14, task15, task16, task17, task18, task19, task20);
         await _context.SaveChangesAsync();
 
+        // Tag assignments for all seeded tasks
         task1.Tags.Add(tags[1]);
         task2.Tags.Add(tags[0]);
         task3.Tags.Add(tags[2]);
@@ -230,6 +404,16 @@ public class DataSeeder(
         task8.Tags.Add(tags[0]);
         task9.Tags.Add(tags[2]);
         task10.Tags.Add(tags[1]);
+        task11.Tags.Add(tags[0]);
+        task12.Tags.Add(tags[1]);
+        task13.Tags.Add(tags[2]);
+        task14.Tags.Add(tags[0]);
+        task15.Tags.Add(tags[1]);
+        task16.Tags.Add(tags[2]);
+        task17.Tags.Add(tags[0]);
+        task18.Tags.Add(tags[1]);
+        task19.Tags.Add(tags[2]);
+        task20.Tags.Add(tags[0]);
         await _context.SaveChangesAsync();
 
         var comments = new List<TaskComment>
@@ -244,7 +428,17 @@ public class DataSeeder(
             new() { TaskId = task7.Id, AuthorId = user1.Id, Content = "CI pipeline will use GitHub Actions." },
             new() { TaskId = task8.Id, AuthorId = user4.Id, Content = "Investigating slow queries." },
             new() { TaskId = task9.Id, AuthorId = user2.Id, Content = "Marketing assets in progress." },
-            new() { TaskId = task10.Id, AuthorId = user3.Id, Content = "Refactoring for better maintainability." }
+            new() { TaskId = task10.Id, AuthorId = user3.Id, Content = "Refactoring for better maintainability." },
+            new() { TaskId = task11.Id, AuthorId = user2.Id, Content = "Initial code review notes added." },
+            new() { TaskId = task12.Id, AuthorId = user3.Id, Content = "Caching implementation started." },
+            new() { TaskId = task13.Id, AuthorId = user4.Id, Content = "Database schema draft available." },
+            new() { TaskId = task14.Id, AuthorId = user1.Id, Content = "Monitoring integrated successfully." },
+            new() { TaskId = task15.Id, AuthorId = user2.Id, Content = "Dependencies updated without errors." },
+            new() { TaskId = task16.Id, AuthorId = user3.Id, Content = "API docs published." },
+            new() { TaskId = task17.Id, AuthorId = user4.Id, Content = "File upload service is live." },
+            new() { TaskId = task18.Id, AuthorId = user1.Id, Content = "UI bugs fixed and tested." },
+            new() { TaskId = task19.Id, AuthorId = user2.Id, Content = "Image optimization complete." },
+            new() { TaskId = task20.Id, AuthorId = user3.Id, Content = "Release notes finalized." },
         };
         _context.TaskComments.AddRange(comments);
         await _context.SaveChangesAsync();
