@@ -39,6 +39,7 @@ public class TaskService(
     public async Task<Paging<TaskDto>> GetAllForUserAsync(string userId, IGridifyQuery query)
     {
         return await _tasks.QueryForUser(userId)
+            .Include(p => p.Project)
             .AsNoTracking()
             .GridifyToAsync<AppTask, TaskDto>(_mapper, query);
     }
@@ -46,7 +47,9 @@ public class TaskService(
     public async Task<TaskDto?> GetByIdAsync(int id, string userId)
     {
         return await _tasks.QueryForUser(userId)
+            .Include(t => t.Project)
             .Where(t => t.Id == id)
+            .AsNoTracking()
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
             .FirstOrDefaultAsync();
@@ -211,6 +214,7 @@ public class TaskService(
     public async Task<IEnumerable<TaskDto>> GetSubTasksAsync(int taskId, string userId)
     {
         var subtasks = await _tasks.QueryForUser(userId)
+            .Include(t => t.Project)
             .Where(t => t.ParentTaskId == taskId)
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
