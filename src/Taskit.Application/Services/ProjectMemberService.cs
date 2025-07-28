@@ -54,7 +54,9 @@ public class ProjectMemberService(
             throw new ForbiddenAccessException();
 
         return await _members.QueryForProject(projectId)
-            .Include(m => m.User)
+            .Include(m => m.User) 
+                .ThenInclude(u => u.Avatar)
+                .ThenInclude(a => a!.Media)
             .AsNoTracking()
             .ProjectTo<ProjectMemberDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -70,6 +72,8 @@ public class ProjectMemberService(
 
         var member = await _members.QueryForProject(projectId)
             .Include(m => m.User)
+                .ThenInclude(u => u.Avatar)
+                .ThenInclude(a => a!.Media)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
 

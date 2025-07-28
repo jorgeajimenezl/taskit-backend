@@ -15,4 +15,6 @@ public record UserDto
 
     [Required]
     public required string FullName { get; init; }
+
+    public string? AvatarUrl { get; init; }
 }

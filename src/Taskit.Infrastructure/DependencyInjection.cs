@@ -114,6 +114,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITagRepository, TagRepository>();
         builder.Services.AddScoped<IProjectActivityLogRepository, ProjectActivityLogRepository>();
         builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+        builder.Services.AddScoped<IUserAvatarRepository, UserAvatarRepository>();
 
         // Background services
         builder.Services.AddHostedService<MediaCleanupService>();

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -22,12 +23,14 @@ public class AuthService(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
     IOptions<JwtSettings> jwtSettings,
-    IRefreshTokenRepository refreshTokenRepository)
+    IRefreshTokenRepository refreshTokenRepository,
+    IUserAvatarRepository avatarRepository)
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
+    private readonly IUserAvatarRepository _avatars = avatarRepository;
 
     public async Task RegisterAsync(RegisterRequest dto)
     {
@@ -40,6 +43,13 @@ public class AuthService(
     public async Task<LoginResponse> LoginAsync(LoginRequest dto, string? userAgent = null, IPAddress? ipAddress = null)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email) ?? throw new UnauthorizedAccessException();
+        if (user.AvatarId != null)
+        {
+            user.Avatar = await _avatars.Query()
+                .Include(a => a.Media)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == user.AvatarId);
+        }
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!result.Succeeded)
             throw new UnauthorizedAccessException("Invalid email or password");
@@ -56,7 +66,8 @@ public class AuthService(
                 Id = user.Id,
                 UserName = user.UserName!,
                 Email = user.Email!,
-                FullName = user.FullName!
+                FullName = user.FullName!,
+                AvatarUrl = user.Avatar?.Media != null ? $"/media/{user.Avatar.Media.FileName}" : null
             }
         };
 

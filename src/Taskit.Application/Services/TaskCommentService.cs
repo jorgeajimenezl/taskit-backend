@@ -35,6 +35,8 @@ public class TaskCommentService(
 
         return await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
+                .ThenInclude(a => a.Avatar)
+                .ThenInclude(av => av!.Media)
             .AsNoTracking()
             .ProjectTo<TaskCommentDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -47,6 +49,8 @@ public class TaskCommentService(
 
         var comment = await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
+                .ThenInclude(a => a.Avatar)
+                .ThenInclude(av => av!.Media)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
 

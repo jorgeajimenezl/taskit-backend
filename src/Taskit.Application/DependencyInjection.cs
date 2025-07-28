@@ -32,5 +32,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<TagService>();
         builder.Services.AddScoped<ProjectActivityLogService>();
         builder.Services.AddScoped<NotificationService>();
+        builder.Services.AddScoped<UserAvatarService>();
     }
 }

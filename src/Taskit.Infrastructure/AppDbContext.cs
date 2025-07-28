@@ -15,6 +15,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<TaskTag> TaskTags { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Media> Media { get; set; }
+    public DbSet<UserAvatar> UserAvatars { get; set; }
     public DbSet<ProjectActivityLog> ProjectActivityLogs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
@@ -78,6 +79,18 @@ public class AppDbContext : IdentityDbContext<AppUser>
         modelBuilder.Entity<Media>()
             .HasOne(m => m.UploadedBy)
             .WithMany();
+
+        modelBuilder.Entity<AppUser>()
+            .HasOne(u => u.Avatar)
+            .WithOne()
+            .HasForeignKey<AppUser>(u => u.AvatarId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<UserAvatar>()
+            .HasOne(a => a.Media)
+            .WithMany()
+            .HasForeignKey(a => a.MediaId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Media>()
             .HasIndex(m => new { m.ModelId, m.ModelType });
