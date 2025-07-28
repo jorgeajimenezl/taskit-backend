@@ -47,7 +47,10 @@ public class MediaServiceTests
     {
         var env = new Mock<IWebHostEnvironment>();
         env.SetupGet(e => e.WebRootPath).Returns(rootPath);
-        return new MediaService(repo.Object, env.Object, CreateMapper(), CreateActivityService());
+        var tasks = new Mock<ITaskRepository>();
+        tasks.Setup(t => t.QueryForUser(It.IsAny<string>()))
+            .Returns(new List<AppTask>().AsQueryable().BuildMock());
+        return new MediaService(repo.Object, env.Object, CreateMapper(), CreateActivityService(), tasks.Object);
     }
 
     private static IFormFile CreateFormFile(string name, string contentType, byte[] content)
@@ -66,7 +69,7 @@ public class MediaServiceTests
         var repo = new Mock<IMediaRepository>();
         repo.Setup(r => r.AddAsync(It.IsAny<Media>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
-        var media = new Media { FileName = "f.jpg", Name = "f.jpg", Disk = "local", CollectionName = "c", Uuid = Guid.NewGuid() };
+        var media = new Media { FileName = "f.jpg", Name = "f.jpg", Disk = "local", CollectionName = "c", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private };
 
         await service.AddAsync(media);
 
@@ -77,7 +80,7 @@ public class MediaServiceTests
     public async Task GetByIdAsync_ReturnsDto()
     {
         var repo = new Mock<IMediaRepository>();
-        var media = new Media { Id = 1, FileName = "f.jpg", Name = "f.jpg", Disk = "local", CollectionName = "c", Uuid = Guid.NewGuid() };
+        var media = new Media { Id = 1, FileName = "f.jpg", Name = "f.jpg", Disk = "local", CollectionName = "c", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private };
         repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(media);
         var service = CreateService(repo, Path.GetTempPath());
 
@@ -143,8 +146,8 @@ public class MediaServiceTests
         var repo = new Mock<IMediaRepository>();
         var items = new List<Media>
         {
-            new() { Id = 1, ModelType = nameof(AppTask), ModelId = "2", CollectionName = "a", FileName = "a.jpg", Name="a", Disk="d", Uuid=Guid.NewGuid() },
-            new() { Id = 2, ModelType = nameof(Project), ModelId = "2", CollectionName = "a", FileName = "b.jpg", Name="b", Disk="d", Uuid=Guid.NewGuid() }
+            new() { Id = 1, ModelType = nameof(AppTask), ModelId = "2", CollectionName = "a", FileName = "a.jpg", Name="a", Disk="d", Uuid=Guid.NewGuid(), AccessScope = AccessScope.Private },
+            new() { Id = 2, ModelType = nameof(Project), ModelId = "2", CollectionName = "a", FileName = "b.jpg", Name="b", Disk="d", Uuid=Guid.NewGuid(), AccessScope = AccessScope.Private }
         };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
         var service = CreateService(repo, Path.GetTempPath());
@@ -161,8 +164,8 @@ public class MediaServiceTests
         var repo = new Mock<IMediaRepository>();
         var items = new List<Media>
         {
-            new() { Id = 1, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "a", FileName = "a.jpg", Name="a", Disk="d", Uuid=Guid.NewGuid() },
-            new() { Id = 2, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "b", FileName = "b.jpg", Name="b", Disk="d", Uuid=Guid.NewGuid() }
+            new() { Id = 1, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "a", FileName = "a.jpg", Name="a", Disk="d", Uuid=Guid.NewGuid(), AccessScope = AccessScope.Private },
+            new() { Id = 2, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "b", FileName = "b.jpg", Name="b", Disk="d", Uuid=Guid.NewGuid(), AccessScope = AccessScope.Private }
         };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
         var service = CreateService(repo, Path.GetTempPath());
@@ -194,7 +197,8 @@ public class MediaServiceTests
                 ModelId = "2",
                 Name = stored,
                 Disk = "d",
-                Uuid = Guid.NewGuid()
+                Uuid = Guid.NewGuid(),
+                AccessScope = AccessScope.Private
             });
             repo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
             var service = CreateService(repo, temp);
@@ -214,7 +218,7 @@ public class MediaServiceTests
     public async Task DeleteAsync_WrongUser_ThrowsForbidden()
     {
         var repo = new Mock<IMediaRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media { Id = 1, FileName = "f.jpg", UploadedById = "other", CollectionName = "c", Name = "f.jpg", Disk = "d", Uuid = Guid.NewGuid() });
+        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media { Id = 1, FileName = "f.jpg", UploadedById = "other", CollectionName = "c", Name = "f.jpg", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private });
         var service = CreateService(repo, Path.GetTempPath());
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.DeleteAsync(1, "u"));
@@ -224,7 +228,7 @@ public class MediaServiceTests
     public async Task ClearMediaCollectionAsync_DeletesRange()
     {
         var repo = new Mock<IMediaRepository>();
-        var items = new List<Media> { new() { Id = 1, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid() } };
+        var items = new List<Media> { new() { Id = 1, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private } };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
         repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
@@ -238,7 +242,7 @@ public class MediaServiceTests
     public async Task ClearMediaCollection_Generic_DelegatesCall()
     {
         var repo = new Mock<IMediaRepository>();
-        var items = new List<Media> { new() { Id = 1, ModelType = nameof(Project), ModelId = "1", CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid() } };
+        var items = new List<Media> { new() { Id = 1, ModelType = nameof(Project), ModelId = "1", CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private } };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
         repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
