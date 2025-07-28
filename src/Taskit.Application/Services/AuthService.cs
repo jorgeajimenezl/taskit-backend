@@ -53,7 +53,7 @@ public class AuthService(
         {
             AccessToken = token,
             RefreshToken = refreshToken,
-            User = _mapper.Map<UserDto>(user)
+            User = _mapper.Map<UserProfileDto>(user)
         };
 
         return response;

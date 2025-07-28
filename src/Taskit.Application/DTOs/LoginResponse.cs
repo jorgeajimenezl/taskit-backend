@@ -7,6 +7,6 @@ public record LoginResponse
     [Required]
     public required string AccessToken { get; init; }
     public string? RefreshToken { get; init; }
-    public UserDto? User { get; init; }
+    public UserProfileDto? User { get; init; }
 }
 
