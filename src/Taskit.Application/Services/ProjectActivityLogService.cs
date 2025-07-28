@@ -24,7 +24,7 @@ public class ProjectActivityLogService(
 
     public async Task<Paging<ProjectActivityLogDto>> GetForUserAsync(string userId, IGridifyQuery query, int? projectId = null)
     {
-        var q = _activityLogs.QueryForUser(userId);
+        var q = _activityLogs.QueryForUser(userId).AsNoTracking();
         if (projectId != null)
             q = q.Where(a => a.ProjectId == projectId);
         q = q.OrderByDescending(a => a.Timestamp);

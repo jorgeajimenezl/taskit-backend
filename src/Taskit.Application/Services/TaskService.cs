@@ -51,6 +51,7 @@ public class TaskService(
             .Where(t => t.Id == id)
             .AsNoTracking()
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
     }
 
@@ -58,6 +59,7 @@ public class TaskService(
     {
         var projectAllowed = await _projects.Query()
             .Include(p => p.Members)
+            .AsNoTracking()
             .AnyAsync(p => p.Id == dto.ProjectId &&
                 (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)));
         if (!projectAllowed)
@@ -66,6 +68,7 @@ public class TaskService(
         if (dto.ParentTaskId is not null)
         {
             var parentAllowed = await _tasks.QueryForUser(userId)
+                .AsNoTracking()
                 .AnyAsync(t => t.Id == dto.ParentTaskId);
             if (!parentAllowed)
                 throw new ForbiddenAccessException();
@@ -75,6 +78,7 @@ public class TaskService(
         {
             var assignedAllowed = await _projects.Query()
                 .Include(p => p.Members)
+                .AsNoTracking()
                 .AnyAsync(p => p.Id == dto.ProjectId &&
                     p.Members.Any(m => m.UserId == dto.AssignedUserId));
             if (!assignedAllowed)
@@ -107,6 +111,7 @@ public class TaskService(
         if (dto.ParentTaskId is not null)
         {
             var parentAllowed = await _tasks.QueryForUser(userId)
+                .AsNoTracking()
                 .AnyAsync(t => t.Id == dto.ParentTaskId);
             if (!parentAllowed)
                 throw new ForbiddenAccessException();
@@ -116,6 +121,7 @@ public class TaskService(
         {
             var assignedAllowed = await _projects.Query()
                 .Include(p => p.Members)
+                .AsNoTracking()
                 .AnyAsync(p => p.Members.Any(m => m.UserId == dto.AssignedUserId));
             if (!assignedAllowed)
                 throw new ForbiddenAccessException();
@@ -197,7 +203,7 @@ public class TaskService(
     public async Task<Paging<TaskDto>> GetByTagsAsync(IEnumerable<int> tagIds, string userId, IGridifyQuery query)
     {
         var tagIdSet = new HashSet<int>(tagIds);
-        var queryable = _tasks.QueryForUser(userId);
+        var queryable = _tasks.QueryForUser(userId).AsNoTracking();
         if (tagIds != null && tagIds.Any())
         {
             queryable = queryable.Where(t => t.Tags.Any(tag => tagIdSet.Contains(tag.Id)));
@@ -211,6 +217,7 @@ public class TaskService(
             .Include(t => t.Project)
             .Where(t => t.ParentTaskId == taskId)
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
+            .AsNoTracking()
             .ToListAsync();
 
         if (subtasks.Count == 0)
@@ -237,7 +244,9 @@ public class TaskService(
 
     private Task<bool> HasAccessToTaskAsync(int taskId, string userId)
     {
-        return _tasks.QueryForUser(userId).AnyAsync(t => t.Id == taskId);
+        return _tasks.QueryForUser(userId)
+            .AsNoTracking()
+            .AnyAsync(t => t.Id == taskId);
     }
 
     public async Task AttachMediaAsync(int taskId, int mediaId, string userId)
@@ -270,6 +279,7 @@ public class TaskService(
 
         var media = await _mediaRepository.Query()
             .Where(m => m.ModelType == nameof(AppTask) && m.ModelId == taskId)
+            .AsNoTracking()
             .ToListAsync();
 
         return _mapper.Map<IEnumerable<MediaDto>>(media);

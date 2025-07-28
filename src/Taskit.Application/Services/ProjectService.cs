@@ -20,16 +20,20 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
 
     public async Task<Paging<ProjectDto>> GetAllForUserAsync(string userId, IGridifyQuery query)
     {
-        var q = _projects.Query().Include(p => p.Members)
-            .Where(p => p.OwnerId == userId || p.Members.Any(m => m.UserId == userId));
+        var q = _projects.Query()
+            .Include(p => p.Members)
+            .Where(p => p.OwnerId == userId || p.Members.Any(m => m.UserId == userId))
+            .AsNoTracking();
         return await q.GridifyToAsync<Project, ProjectDto>(_mapper, query);
     }
 
     public async Task<ProjectDto> GetByIdAsync(int id, string userId)
     {
-        var project = await _projects.Query().Include(p => p.Members)
+        var project = await _projects.Query()
+            .Include(p => p.Members)
             .Where(p => p.Id == id && (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)))
             .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
         Guard.Against.NotFound(id, project);
         return project;
@@ -61,6 +65,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         if (dto.Name != null)
         {
             var exists = await _projects.Query()
+                .AsNoTracking()
                 .AnyAsync(p => p.OwnerId == userId && p.Name == dto.Name && p.Id != id);
             if (exists)
                 throw new RuleViolationException("A project with this name already exists");

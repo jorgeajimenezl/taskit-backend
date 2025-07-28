@@ -24,6 +24,7 @@ public class TaskCommentService(
     private async Task<bool> HasAccessToTask(int taskId, string userId)
     {
         return await _tasks.QueryForUser(userId)
+            .AsNoTracking()
             .AnyAsync(t => t.Id == taskId);
     }
 
@@ -34,6 +35,7 @@ public class TaskCommentService(
 
         return await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
+            .AsNoTracking()
             .ProjectTo<TaskCommentDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -45,6 +47,7 @@ public class TaskCommentService(
 
         var comment = await _comments.QueryForTask(taskId)
             .Include(c => c.Author)
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
 
         Guard.Against.NotFound(id, comment);
@@ -61,7 +64,11 @@ public class TaskCommentService(
         comment.AuthorId = userId;
 
         await _comments.AddAsync(comment);
-        var projectId = await _tasks.Query().Where(t => t.Id == taskId).Select(t => t.ProjectId).FirstOrDefaultAsync();
+        var projectId = await _tasks.Query()
+            .AsNoTracking()
+            .Where(t => t.Id == taskId)
+            .Select(t => t.ProjectId)
+            .FirstOrDefaultAsync();
         await _activity.RecordAsync(ProjectActivityLogEventType.CommentAdded, userId, projectId, taskId, new Dictionary<string, object?>
         {
             ["commentId"] = comment.Id
@@ -72,6 +79,7 @@ public class TaskCommentService(
     public async Task UpdateAsync(int taskId, int id, UpdateTaskCommentRequest dto, string userId)
     {
         var comment = await _comments.QueryForTask(taskId)
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
         Guard.Against.NotFound(id, comment);
 
