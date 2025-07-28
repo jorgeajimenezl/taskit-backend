@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 using AutoMapper;
 using Taskit.Domain.Entities;
+using TaskPriority = Taskit.Domain.Enums.TaskPriority;
 
 namespace Taskit.Application.DTOs;
 
@@ -18,7 +19,7 @@ public record UpdateTaskRequest
 
     public Taskit.Domain.Enums.TaskStatus? Status { get; init; }
 
-    public int? Priority { get; init; }
+    public TaskPriority? Priority { get; init; }
 
     public int? Complexity { get; init; }
 

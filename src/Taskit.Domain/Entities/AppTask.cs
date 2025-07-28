@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TaskStatus = Taskit.Domain.Enums.TaskStatus;
+using TaskPriority = Taskit.Domain.Enums.TaskPriority;
 
 namespace Taskit.Domain.Entities;
 
@@ -16,7 +17,7 @@ public class AppTask : BaseEntity<int>
     public DateTime? CompletedAt { get; set; }
 
     public TaskStatus Status { get; set; } = TaskStatus.Created;
-    public int Priority { get; set; } = 0;
+    public TaskPriority Priority { get; set; } = TaskPriority.Low;
     public bool IsArchived { get; set; } = false;
     public int Complexity { get; set; } = 0;
 
