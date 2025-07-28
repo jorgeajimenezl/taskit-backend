@@ -17,25 +17,20 @@ public class UsersController(UserManager<AppUser> userManager, MediaService medi
     private readonly MediaService _media = mediaService;
     private readonly IMapper _mapper = mapper;
 
-    [HttpPost("{userId}/avatar")]
-    public async Task<ActionResult<UserDto>> UploadAvatar(string userId, IFormFile file)
+    [HttpPost("avatar")]
+    public async Task<ActionResult<MediaDto>> UploadAvatar(IFormFile file)
     {
         if (file == null)
             return BadRequest();
 
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        if (currentUserId != userId)
-            return Forbid();
-
-        var user = await _users.FindByIdAsync(userId);
+        var user = await _users.FindByIdAsync(currentUserId);
         if (user == null)
             return NotFound();
 
-        var media = await _media.UploadAsync(file, currentUserId, userId, nameof(AppUser), "avatars");
+        var media = await _media.UploadAsync(file, currentUserId, currentUserId, nameof(AppUser), "avatars");
         user.AvatarId = media.Id;
         await _users.UpdateAsync(user);
-
-        var dto = _mapper.Map<UserDto>(user);
-        return Ok(dto);
+        return Created($"/api/media/{media.Id}", media); ;
     }
 }
