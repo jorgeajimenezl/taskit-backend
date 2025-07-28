@@ -34,13 +34,13 @@ public class UserService(UserManager<AppUser> userManager, IMapper mapper, Media
         return mediaDto;
     }
 
-    public async Task<UserDto> GetUserByIdAsync(string userId)
+    public async Task<UserProfileDto> GetUserByIdAsync(string userId)
     {
         var user = await _users.Users
             .Include(u => u.Avatar)
             .FirstOrDefaultAsync(u => u.Id == userId)
             ?? throw new KeyNotFoundException("User not found");
 
-        return _mapper.Map<UserDto>(user);
+        return _mapper.Map<UserProfileDto>(user);
     }
 }

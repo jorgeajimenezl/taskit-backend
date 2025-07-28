@@ -27,7 +27,7 @@ public class UsersController(UserService userService) : ApiControllerBase
     }
 
     [HttpGet("me")]
-    public async Task<ActionResult<UserDto>> GetMe()
+    public async Task<ActionResult<UserProfileDto>> GetMe()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
