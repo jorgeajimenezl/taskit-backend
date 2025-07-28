@@ -14,8 +14,6 @@ public record TaskDto
     public required string Description { get; init; }
     public DateTime? DueDate { get; init; }
     public DateTime? CompletedAt { get; init; }
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public TaskStatus Status { get; init; }
 
     public int Priority { get; init; }
