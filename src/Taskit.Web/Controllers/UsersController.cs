@@ -31,8 +31,7 @@ public class UsersController(UserManager<AppUser> userManager, MediaService medi
         if (user == null)
             return NotFound();
 
-        int? modelId = int.TryParse(userId, out var parsed) ? parsed : null;
-        var media = await _media.UploadAsync(file, currentUserId, modelId, nameof(AppUser), "avatars");
+        var media = await _media.UploadAsync(file, currentUserId, userId, nameof(AppUser), "avatars");
         user.AvatarId = media.Id;
         await _users.UpdateAsync(user);
 
