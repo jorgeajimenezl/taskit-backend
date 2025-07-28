@@ -295,4 +295,42 @@ public class MediaServiceTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public async Task DownloadAsync_ReturnsFileStream()
+    {
+        var temp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(Path.Combine(temp, "uploads"));
+        var stored = "file.txt";
+        var fullPath = Path.Combine(temp, "uploads", stored);
+        await File.WriteAllTextAsync(fullPath, "data");
+        try
+        {
+            var repo = new Mock<IMediaRepository>();
+            repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media
+            {
+                Id = 1,
+                FileName = stored,
+                MimeType = "text/plain",
+                Name = "file.txt",
+                Disk = "local",
+                CollectionName = "c",
+                Uuid = Guid.NewGuid()
+            });
+            var service = CreateService(repo, temp);
+
+            var (fileName, contentType, stream) = await service.DownloadAsync(1)
+                ?? throw new InvalidOperationException("Download failed");
+            using var reader = new StreamReader(stream);
+            var content = await reader.ReadToEndAsync();
+
+            Assert.Equal("data", content);
+            Assert.Equal("text/plain", contentType);
+            Assert.Equal("file.txt", fileName);
+        }
+        finally
+        {
+            Directory.Delete(temp, true);
+        }
+    }
 }
