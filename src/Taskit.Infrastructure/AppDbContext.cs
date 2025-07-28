@@ -26,6 +26,12 @@ public class AppDbContext : IdentityDbContext<AppUser>
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<AppUser>()
+            .HasOne(u => u.Avatar)
+            .WithMany()
+            .HasForeignKey(u => u.AvatarId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.Entity<AppTask>()
             .HasOne(t => t.Author)
             .WithMany()

@@ -22,12 +22,14 @@ public class AuthService(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
     IOptions<JwtSettings> jwtSettings,
-    IRefreshTokenRepository refreshTokenRepository)
+    IRefreshTokenRepository refreshTokenRepository,
+    AutoMapper.IMapper mapper)
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
+    private readonly AutoMapper.IMapper _mapper = mapper;
 
     public async Task RegisterAsync(RegisterRequest dto)
     {
@@ -51,13 +53,7 @@ public class AuthService(
         {
             AccessToken = token,
             RefreshToken = refreshToken,
-            User = new UserDto
-            {
-                Id = user.Id,
-                UserName = user.UserName!,
-                Email = user.Email!,
-                FullName = user.FullName!
-            }
+            User = _mapper.Map<UserDto>(user)
         };
 
         return response;

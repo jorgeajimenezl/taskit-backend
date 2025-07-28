@@ -27,7 +27,8 @@ public class ProfileController(UserManager<AppUser> userManager) : ApiController
         {
             FullName = user.FullName,
             Username = user.UserName!,
-            Email = user.Email!
+            Email = user.Email!,
+            AvatarUrl = user.Avatar != null ? $"/media/{user.Avatar.FileName}" : null
         });
     }
 }
