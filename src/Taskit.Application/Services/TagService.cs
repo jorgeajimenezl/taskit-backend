@@ -13,7 +13,9 @@ public class TagService(ITagRepository tagRepository, IMapper mapper)
 
     public async Task<IEnumerable<TagDto>> GetAllAsync()
     {
-        var tags = await _tags.Query().ToListAsync();
+        var tags = await _tags.Query()
+            .AsNoTracking()
+            .ToListAsync();
         return _mapper.Map<IEnumerable<TagDto>>(tags);
     }
 

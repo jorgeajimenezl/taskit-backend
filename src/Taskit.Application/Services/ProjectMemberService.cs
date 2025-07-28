@@ -41,6 +41,7 @@ public class ProjectMemberService(
     {
         return await _projects.Query()
             .Include(p => p.Members)
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == projectId);
     }
 
@@ -54,6 +55,7 @@ public class ProjectMemberService(
 
         return await _members.QueryForProject(projectId)
             .Include(m => m.User)
+            .AsNoTracking()
             .ProjectTo<ProjectMemberDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -68,6 +70,7 @@ public class ProjectMemberService(
 
         var member = await _members.QueryForProject(projectId)
             .Include(m => m.User)
+            .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
 
         Guard.Against.NotFound(id, member);
@@ -106,6 +109,7 @@ public class ProjectMemberService(
         var member = await _members.Query()
             .Include(m => m.Project)
             .ThenInclude(p => p!.Members)
+            .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
         Guard.Against.NotFound(id, member);
 
@@ -125,6 +129,7 @@ public class ProjectMemberService(
         var member = await _members.Query()
             .Include(m => m.Project)
             .ThenInclude(p => p!.Members)
+            .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
         Guard.Against.NotFound(id, member);
 

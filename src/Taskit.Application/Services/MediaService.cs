@@ -116,7 +116,8 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     public async Task<IEnumerable<Media>> GetMediaAsync(string modelType, int modelId, string? collectionName = null)
     {
         var query = _mediaRepository.Query()
-            .Where(m => m.ModelType == modelType && m.ModelId == modelId);
+            .Where(m => m.ModelType == modelType && m.ModelId == modelId)
+            .AsNoTracking();
         if (!string.IsNullOrEmpty(collectionName))
             query = query.Where(m => m.CollectionName == collectionName);
         return await query.ToListAsync();
@@ -125,7 +126,8 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     public async Task<Media?> GetFirstMediaAsync(string modelType, int modelId, string? collectionName = null)
     {
         var query = _mediaRepository.Query()
-            .Where(m => m.ModelType == modelType && m.ModelId == modelId);
+            .Where(m => m.ModelType == modelType && m.ModelId == modelId)
+            .AsNoTracking();
         if (!string.IsNullOrEmpty(collectionName))
             query = query.Where(m => m.CollectionName == collectionName);
         return await query.FirstOrDefaultAsync();
@@ -163,6 +165,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             .Where(m => m.ModelType == modelType &&
                         m.ModelId == modelId &&
                         m.CollectionName == collectionName)
+            .AsNoTracking()
             .ToListAsync();
 
         if (mediaItems.Count != 0)
