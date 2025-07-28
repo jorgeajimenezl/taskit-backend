@@ -247,4 +247,52 @@ public class MediaServiceTests
 
         repo.Verify(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>()), Times.Once);
     }
+
+    [Fact]
+    public async Task DownloadAsync_ReturnsStream()
+    {
+        var temp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(Path.Combine(temp, "uploads"));
+        var stored = "file.txt";
+        var fullPath = Path.Combine(temp, "uploads", stored);
+        await File.WriteAllTextAsync(fullPath, "content");
+        try
+        {
+            var repo = new Mock<IMediaRepository>();
+            repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media
+            {
+                Id = 1,
+                FileName = stored,
+                Name = "file.txt",
+                MimeType = "text/plain",
+                Disk = "local",
+                CollectionName = "c",
+                Uuid = Guid.NewGuid()
+            });
+            var service = CreateService(repo, temp);
+
+            var result = await service.DownloadAsync(1);
+
+            Assert.NotNull(result);
+            Assert.Equal("text/plain", result!.ContentType);
+            using var reader = new StreamReader(result.Stream);
+            Assert.Equal("content", reader.ReadToEnd());
+        }
+        finally
+        {
+            Directory.Delete(temp, true);
+        }
+    }
+
+    [Fact]
+    public async Task DownloadAsync_WhenNotFound_ReturnsNull()
+    {
+        var repo = new Mock<IMediaRepository>();
+        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Media?)null);
+        var service = CreateService(repo, Path.GetTempPath());
+
+        var result = await service.DownloadAsync(1);
+
+        Assert.Null(result);
+    }
 }

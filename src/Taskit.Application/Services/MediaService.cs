@@ -143,6 +143,22 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return await query.FirstOrDefaultAsync();
     }
 
+    public async Task<MediaDownloadResult?> DownloadAsync(int id)
+    {
+        var media = await _mediaRepository.GetByIdAsync(id);
+        if (media == null)
+            return null;
+
+        var sanitizedFileName = Path.GetFileName(media.FileName);
+        var path = Path.Combine(UploadsPath, sanitizedFileName);
+        if (!File.Exists(path))
+            return null;
+
+        var stream = File.OpenRead(path);
+        var contentType = media.MimeType ?? "application/octet-stream";
+        return new MediaDownloadResult(media.Name, contentType, stream);
+    }
+
     public async Task DeleteAsync(int id, string userId)
     {
         var media = await _mediaRepository.GetByIdAsync(id);
