@@ -236,7 +236,7 @@ public class TaskServiceTests
 
         await service.AttachMediaAsync(1, 5, "u");
 
-        Assert.Equal(1, media.ModelId);
+        Assert.Equal("1", media.ModelId);
         Assert.Equal(nameof(AppTask), media.ModelType);
     }
 
@@ -244,7 +244,7 @@ public class TaskServiceTests
     public async Task GetAttachmentsAsync_ReturnsAttachments()
     {
         var mapper = CreateMapper();
-        var media = new Media { Id = 5, UploadedById = "u", FileName = "f.jpg", CollectionName = "c", Name = "n", Disk = "d", Uuid = Guid.NewGuid(), ModelId = 1, ModelType = nameof(AppTask) };
+        var media = new Media { Id = 5, UploadedById = "u", FileName = "f.jpg", CollectionName = "c", Name = "n", Disk = "d", Uuid = Guid.NewGuid(), ModelId = "1", ModelType = nameof(AppTask) };
         var taskRepo = new Mock<ITaskRepository>();
         taskRepo.Setup(r => r.QueryForUser("u")).Returns(new List<AppTask> { new AppTask { Id = 1, ProjectId = 1, Title = "T", Description = "D" } }.AsQueryable().BuildMock());
         var mediaRepo = new Mock<IMediaRepository>();

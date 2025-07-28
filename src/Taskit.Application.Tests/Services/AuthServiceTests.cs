@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Moq;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Taskit.Application.Services;
 using Taskit.Application.DTOs;
 using Taskit.Application.Common.Settings;
@@ -33,6 +35,18 @@ public class AuthServiceTests
 #pragma warning restore CS8625
     }
 
+    private static IMapper CreateMapper()
+    {
+        var factory = new Mock<ILoggerFactory>();
+        factory.Setup(f => f.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<AppUser, UserDto>()
+                .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => s.Avatar != null ? $"/media/{s.Avatar.FileName}" : null));
+        }, factory.Object);
+        return config.CreateMapper();
+    }
+
     private static AuthService CreateService(Mock<UserManager<AppUser>> userManager,
         Mock<SignInManager<AppUser>> signInManager,
         Mock<IRefreshTokenRepository> repo)
@@ -45,7 +59,8 @@ public class AuthServiceTests
             AccessTokenExpirationMinutes = 1,
             RefreshTokenExpirationDays = 7
         });
-        return new AuthService(userManager.Object, signInManager.Object, settings, repo.Object);
+        var mapper = CreateMapper();
+        return new AuthService(userManager.Object, signInManager.Object, settings, repo.Object, mapper);
     }
 
     private static string ComputeSha256(string raw)
