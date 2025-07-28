@@ -89,7 +89,10 @@ public class TaskService(
         task.AuthorId = userId;
 
         await _tasks.AddAsync(task);
-        await _activity.RecordAsync(ProjectActivityLogEventType.TaskCreated, userId, task.ProjectId, task.Id);
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskCreated, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+        {
+            ["title"] = task.Title,
+        });
         if (task.AssignedUserId != null)
         {
             await _activity.RecordAsync(ProjectActivityLogEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
