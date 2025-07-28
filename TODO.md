@@ -1,6 +1,4 @@
 - Refactor: group the ownership filtering logic of ProjectService methods to avoid code duplication.
-- Test: add unit test for the whole suite
 - Feat: realtime notifications for task updates
-- Fix: Use DateTimeOffset instead of DateTime for consistency in timestamps
 - Fix: Use the cancellation token in the controller and services
-- Validate the patch methods (the properties changed)
+- Chore: create dummy interfaces for services to be DI compatible

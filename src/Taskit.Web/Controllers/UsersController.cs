@@ -12,11 +12,9 @@ using Taskit.Domain.Enums;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class UsersController(UserManager<AppUser> userManager, MediaService mediaService, IMapper mapper) : ApiControllerBase
+public class UsersController(UserService userService) : ApiControllerBase
 {
-    private readonly UserManager<AppUser> _users = userManager;
-    private readonly MediaService _media = mediaService;
-    private readonly IMapper _mapper = mapper;
+    private readonly UserService _userService = userService;
 
     [HttpPost("avatar")]
     public async Task<ActionResult<MediaDto>> UploadAvatar(IFormFile file)
@@ -24,18 +22,18 @@ public class UsersController(UserManager<AppUser> userManager, MediaService medi
         if (file == null)
             return BadRequest();
 
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var user = await _users.FindByIdAsync(currentUserId)
-            ?? throw new UnauthorizedAccessException("User not found");
-        var media = await _media.UploadAsync(
-            file,
-            currentUserId,
-            currentUserId,
-            nameof(AppUser),
-            "avatars",
-            AccessScope.Public);
-        user.AvatarId = media.Id;
-        await _users.UpdateAsync(user);
-        return Created($"/api/media/{media.Id}", media); ;
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        return await _userService.UploadAvatar(userId, file);
+    }
+
+    [HttpGet("me")]
+    public async Task<ActionResult<UserDto>> GetMe()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+            return Unauthorized();
+        ;
+        var userDto = await _userService.GetUserByIdAsync(userId);
+        return Ok(userDto);
     }
 }
