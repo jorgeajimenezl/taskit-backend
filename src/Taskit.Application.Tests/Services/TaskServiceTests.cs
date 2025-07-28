@@ -37,6 +37,7 @@ public class TaskServiceTests
             cfg.CreateMap<Media, MediaDto>()
                 .ForMember(d => d.Url, opt => opt.MapFrom(s => $"/media/{s.FileName}"));
             cfg.CreateMap<TaskTag, TagDto>();
+            cfg.CreateMap<AppUser, UserDto>();
         }, mockLoggerFactory.Object);
         return config.CreateMapper();
     }
