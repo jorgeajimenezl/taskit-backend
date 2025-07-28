@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Taskit.Domain.Entities;
 
 using TaskStatus = Taskit.Domain.Enums.TaskStatus;
+using TaskPriority = Taskit.Domain.Enums.TaskPriority;
 namespace Taskit.Application.DTOs;
 
 public record TaskDto
@@ -25,7 +26,7 @@ public record TaskDto
     public DateTime? DueDate { get; init; }
     public DateTime? CompletedAt { get; init; }
     public TaskStatus Status { get; init; }
-    public int Priority { get; init; }
+    public TaskPriority Priority { get; init; }
     public int Complexity { get; init; }
     public int CompletedPercentage { get; init; }
 

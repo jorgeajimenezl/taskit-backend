@@ -136,7 +136,7 @@ public class DataSeeder(
             AuthorId = user1.Id,
             AssignedUserId = user2.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 2,
             CompletedPercentage = 50
         };
@@ -149,7 +149,7 @@ public class DataSeeder(
             AuthorId = user2.Id,
             AssignedUserId = user3.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 3,
             CompletedPercentage = 0
         };
@@ -162,7 +162,7 @@ public class DataSeeder(
             AuthorId = user2.Id,
             AssignedUserId = user4.Id,
             Status = Domain.Enums.TaskStatus.Pending,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 1,
             CompletedPercentage = 20
         };
@@ -175,7 +175,7 @@ public class DataSeeder(
             AuthorId = user3.Id,
             AssignedUserId = user1.Id,
             Status = Domain.Enums.TaskStatus.Created,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 2,
             CompletedPercentage = 0
         };
@@ -188,7 +188,7 @@ public class DataSeeder(
             AuthorId = user1.Id,
             AssignedUserId = user3.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 3,
             CompletedPercentage = 40
         };
@@ -201,7 +201,7 @@ public class DataSeeder(
             AuthorId = user4.Id,
             AssignedUserId = user2.Id,
             Status = Domain.Enums.TaskStatus.Completed,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 2,
             CompletedPercentage = 100
         };
@@ -214,7 +214,7 @@ public class DataSeeder(
             AuthorId = user2.Id,
             AssignedUserId = user1.Id,
             Status = Domain.Enums.TaskStatus.Pending,
-            Priority = 3,
+            Priority = Domain.Enums.TaskPriority.High,
             Complexity = 3,
             CompletedPercentage = 10
         };
@@ -227,7 +227,7 @@ public class DataSeeder(
             AuthorId = user3.Id,
             AssignedUserId = user2.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 4,
             CompletedPercentage = 60
         };
@@ -240,7 +240,7 @@ public class DataSeeder(
             AuthorId = user1.Id,
             AssignedUserId = user4.Id,
             Status = Domain.Enums.TaskStatus.Created,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 1,
             CompletedPercentage = 0
         };
@@ -253,7 +253,7 @@ public class DataSeeder(
             AuthorId = user4.Id,
             AssignedUserId = user3.Id,
             Status = Domain.Enums.TaskStatus.Cancelled,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 2,
             CompletedPercentage = 0
         };
@@ -267,7 +267,7 @@ public class DataSeeder(
             AuthorId = user3.Id,
             AssignedUserId = user2.Id,
             Status = Domain.Enums.TaskStatus.Pending,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 2,
             CompletedPercentage = 20
         };
@@ -280,7 +280,7 @@ public class DataSeeder(
             AuthorId = user2.Id,
             AssignedUserId = user3.Id,
             Status = Domain.Enums.TaskStatus.Created,
-            Priority = 3,
+            Priority = Domain.Enums.TaskPriority.High,
             Complexity = 3,
             CompletedPercentage = 0
         };
@@ -293,7 +293,7 @@ public class DataSeeder(
             AuthorId = user4.Id,
             AssignedUserId = user1.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 4,
             CompletedPercentage = 50
         };
@@ -306,7 +306,7 @@ public class DataSeeder(
             AuthorId = user1.Id,
             AssignedUserId = user4.Id,
             Status = Domain.Enums.TaskStatus.Pending,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 2,
             CompletedPercentage = 10
         };
@@ -319,7 +319,7 @@ public class DataSeeder(
             AuthorId = user1.Id,
             AssignedUserId = user2.Id,
             Status = Domain.Enums.TaskStatus.Completed,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 1,
             CompletedPercentage = 100
         };
@@ -332,7 +332,7 @@ public class DataSeeder(
             AuthorId = user3.Id,
             AssignedUserId = user1.Id,
             Status = Domain.Enums.TaskStatus.Created,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 2,
             CompletedPercentage = 0
         };
@@ -345,7 +345,7 @@ public class DataSeeder(
             AuthorId = user4.Id,
             AssignedUserId = user2.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 3,
+            Priority = Domain.Enums.TaskPriority.High,
             Complexity = 4,
             CompletedPercentage = 30
         };
@@ -358,7 +358,7 @@ public class DataSeeder(
             AuthorId = user2.Id,
             AssignedUserId = user3.Id,
             Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = 2,
+            Priority = Domain.Enums.TaskPriority.Medium,
             Complexity = 2,
             CompletedPercentage = 0
         };
@@ -371,7 +371,7 @@ public class DataSeeder(
             AuthorId = user3.Id,
             AssignedUserId = user4.Id,
             Status = Domain.Enums.TaskStatus.Pending,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 1,
             CompletedPercentage = 0
         };
@@ -384,7 +384,7 @@ public class DataSeeder(
             AuthorId = user2.Id,
             AssignedUserId = user1.Id,
             Status = Domain.Enums.TaskStatus.Created,
-            Priority = 1,
+            Priority = Domain.Enums.TaskPriority.Low,
             Complexity = 1,
             CompletedPercentage = 0
         };
