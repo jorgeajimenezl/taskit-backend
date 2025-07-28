@@ -162,6 +162,11 @@ public class TaskService(
                 ["assignedTo"] = task.AssignedUserId
             });
         }
+
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+        {
+            ["title"] = task.Title,
+        });
     }
 
     public async Task DeleteAsync(int id, string userId)
