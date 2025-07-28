@@ -25,17 +25,14 @@ public class UsersController(UserManager<AppUser> userManager, MediaService medi
             return BadRequest();
 
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var user = await _users.FindByIdAsync(currentUserId);
-        if (user == null)
-            return NotFound();
-
+        var user = await _users.FindByIdAsync(currentUserId)
+            ?? throw new UnauthorizedAccessException("User not found");
         var media = await _media.UploadAsync(
             file,
             currentUserId,
             currentUserId,
             nameof(AppUser),
             "avatars",
-            null,
             AccessScope.Public);
         user.AvatarId = media.Id;
         await _users.UpdateAsync(user);

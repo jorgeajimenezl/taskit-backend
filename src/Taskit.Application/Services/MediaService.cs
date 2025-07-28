@@ -54,8 +54,8 @@ public class MediaService(
         string? modelId = null,
         string? modelType = null,
         string? collectionName = null,
-        Func<IFormFile, Task<bool>>? validate = null,
-        AccessScope accessScope = AccessScope.Private
+        AccessScope accessScope = AccessScope.Private,
+        Func<IFormFile, Task<bool>>? validate = null
     )
     {
         if (!IsValidFile(file))
