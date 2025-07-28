@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Taskit.Domain.Interfaces;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Domain.Entities;
 
@@ -25,6 +26,8 @@ public class Media : BaseEntity<int>, ISoftDeletable
     public required string Disk { get; set; }
 
     public ulong Size { get; set; }
+
+    public AccessScope AccessScope { get; set; } = AccessScope.Private;
 
     public IDictionary<string, object?>? Metadata { get; set; }
 

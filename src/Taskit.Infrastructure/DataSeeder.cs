@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Infrastructure;
 
@@ -442,6 +443,7 @@ public class DataSeeder(
             MimeType = "image/png",
             Disk = "local",
             Size = 2048,
+            AccessScope = AccessScope.Private,
             ModelId = task1.Id.ToString(),
             ModelType = nameof(AppTask),
             UploadedById = user1.Id

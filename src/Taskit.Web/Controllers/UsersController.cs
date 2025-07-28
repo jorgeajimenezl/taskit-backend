@@ -7,6 +7,7 @@ using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 using Taskit.Domain.Entities;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Web.Controllers;
 
@@ -28,7 +29,14 @@ public class UsersController(UserManager<AppUser> userManager, MediaService medi
         if (user == null)
             return NotFound();
 
-        var media = await _media.UploadAsync(file, currentUserId, currentUserId, nameof(AppUser), "avatars");
+        var media = await _media.UploadAsync(
+            file,
+            currentUserId,
+            currentUserId,
+            nameof(AppUser),
+            "avatars",
+            null,
+            AccessScope.Public);
         user.AvatarId = media.Id;
         await _users.UpdateAsync(user);
         return Created($"/api/media/{media.Id}", media); ;

@@ -265,6 +265,7 @@ public class TaskService(
 
         media.ModelId = taskId.ToString();
         media.ModelType = nameof(AppTask);
+        media.AccessScope = AccessScope.Private;
         await _mediaRepository.UpdateAsync(media);
         await _activity.RecordAsync(ProjectActivityLogEventType.FileAttached, userId, task.ProjectId, taskId, new Dictionary<string, object?>
         {

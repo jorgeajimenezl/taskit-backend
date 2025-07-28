@@ -13,12 +13,18 @@ using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
 
-public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment environment, IMapper mapper, ProjectActivityLogService activityService)
+public class MediaService(
+    IMediaRepository mediaRepository,
+    IWebHostEnvironment environment,
+    IMapper mapper,
+    ProjectActivityLogService activityService,
+    ITaskRepository taskRepository)
 {
     private readonly ProjectActivityLogService _activity = activityService;
     private readonly IMediaRepository _mediaRepository = mediaRepository;
     private readonly IWebHostEnvironment _environment = environment;
     private readonly IMapper _mapper = mapper;
+    private readonly ITaskRepository _tasks = taskRepository;
 
     private static readonly string[] _allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".pdf" };
     private static readonly HashSet<string> _allowedMimeTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -48,7 +54,8 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         string? modelId = null,
         string? modelType = null,
         string? collectionName = null,
-        Func<IFormFile, Task<bool>>? validate = null
+        Func<IFormFile, Task<bool>>? validate = null,
+        AccessScope accessScope = AccessScope.Private
     )
     {
         if (!IsValidFile(file))
@@ -89,6 +96,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             MimeType = file.ContentType,
             Disk = "local",
             Size = (ulong)file.Length,
+            AccessScope = accessScope,
             ModelId = modelId,
             ModelType = modelType,
             UploadedById = userId
@@ -141,6 +149,43 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         if (!string.IsNullOrEmpty(collectionName))
             query = query.Where(m => m.CollectionName == collectionName);
         return await query.FirstOrDefaultAsync();
+    }
+
+    public async Task<(string Path, string MimeType)> GetFileAsync(int id, string? userId)
+    {
+        var media = await _mediaRepository.GetByIdAsync(id);
+        Guard.Against.NotFound(id, media);
+
+        if (media.AccessScope == AccessScope.Private)
+        {
+            if (userId == null)
+                throw new ForbiddenAccessException();
+
+            bool allowed = false;
+            if (media.ModelType == nameof(AppTask) && media.ModelId != null)
+            {
+                if (int.TryParse(media.ModelId, out var taskId))
+                {
+                    allowed = await _tasks.QueryForUser(userId)
+                        .AsNoTracking()
+                        .AnyAsync(t => t.Id == taskId);
+                }
+            }
+            else if (media.UploadedById == userId)
+            {
+                allowed = true;
+            }
+
+            if (!allowed)
+                throw new ForbiddenAccessException();
+        }
+
+        var sanitizedFileName = Path.GetFileName(media.FileName);
+        var path = Path.Combine(UploadsPath, sanitizedFileName);
+        if (!File.Exists(path))
+            throw new FileNotFoundException();
+
+        return (path, media.MimeType ?? "application/octet-stream");
     }
 
     public async Task DeleteAsync(int id, string userId)

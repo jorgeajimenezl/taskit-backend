@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Web.Controllers;
 
@@ -11,6 +12,15 @@ namespace Taskit.Web.Controllers;
 public class MediaController(MediaService mediaService) : ApiControllerBase
 {
     private readonly MediaService _mediaService = mediaService;
+
+    [AllowAnonymous]
+    [HttpGet("{mediaId:int}")]
+    public async Task<IActionResult> Download(int mediaId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var (path, mime) = await _mediaService.GetFileAsync(mediaId, userId);
+        return PhysicalFile(path, mime, enableRangeProcessing: true);
+    }
 
     [HttpPost]
     public async Task<ActionResult<MediaDto>> Upload(IFormFile file)
