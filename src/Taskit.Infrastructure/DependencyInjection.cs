@@ -45,6 +45,8 @@ public static class DependencyInjection
                         logger);
                     seeder.Seed();
                 });
+
+            options.UseOpenIddict();
         });
 
         builder.Services.AddHealthChecks()
@@ -114,6 +116,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITagRepository, TagRepository>();
         builder.Services.AddScoped<IProjectActivityLogRepository, ProjectActivityLogRepository>();
         builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+        builder.Services.AddScoped<IExternalLoginRepository, ExternalLoginRepository>();
 
         // Background services
         builder.Services.AddHostedService<MediaCleanupService>();

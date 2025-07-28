@@ -3,7 +3,9 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.OpenApi.Models;
+using Taskit.Infrastructure;
 using Taskit.Web.Infrastructure;
+using Taskit.Web.Settings;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -42,6 +44,43 @@ public static class DependencyInjection
                 Scheme = "Bearer"
             });
         });
+
+        var githubOAuthSettings = builder.Configuration.GetSection("OAuth:GitHub")
+            .Get<GithubOAuthSettings>()
+            ?? throw new InvalidOperationException("GitHub OAuth settings are not configured.");
+
+        builder.Services.AddOpenIddict()
+            .AddCore(options =>
+            {
+                options.UseEntityFrameworkCore()
+                    .UseDbContext<AppDbContext>();
+            })
+            .AddClient(options =>
+            {
+                options.AllowAuthorizationCodeFlow();
+                options.UseAspNetCore()
+                    .EnableRedirectionEndpointPassthrough()
+                    .EnablePostLogoutRedirectionEndpointPassthrough();
+
+                options.AddDevelopmentEncryptionCertificate()
+                    .AddDevelopmentSigningCertificate();
+
+                options.UseAspNetCore()
+                    .EnableRedirectionEndpointPassthrough()
+                    // TODO: Enable this when the frontend is ready
+                    .DisableTransportSecurityRequirement();
+
+                options.UseSystemNetHttp();
+
+                options.UseWebProviders()
+                    .AddGitHub(gh =>
+                    {
+                        gh.SetClientId(githubOAuthSettings.ClientId);
+                        gh.SetClientSecret(githubOAuthSettings.ClientSecret);
+                        gh.SetRedirectUri(githubOAuthSettings.RedirectUri);
+                        gh.AddScopes("read:user", "user:email");
+                    });
+            });
 
         builder.Services.AddRateLimiter(options =>
         {

@@ -17,6 +17,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Media> Media { get; set; }
     public DbSet<ProjectActivityLog> ProjectActivityLogs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ExternalLogin> ExternalLogins { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) :
         base(options)
@@ -74,6 +75,16 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .WithMany(u => u.RefreshTokens)
             .HasForeignKey(rt => rt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExternalLogin>()
+            .HasOne(e => e.User)
+            .WithMany()
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExternalLogin>()
+            .HasIndex(e => new { e.Provider, e.ProviderUserId })
+            .IsUnique();
 
         modelBuilder.Entity<Media>()
             .HasOne(m => m.UploadedBy)

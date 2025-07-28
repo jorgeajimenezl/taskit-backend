@@ -22,12 +22,14 @@ public class AuthService(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
     IOptions<JwtSettings> jwtSettings,
-    IRefreshTokenRepository refreshTokenRepository)
+    IRefreshTokenRepository refreshTokenRepository,
+    IExternalLoginRepository externalLoginRepository)
 {
     private readonly UserManager<AppUser> _userManager = userManager;
     private readonly SignInManager<AppUser> _signInManager = signInManager;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
+    private readonly IExternalLoginRepository _externalLoginRepository = externalLoginRepository;
 
     public async Task RegisterAsync(RegisterRequest dto)
     {
@@ -37,7 +39,10 @@ public class AuthService(
             throw new ValidationException(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
     }
 
-    public async Task<LoginResponse> LoginAsync(LoginRequest dto, string? userAgent = null, IPAddress? ipAddress = null)
+    public async Task<LoginResponse> LoginAsync(
+        LoginRequest dto,
+        string? userAgent = null,
+        IPAddress? ipAddress = null)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email) ?? throw new UnauthorizedAccessException();
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
@@ -68,7 +73,10 @@ public class AuthService(
         await _signInManager.SignOutAsync();
     }
 
-    public async Task<RefreshResponse> RefreshAsync(string refreshToken, string? userAgent = null, IPAddress? ipAddress = null)
+    public async Task<RefreshResponse> RefreshAsync(
+        string refreshToken,
+        string? userAgent = null,
+        IPAddress? ipAddress = null)
     {
         if (string.IsNullOrEmpty(refreshToken))
             throw new UnauthorizedAccessException("Refresh token is required");
@@ -91,6 +99,76 @@ public class AuthService(
         };
 
         return response;
+    }
+
+    public async Task<LoginResponse> ExternalLoginAsync(
+        string provider,
+        string providerUserId,
+        string? userAgent = null,
+        IPAddress? ipAddress = null)
+    {
+        Guard.Against.NullOrWhiteSpace(provider, nameof(provider));
+        Guard.Against.NullOrWhiteSpace(providerUserId, nameof(providerUserId));
+
+        var externalLogin = await _externalLoginRepository.GetByProviderAsync(provider, providerUserId)
+            ?? throw new UnauthorizedAccessException("Not user registered with this provider");
+
+        var user = await _userManager.FindByIdAsync(externalLogin.UserId)
+            ?? throw new UnauthorizedAccessException("User not found");
+
+        var token = GenerateJwtToken(user);
+        var refresh = await CreateRefreshTokenAsync(user, userAgent, ipAddress);
+
+        return new LoginResponse
+        {
+            AccessToken = token,
+            RefreshToken = refresh,
+            User = new AppUserDto
+            {
+                UserName = user.UserName!,
+                Email = user.Email!,
+                FullName = user.FullName!
+            }
+        };
+    }
+
+    public async Task LinkExternalLoginAsync(
+        string userId,
+        string provider,
+        string providerUserId)
+    {
+        Guard.Against.NullOrWhiteSpace(userId, nameof(userId));
+        Guard.Against.NullOrWhiteSpace(provider, nameof(provider));
+        Guard.Against.NullOrWhiteSpace(providerUserId, nameof(providerUserId));
+
+        var existingLogin = await _externalLoginRepository.GetByProviderAsync(provider, providerUserId);
+        if (existingLogin != null)
+            throw new ValidationException(
+                new Dictionary<string, string[]>
+                {
+                    ["provider"] = ["This external login is already linked to another account."]
+                }
+            );
+
+        var externalLogin = new ExternalLogin
+        {
+            UserId = userId,
+            Provider = provider,
+            ProviderUserId = providerUserId
+        };
+
+        await _externalLoginRepository.AddAsync(externalLogin);
+    }
+
+    public async Task DisconnectExternalLoginAsync(string userId, string provider)
+    {
+        Guard.Against.NullOrWhiteSpace(userId, nameof(userId));
+        Guard.Against.NullOrWhiteSpace(provider, nameof(provider));
+
+        var externalLogin = await _externalLoginRepository.GetByProviderAsync(provider, userId)
+            ?? throw new UnauthorizedAccessException();
+
+        await _externalLoginRepository.DeleteAsync(externalLogin.Id);
     }
 
     private string GenerateJwtToken(AppUser user)
