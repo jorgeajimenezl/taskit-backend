@@ -51,7 +51,7 @@ public class AuthService(
         {
             AccessToken = token,
             RefreshToken = refreshToken,
-            User = new AppUserDto
+            User = new UserDto
             {
                 UserName = user.UserName!,
                 Email = user.Email!,

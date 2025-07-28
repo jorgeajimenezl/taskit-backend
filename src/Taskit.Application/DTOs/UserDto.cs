@@ -1,6 +1,6 @@
 namespace Taskit.Application.DTOs;
 
-public record AppUserDto
+public record UserDto
 {
     public required string UserName { get; init; }
     public required string Email { get; init; }
