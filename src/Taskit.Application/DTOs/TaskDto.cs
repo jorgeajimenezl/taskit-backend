@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Taskit.Domain.Entities;
 
@@ -10,9 +11,16 @@ namespace Taskit.Application.DTOs;
 public record TaskDto
 {
     public int Id { get; init; }
+
+    [Required]
     public required string Title { get; init; }
+
+    [Required]
     public required string Description { get; init; }
+
+    [Required]
     public required string ProjectName { get; init; }
+
     public int ProjectId { get; init; }
     public DateTime? DueDate { get; init; }
     public DateTime? CompletedAt { get; init; }
