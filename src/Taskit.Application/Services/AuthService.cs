@@ -53,6 +53,7 @@ public class AuthService(
             RefreshToken = refreshToken,
             User = new UserDto
             {
+                Id = user.Id,
                 UserName = user.UserName!,
                 Email = user.Email!,
                 FullName = user.FullName!
