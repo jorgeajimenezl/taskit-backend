@@ -22,7 +22,7 @@ public record UserProfileDto
     {
         public Mapping()
         {
-            CreateMap<Taskit.Domain.Entities.AppUser, UserDto>()
+            CreateMap<Taskit.Domain.Entities.AppUser, UserProfileDto>()
                 .ForMember(d => d.AvatarUrl, opt => opt.MapFrom(s => s.Avatar != null ? $"/media/{s.Avatar.FileName}" : null));
         }
     }
