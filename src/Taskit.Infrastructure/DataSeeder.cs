@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
+using System.Linq;
 
 namespace Taskit.Infrastructure;
 
@@ -101,6 +102,7 @@ public class DataSeeder(
         _context.TaskTags.AddRange(tags);
         await _context.SaveChangesAsync();
 
+
         var project1 = new Project
         {
             Name = "Demo project",
@@ -127,6 +129,43 @@ public class DataSeeder(
 
         _context.ProjectMembers.AddRange(members);
         await _context.SaveChangesAsync();
+
+        var memberLogs = new List<ProjectActivityLog>
+        {
+            new()
+            {
+                EventType = ProjectActivityLogEventType.UserJoinedProject,
+                UserId = user1.Id,
+                ProjectId = project1.Id,
+                Data = new Dictionary<string, object?>
+                {
+                    ["memberId"] = members[0].Id,
+                    ["addedUserId"] = user2.Id
+                }
+            },
+            new()
+            {
+                EventType = ProjectActivityLogEventType.UserJoinedProject,
+                UserId = user1.Id,
+                ProjectId = project1.Id,
+                Data = new Dictionary<string, object?>
+                {
+                    ["memberId"] = members[1].Id,
+                    ["addedUserId"] = user3.Id
+                }
+            },
+            new()
+            {
+                EventType = ProjectActivityLogEventType.UserJoinedProject,
+                UserId = user2.Id,
+                ProjectId = project2.Id,
+                Data = new Dictionary<string, object?>
+                {
+                    ["memberId"] = members[2].Id,
+                    ["addedUserId"] = user1.Id
+                }
+            }
+        };
 
         // Seed tasks with varied properties
         var task1 = new AppTask
@@ -390,9 +429,42 @@ public class DataSeeder(
             CompletedPercentage = 0
         };
 
-        _context.Tasks.AddRange(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10,
-            task11, task12, task13, task14, task15, task16, task17, task18, task19, task20);
+        var tasks = new[]
+        {
+            task1, task2, task3, task4, task5, task6, task7, task8, task9, task10,
+            task11, task12, task13, task14, task15, task16, task17, task18, task19, task20
+        };
+
+        _context.Tasks.AddRange(tasks);
         await _context.SaveChangesAsync();
+
+        var taskLogs = new List<ProjectActivityLog>();
+        foreach (var t in tasks)
+        {
+            taskLogs.Add(new ProjectActivityLog
+            {
+                EventType = ProjectActivityLogEventType.TaskCreated,
+                UserId = t.AuthorId,
+                ProjectId = t.ProjectId,
+                TaskId = t.Id,
+                Data = new Dictionary<string, object?> { ["title"] = t.Title }
+            });
+
+            if (t.AssignedUserId != null)
+            {
+                taskLogs.Add(new ProjectActivityLog
+                {
+                    EventType = ProjectActivityLogEventType.TaskAssigned,
+                    UserId = t.AuthorId,
+                    ProjectId = t.ProjectId,
+                    TaskId = t.Id,
+                    Data = new Dictionary<string, object?>
+                    {
+                        ["assignedTo"] = t.AssignedUserId
+                    }
+                });
+            }
+        }
 
         // Tag assignments for all seeded tasks
         task1.Tags.Add(tags[1]);
@@ -434,6 +506,18 @@ public class DataSeeder(
         _context.TaskComments.AddRange(comments);
         await _context.SaveChangesAsync();
 
+        var commentLogs = comments.Select(c => new ProjectActivityLog
+        {
+            EventType = ProjectActivityLogEventType.CommentAdded,
+            UserId = c.AuthorId!,
+            ProjectId = tasks.First(t => t.Id == c.TaskId).ProjectId,
+            TaskId = c.TaskId,
+            Data = new Dictionary<string, object?>
+            {
+                ["commentId"] = c.Id
+            }
+        }).ToList();
+
         var media1 = new Media
         {
             Uuid = Guid.NewGuid(),
@@ -452,20 +536,59 @@ public class DataSeeder(
         _context.Media.Add(media1);
         await _context.SaveChangesAsync();
 
-
-        var log1 = new ProjectActivityLog
+        var fileLogs = new List<ProjectActivityLog>
         {
-            EventType = Domain.Enums.ProjectActivityLogEventType.ProjectCreated,
-            UserId = user1.Id,
-            ProjectId = project1.Id,
-            Data = new Dictionary<string, object?>
+            new()
             {
-                ["projectId"] = project1.Id,
-                ["name"] = project1.Name
+                EventType = ProjectActivityLogEventType.FileUploaded,
+                UserId = user1.Id,
+                ProjectId = project1.Id,
+                TaskId = task1.Id,
+                Data = new Dictionary<string, object?>
+                {
+                    ["mediaId"] = media1.Id,
+                    ["collectionName"] = media1.CollectionName,
+                    ["size"] = media1.Size,
+                    ["fileName"] = media1.FileName
+                }
             }
         };
 
-        _context.ProjectActivityLogs.Add(log1);
+
+        var projectLogs = new List<ProjectActivityLog>
+        {
+            new()
+            {
+                EventType = ProjectActivityLogEventType.ProjectCreated,
+                UserId = user1.Id,
+                ProjectId = project1.Id,
+                Data = new Dictionary<string, object?>
+                {
+                    ["projectId"] = project1.Id,
+                    ["name"] = project1.Name
+                }
+            },
+            new()
+            {
+                EventType = ProjectActivityLogEventType.ProjectCreated,
+                UserId = user2.Id,
+                ProjectId = project2.Id,
+                Data = new Dictionary<string, object?>
+                {
+                    ["projectId"] = project2.Id,
+                    ["name"] = project2.Name
+                }
+            }
+        };
+
+        var logs = new List<ProjectActivityLog>();
+        logs.AddRange(projectLogs);
+        logs.AddRange(memberLogs);
+        logs.AddRange(taskLogs);
+        logs.AddRange(commentLogs);
+        logs.AddRange(fileLogs);
+
+        _context.ProjectActivityLogs.AddRange(logs);
         await _context.SaveChangesAsync();
     }
 
