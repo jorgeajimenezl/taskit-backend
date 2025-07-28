@@ -263,7 +263,7 @@ public class TaskService(
         var task = await _tasks.QueryForUser(userId).FirstOrDefaultAsync(t => t.Id == taskId);
         Guard.Against.NotFound(taskId, task);
 
-        media.ModelId = taskId;
+        media.ModelId = taskId.ToString();
         media.ModelType = nameof(AppTask);
         await _mediaRepository.UpdateAsync(media);
         await _activity.RecordAsync(ProjectActivityLogEventType.FileAttached, userId, task.ProjectId, taskId, new Dictionary<string, object?>
@@ -278,7 +278,7 @@ public class TaskService(
             throw new ForbiddenAccessException();
 
         var media = await _mediaRepository.Query()
-            .Where(m => m.ModelType == nameof(AppTask) && m.ModelId == taskId)
+            .Where(m => m.ModelType == nameof(AppTask) && m.ModelId == taskId.ToString())
             .AsNoTracking()
             .ToListAsync();
 

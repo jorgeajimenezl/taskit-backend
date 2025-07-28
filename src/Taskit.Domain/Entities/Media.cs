@@ -28,7 +28,7 @@ public class Media : BaseEntity<int>, ISoftDeletable
 
     public IDictionary<string, object?>? Metadata { get; set; }
 
-    public int? ModelId { get; set; }
+    public string? ModelId { get; set; }
     public string? ModelType { get; set; }
 
     [ForeignKey(nameof(UploadedBy))]

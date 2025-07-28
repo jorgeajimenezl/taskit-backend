@@ -45,7 +45,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
     public async Task<MediaDto> UploadAsync(
         IFormFile file,
         string userId,
-        int? modelId = null,
+        string? modelId = null,
         string? modelType = null,
         string? collectionName = null,
         Func<IFormFile, Task<bool>>? validate = null
@@ -96,8 +96,8 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
 
         await _mediaRepository.AddAsync(media);
 
-        var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
-        var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
+        int? taskId = media.ModelType == nameof(AppTask) ? int.Parse(media.ModelId!) : null;
+        int? projectId = media.ModelType == nameof(Project) ? int.Parse(media.ModelId!) : null;
         await _activity.RecordAsync(ProjectActivityLogEventType.FileUploaded, userId, projectId, taskId, new Dictionary<string, object?>
         {
             ["mediaId"] = media.Id,
@@ -123,7 +123,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return true;
     }
 
-    public async Task<IEnumerable<Media>> GetMediaAsync(string modelType, int modelId, string? collectionName = null)
+    public async Task<IEnumerable<Media>> GetMediaAsync(string modelType, string modelId, string? collectionName = null)
     {
         var query = _mediaRepository.Query()
             .Where(m => m.ModelType == modelType && m.ModelId == modelId)
@@ -133,7 +133,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         return await query.ToListAsync();
     }
 
-    public async Task<Media?> GetFirstMediaAsync(string modelType, int modelId, string? collectionName = null)
+    public async Task<Media?> GetFirstMediaAsync(string modelType, string modelId, string? collectionName = null)
     {
         var query = _mediaRepository.Query()
             .Where(m => m.ModelType == modelType && m.ModelId == modelId)
@@ -158,8 +158,8 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
 
         await _mediaRepository.DeleteAsync(id);
 
-        var taskId = media.ModelType == nameof(AppTask) ? media.ModelId : null;
-        var projectId = media.ModelType == nameof(Project) ? media.ModelId : null;
+        int? taskId = media.ModelType == nameof(AppTask) ? int.Parse(media.ModelId!) : null;
+        int? projectId = media.ModelType == nameof(Project) ? int.Parse(media.ModelId!) : null;
 
         await _activity.RecordAsync(ProjectActivityLogEventType.FileDeleted, userId, projectId, taskId, new Dictionary<string, object?>
         {
@@ -169,7 +169,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         });
     }
 
-    public async Task ClearMediaCollectionAsync(string modelType, int modelId, string collectionName)
+    public async Task ClearMediaCollectionAsync(string modelType, string modelId, string collectionName)
     {
         var mediaItems = await _mediaRepository.Query()
             .Where(m => m.ModelType == modelType &&
@@ -182,7 +182,7 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
             await _mediaRepository.DeleteRangeAsync(mediaItems);
     }
 
-    public Task ClearMediaCollectionAsync<TModel>(int modelId, string collectionName)
+    public Task ClearMediaCollectionAsync<TModel>(string modelId, string collectionName)
         where TModel : class
     {
         return ClearMediaCollectionAsync(typeof(TModel).Name, modelId, collectionName);
