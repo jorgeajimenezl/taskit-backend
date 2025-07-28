@@ -47,13 +47,23 @@ public class MediaService(IMediaRepository mediaRepository, IWebHostEnvironment 
         string userId,
         int? modelId = null,
         string? modelType = null,
-        string? collectionName = null
+        string? collectionName = null,
+        Func<IFormFile, Task<bool>>? validate = null
     )
     {
         if (!IsValidFile(file))
             throw new ValidationException(
                 new Dictionary<string, string[]> { { "file", ["Invalid file"] } }
             );
+
+        if (validate != null)
+        {
+            var isValid = await validate(file);
+            if (!isValid)
+                throw new ValidationException(
+                    new Dictionary<string, string[]> { { "file", ["File validation failed"] } }
+                );
+        }
 
         var extension = Path.GetExtension(file.FileName);
         var storedName = $"{Guid.NewGuid()}{extension}";
