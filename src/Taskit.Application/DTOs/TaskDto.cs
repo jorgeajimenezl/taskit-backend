@@ -30,7 +30,10 @@ public record TaskDto
     public int Complexity { get; init; }
     public int CompletedPercentage { get; init; }
 
+    public UserDto? Author { get; init; }
+    public UserDto? AssignedUser { get; init; }
     public IEnumerable<TagDto> Tags { get; init; } = [];
+
 
     private class Mapping : Profile
     {
@@ -38,7 +41,9 @@ public record TaskDto
         {
             CreateMap<AppTask, TaskDto>()
                 .ForMember(d => d.ProjectName, o => o.MapFrom(s => s.Project!.Name))
-                .ForMember(d => d.ProjectId, o => o.MapFrom(s => s.ProjectId));
+                .ForMember(d => d.ProjectId, o => o.MapFrom(s => s.ProjectId))
+                .ForMember(d => d.AssignedUser, o => o.MapFrom(s => s.AssignedUser))
+                .ForMember(d => d.Author, o => o.MapFrom(s => s.Author));
         }
     }
 }
