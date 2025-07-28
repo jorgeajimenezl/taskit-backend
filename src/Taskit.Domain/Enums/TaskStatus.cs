@@ -23,11 +23,6 @@ public enum TaskStatus
     Completed = 3,
 
     /// <summary>
-    /// Task is overdue and requires attention.
-    /// </summary>
-    Overdue = 4,
-
-    /// <summary>
     /// Task has been cancelled and will not be processed.
     /// </summary>
     Cancelled = 5

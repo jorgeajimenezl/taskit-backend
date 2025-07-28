@@ -148,7 +148,7 @@ public class DataSeeder(
             ProjectId = project1.Id,
             AuthorId = user2.Id,
             AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.Overdue,
+            Status = Domain.Enums.TaskStatus.InProgress,
             Priority = 2,
             Complexity = 3,
             CompletedPercentage = 0
@@ -357,7 +357,7 @@ public class DataSeeder(
             ProjectId = project2.Id,
             AuthorId = user2.Id,
             AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.Overdue,
+            Status = Domain.Enums.TaskStatus.InProgress,
             Priority = 2,
             Complexity = 2,
             CompletedPercentage = 0
