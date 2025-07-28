@@ -66,7 +66,10 @@ public class TaskServiceTests
     public async Task GetByIdAsync_ReturnsTask()
     {
         var mapper = CreateMapper();
-        var tasks = new List<AppTask> { new() { Id = 1, Title = "T", Description = "D", ProjectId = 1 } };
+        var tasks = new List<AppTask> { new() {
+            Id = 1, Title = "T", Description = "D", ProjectId = 1,
+            Project = new Project() { Id = 1, Name = "P", OwnerId = "u"
+        } } };
         var queryable = tasks.AsQueryable().BuildMock();
         var repo = new Mock<ITaskRepository>();
         repo.Setup(r => r.QueryForUser("u")).Returns(queryable);
@@ -187,7 +190,7 @@ public class TaskServiceTests
     public async Task GetSubTasksAsync_ReturnsSubtasks()
     {
         var mapper = CreateMapper();
-        var child = new AppTask { Id = 2, ParentTaskId = 1, Title = "S", Description = "D", ProjectId = 1 };
+        var child = new AppTask { Id = 2, ParentTaskId = 1, Title = "S", Description = "D", ProjectId = 1, Project = new Project() { Id = 1, Name = "P", OwnerId = "u" } };
         var taskRepo = new Mock<ITaskRepository>();
         taskRepo.Setup(r => r.QueryForUser("u")).Returns(new List<AppTask> { child }.AsQueryable().BuildMock());
         var service = CreateService(taskRepo, new Mock<IProjectRepository>(), new Mock<ITagRepository>(), new Mock<IMediaRepository>(),
