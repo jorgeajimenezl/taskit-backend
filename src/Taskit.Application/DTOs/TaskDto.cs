@@ -22,7 +22,9 @@ public record TaskDto
     [Required]
     public required string ProjectName { get; init; }
 
+    [Required]
     public int ProjectId { get; init; }
+
     public DateTime? DueDate { get; init; }
     public DateTime? CompletedAt { get; init; }
     public TaskStatus Status { get; init; }
