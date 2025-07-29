@@ -11,6 +11,7 @@ namespace Taskit.Application.DTOs;
 
 public record TaskDto
 {
+    [Required]
     public int Id { get; init; }
 
     [Required]
