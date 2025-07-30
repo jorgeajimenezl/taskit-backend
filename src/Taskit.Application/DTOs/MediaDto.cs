@@ -17,7 +17,7 @@ public record MediaDto
         public Mapping()
         {
             CreateMap<Media, MediaDto>()
-                .ForMember(d => d.Url, opt => opt.MapFrom(src => $"/media/{src.Id}"));
+                .ForMember(d => d.Url, opt => opt.MapFrom(src => $"http://localhost:5152http://localhost:5152/media/{src.Id}"));
         }
     }
 }

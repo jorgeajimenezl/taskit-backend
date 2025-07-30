@@ -2,3 +2,5 @@
 - Feat: realtime notifications for task updates
 - Fix: Use the cancellation token in the controller and services
 - Chore: create dummy interfaces for services to be DI compatible
+- Fix: media URL generation
+- Feat: save media in the cloud instead of local storage (Azure Blob Storage)
