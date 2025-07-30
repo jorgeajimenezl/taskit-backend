@@ -35,7 +35,7 @@ public class TaskServiceTests
             cfg.CreateMap<UpdateTaskRequest, AppTask>()
                 .ForAllMembers(o => o.Condition((src, dest, member) => member != null));
             cfg.CreateMap<Media, MediaDto>()
-                .ForMember(d => d.Url, opt => opt.MapFrom(s => $"http://localhost:5152/media/{s.Id}"));
+                .ForMember(d => d.Url, opt => opt.MapFrom(s => $"http://localhost:5152/api/media/{s.Id}"));
             cfg.CreateMap<TaskTag, TagDto>();
             cfg.CreateMap<AppUser, UserDto>();
         }, mockLoggerFactory.Object);

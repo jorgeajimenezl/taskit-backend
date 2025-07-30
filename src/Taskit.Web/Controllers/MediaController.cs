@@ -30,7 +30,7 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var media = await _mediaService.UploadAsync(file, userId);
-        return Created($"/apihttp://localhost:5152/media/{media.Id}", media);
+        return Created($"http://localhost:5152/api/media/{media.Id}", media);
     }
 
     [HttpDelete("{mediaId:int}")]

@@ -23,7 +23,7 @@ public record UserProfileDto
         public Mapping()
         {
             CreateMap<Taskit.Domain.Entities.AppUser, UserProfileDto>()
-                .ForMember(d => d.AvatarUrl, opt => opt.MapFrom(s => s.Avatar != null ? $"http://localhost:5152/media/{s.Avatar.Id}" : null));
+                .ForMember(d => d.AvatarUrl, opt => opt.MapFrom(s => s.Avatar != null ? $"http://localhost:5152/api/media/{s.Avatar.Id}" : null));
         }
     }
 }
