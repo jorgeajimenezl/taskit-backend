@@ -89,6 +89,10 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .HasIndex(m => new { m.ModelId, m.ModelType });
 
         modelBuilder.Entity<Media>()
+            .HasIndex(m => m.Uuid)
+            .IsUnique();
+
+        modelBuilder.Entity<Media>()
             .Property(m => m.Metadata)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
