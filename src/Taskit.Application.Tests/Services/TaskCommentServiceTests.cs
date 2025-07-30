@@ -26,8 +26,9 @@ public class TaskCommentServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
+            cfg.CreateMap<AppUser, UserDto>();
             cfg.CreateMap<TaskComment, TaskCommentDto>()
-                .ForMember(d => d.AuthorUsername, o => o.MapFrom(s => s.Author!.UserName));
+                .ForMember(d => d.Author, o => o.MapFrom(s => s.Author));
             cfg.CreateMap<CreateTaskCommentRequest, TaskComment>();
             cfg.CreateMap<UpdateTaskCommentRequest, TaskComment>()
                 .ForAllMembers(o => o.Condition((src, dest, member) => member != null));

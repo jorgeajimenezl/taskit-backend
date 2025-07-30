@@ -12,17 +12,14 @@ public record TaskCommentDto
     public required string Content { get; init; }
 
     [Required]
-    public required string AuthorId { get; init; }
-
-    [Required]
-    public required string AuthorUsername { get; init; }
+    public required UserDto Author { get; init; }
 
     private class Mapping : Profile
     {
         public Mapping()
         {
             CreateMap<TaskComment, TaskCommentDto>()
-                .ForMember(d => d.AuthorUsername, o => o.MapFrom(s => s.Author!.UserName));
+                .ForMember(d => d.Author, o => o.MapFrom(s => s.Author));
         }
     }
 }
