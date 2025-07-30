@@ -7,6 +7,7 @@ namespace Taskit.Application.DTOs;
 
 public record ProjectMemberDto
 {
+    [Required]
     public int Id { get; init; }
 
     [Required]

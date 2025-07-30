@@ -6,6 +6,7 @@ namespace Taskit.Application.DTOs;
 
 public record TagDto
 {
+    [Required]
     public int Id { get; init; }
 
     [Required]

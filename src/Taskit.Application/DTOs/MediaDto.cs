@@ -6,6 +6,7 @@ namespace Taskit.Application.DTOs;
 
 public record MediaDto
 {
+    [Required]
     public int Id { get; init; }
 
     [Required]
