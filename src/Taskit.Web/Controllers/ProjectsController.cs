@@ -49,7 +49,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
     }
 
     [HttpPatch("{id:int}", Name = "PatchProject")]
-    public async Task<IActionResult> PatchProject(int id, JsonPatchDocument<UpdateProjectRequest> patch)
+    public async Task<IActionResult> PatchProject(int id, [FromBody] JsonPatchDocument<UpdateProjectRequest> patch)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var project = await _projectService.GetByIdAsync(id, userId);

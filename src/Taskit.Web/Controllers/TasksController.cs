@@ -48,7 +48,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
     }
 
     [HttpPatch("{id:int}", Name = "PatchTask")]
-    public async Task<IActionResult> PatchTask(int id, JsonPatchDocument<UpdateTaskRequest> patch)
+    public async Task<IActionResult> PatchTask(int id, [FromBody] JsonPatchDocument<UpdateTaskRequest> patch)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var existing = await _taskService.GetByIdAsync(id, userId);
