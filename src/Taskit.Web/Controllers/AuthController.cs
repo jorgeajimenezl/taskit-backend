@@ -20,14 +20,14 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
         Expires = DateTimeOffset.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays)
     };
 
-    [HttpPost("register")]
+    [HttpPost("register", Name = "RegisterUser")]
     public async Task<IActionResult> Register(RegisterRequest dto)
     {
         await _auth.RegisterAsync(dto);
         return Ok();
     }
 
-    [HttpPost("login")]
+    [HttpPost("login", Name = "LoginUser")]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest dto)
     {
         var userAgent = Request.Headers.UserAgent.ToString();
@@ -52,7 +52,7 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
     }
 
     [Authorize]
-    [HttpPost("logout")]
+    [HttpPost("logout", Name = "LogoutUser")]
     public async Task<IActionResult> Logout()
     {
         await _auth.LogoutAsync();
@@ -60,7 +60,7 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
         return Ok();
     }
 
-    [HttpPost("refresh")]
+    [HttpPost("refresh", Name = "RefreshToken")]
     public async Task<ActionResult<RefreshResponse>> Refresh([FromBody] RefreshRequest? dto)
     {
         var refreshToken = Request.Cookies["refreshToken"] ?? dto?.RefreshToken;

@@ -16,14 +16,14 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
     private readonly TaskService _taskService = taskService;
     private readonly IMapper _mapper = mapper;
 
-    [HttpGet("")]
+    [HttpGet("", Name = "GetTasks")]
     public async Task<ActionResult<Paging<TaskDto>>> GetTasks([FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         return Ok(await _taskService.GetAllForUserAsync(userId, query));
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetTaskById")]
     public async Task<ActionResult<TaskDto>> GetTask(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -31,7 +31,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return Ok(task);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "CreateTask")]
     public async Task<ActionResult<TaskDto>> CreateTask(CreateTaskRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -39,7 +39,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int}", Name = "UpdateTask")]
     public async Task<IActionResult> UpdateTask(int id, UpdateTaskRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -47,7 +47,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPatch("{id:int}", Name = "PatchTask")]
     public async Task<IActionResult> PatchTask(int id, JsonPatchDocument<UpdateTaskRequest> patch)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -63,7 +63,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int}", Name = "DeleteTask")]
     public async Task<IActionResult> DeleteTask(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -71,7 +71,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpPost("{id:int}/tags/{tagId:int}")]
+    [HttpPost("{id:int}/tags/{tagId:int}", Name = "AddTagToTask")]
     public async Task<IActionResult> AddTag(int id, int tagId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -79,7 +79,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpDelete("{id:int}/tags/{tagId:int}")]
+    [HttpDelete("{id:int}/tags/{tagId:int}", Name = "RemoveTagFromTask")]
     public async Task<IActionResult> RemoveTag(int id, int tagId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -87,7 +87,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpGet("{id:int}/subtasks")]
+    [HttpGet("{id:int}/subtasks", Name = "GetSubTasks")]
     public async Task<ActionResult<IEnumerable<TaskDto>>> GetSubTasks(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -95,7 +95,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return Ok(tasks);
     }
 
-    [HttpDelete("{parentId:int}/subtasks/{subTaskId:int}")]
+    [HttpDelete("{parentId:int}/subtasks/{subTaskId:int}", Name = "DetachSubTask")]
     public async Task<IActionResult> DetachSubTask(int parentId, int subTaskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -103,14 +103,14 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpGet("by-tags")]
+    [HttpGet("by-tags", Name = "GetTasksByTags")]
     public async Task<ActionResult<Paging<TaskDto>>> GetTasksByTags([FromQuery(Name = "ids")] int[] tagIds, [FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         return Ok(await _taskService.GetByTagsAsync(tagIds, userId, query));
     }
 
-    [HttpPost("{taskId:int}/attachments")]
+    [HttpPost("{taskId:int}/attachments", Name = "AddAttachmentToTask")]
     public async Task<IActionResult> AddAttachment(int taskId, AddTaskAttachmentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -118,7 +118,7 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         return NoContent();
     }
 
-    [HttpGet("{taskId:int}/attachments")]
+    [HttpGet("{taskId:int}/attachments", Name = "GetTaskAttachments")]
     public async Task<ActionResult<IEnumerable<MediaDto>>> GetAttachments(int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

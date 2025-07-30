@@ -16,7 +16,7 @@ public class UsersController(UserService userService) : ApiControllerBase
 {
     private readonly UserService _userService = userService;
 
-    [HttpPost("avatar")]
+    [HttpPost("avatar", Name = "UploadAvatar")]
     public async Task<ActionResult<MediaDto>> UploadAvatar(IFormFile file)
     {
         if (file == null)
@@ -26,7 +26,7 @@ public class UsersController(UserService userService) : ApiControllerBase
         return await _userService.UploadAvatar(userId, file);
     }
 
-    [HttpGet("me")]
+    [HttpGet("me", Name = "GetMe")]
     public async Task<ActionResult<UserProfileDto>> GetMe()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

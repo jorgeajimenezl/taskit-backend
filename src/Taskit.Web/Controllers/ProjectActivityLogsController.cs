@@ -13,7 +13,7 @@ public class ProjectActivityLogsController(ProjectActivityLogService service) : 
 {
     private readonly ProjectActivityLogService _service = service;
 
-    [HttpGet]
+    [HttpGet(Name = "GetProjectActivityLogs")]
     public async Task<ActionResult<Paging<ProjectActivityLogDto>>> GetProjectActivityLogs([FromQuery] GridifyQuery query, [FromQuery] int? projectId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

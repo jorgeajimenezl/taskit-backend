@@ -15,7 +15,7 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
     private readonly TaskCommentService _service = service;
     private readonly IMapper _mapper = mapper;
 
-    [HttpGet]
+    [HttpGet(Name = "GetTaskComments")]
     public async Task<ActionResult<IEnumerable<TaskCommentDto>>> GetComments(int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -23,7 +23,7 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
         return Ok(comments);
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetTaskComment")]
     public async Task<ActionResult<TaskCommentDto>> GetComment(int taskId, int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -31,7 +31,7 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
         return Ok(comment);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "AddTaskComment")]
     public async Task<ActionResult<TaskCommentDto>> AddComment(int taskId, CreateTaskCommentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -39,7 +39,7 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
         return CreatedAtAction(nameof(GetComment), new { taskId, id = comment.Id }, comment);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int}", Name = "UpdateTaskComment")]
     public async Task<IActionResult> UpdateComment(int taskId, int id, UpdateTaskCommentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -47,7 +47,7 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
         return NoContent();
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPatch("{id:int}", Name = "PatchTaskComment")]
     public async Task<IActionResult> PatchComment(int taskId, int id, JsonPatchDocument<UpdateTaskCommentRequest> patch)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -61,7 +61,7 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int}", Name = "DeleteTaskComment")]
     public async Task<IActionResult> DeleteComment(int taskId, int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

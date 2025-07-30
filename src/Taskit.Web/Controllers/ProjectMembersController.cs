@@ -14,7 +14,7 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
     private readonly ProjectMemberService _service = service;
     private readonly IMapper _mapper = mapper;
 
-    [HttpGet]
+    [HttpGet(Name = "GetProjectMembers")]
     public async Task<ActionResult<IEnumerable<ProjectMemberDto>>> GetMembers(int projectId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -22,7 +22,7 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
         return Ok(members);
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetProjectMember")]
     public async Task<ActionResult<ProjectMemberDto>> GetMember(int projectId, int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -30,7 +30,7 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
         return Ok(member);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "AddProjectMember")]
     public async Task<ActionResult<ProjectMemberDto>> AddMember(int projectId, AddProjectMemberRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -38,7 +38,7 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
         return CreatedAtAction(nameof(GetMember), new { projectId, id = member.Id }, member);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int}", Name = "UpdateProjectMember")]
     public async Task<IActionResult> UpdateMember(int projectId, int id, UpdateProjectMemberRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -46,7 +46,7 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int}", Name = "RemoveProjectMember")]
     public async Task<IActionResult> RemoveMember(int projectId, int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

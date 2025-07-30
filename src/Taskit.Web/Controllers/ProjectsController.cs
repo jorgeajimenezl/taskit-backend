@@ -16,7 +16,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
     private readonly ProjectService _projectService = projectService;
     private readonly IMapper _mapper = mapper;
 
-    [HttpGet]
+    [HttpGet(Name = "GetProjects")]
     public async Task<ActionResult<Paging<ProjectDto>>> GetProjects([FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -24,7 +24,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
         return Ok(projects);
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = "GetProject")]
     public async Task<ActionResult<ProjectDto>> GetProject(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -32,7 +32,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
         return Ok(project);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "CreateProject")]
     public async Task<ActionResult<ProjectDto>> CreateProject(CreateProjectRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -40,7 +40,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
         return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int}", Name = "UpdateProject")]
     public async Task<IActionResult> UpdateProject(int id, UpdateProjectRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -48,7 +48,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
         return NoContent();
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPatch("{id:int}", Name = "PatchProject")]
     public async Task<IActionResult> PatchProject(int id, JsonPatchDocument<UpdateProjectRequest> patch)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -65,7 +65,7 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int}", Name = "DeleteProject")]
     public async Task<IActionResult> DeleteProject(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
