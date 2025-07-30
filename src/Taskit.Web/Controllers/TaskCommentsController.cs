@@ -48,12 +48,19 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
     }
 
     [HttpPatch("{id:int}", Name = "PatchTaskComment")]
-    public async Task<IActionResult> PatchComment(int taskId, int id, JsonPatchDocument<UpdateTaskCommentRequest> patch)
+    public async Task<IActionResult> PatchComment(
+        int taskId, int id,
+        [FromBody] JsonPatchDocument<UpdateTaskCommentRequest> patch)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var existing = await _service.GetByIdAsync(taskId, id, userId);
         var dto = _mapper.Map<UpdateTaskCommentRequest>(existing);
-        patch.ApplyTo(dto, ModelState);
+        patch.ApplyTo(dto, (error) =>
+        {
+            var key = error.AffectedObject.GetType().Name;
+            ModelState.AddModelError(key, error.ErrorMessage);
+        });
+
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
 

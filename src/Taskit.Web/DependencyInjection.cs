@@ -7,14 +7,6 @@ using Taskit.Web.Infrastructure;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public class LowercaseParameterTransformer : IOutboundParameterTransformer
-{
-    public string? TransformOutbound(object? value)
-    {
-        return value?.ToString()?.ToLowerInvariant();
-    }
-}
-
 public static class DependencyInjection
 {
     public static void AddWebServices(this IHostApplicationBuilder builder)

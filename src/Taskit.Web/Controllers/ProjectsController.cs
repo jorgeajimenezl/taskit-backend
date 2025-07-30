@@ -54,7 +54,11 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var project = await _projectService.GetByIdAsync(id, userId);
         var dto = _mapper.Map<UpdateProjectRequest>(project);
-        patch.ApplyTo(dto, ModelState);
+        patch.ApplyTo(dto, (error) =>
+        {
+            var key = error.AffectedObject.GetType().Name;
+            ModelState.AddModelError(key, error.ErrorMessage);
+        });
 
         if (!ModelState.IsValid)
         {

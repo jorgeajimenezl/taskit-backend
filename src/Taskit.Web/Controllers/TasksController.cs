@@ -53,8 +53,11 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var existing = await _taskService.GetByIdAsync(id, userId);
         var dto = _mapper.Map<UpdateTaskRequest>(existing);
-
-        patch.ApplyTo(dto, ModelState);
+        patch.ApplyTo(dto, (error) =>
+        {
+            var key = error.AffectedObject.GetType().Name;
+            ModelState.AddModelError(key, error.ErrorMessage);
+        });
 
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
