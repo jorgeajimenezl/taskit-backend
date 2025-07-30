@@ -2,8 +2,6 @@ using System.Security.Claims;
 using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.JsonPatch;
-using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Common.Models;
 using Taskit.Application.Services;
@@ -11,10 +9,9 @@ using Taskit.Application.Services;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class TasksController(TaskService taskService, IMapper mapper) : ApiControllerBase
+public class TasksController(TaskService taskService) : ApiControllerBase
 {
     private readonly TaskService _taskService = taskService;
-    private readonly IMapper _mapper = mapper;
 
     [HttpGet("", Name = "GetTasks")]
     public async Task<ActionResult<Paging<TaskDto>>> GetTasks([FromQuery] GridifyQuery query)
@@ -48,20 +45,9 @@ public class TasksController(TaskService taskService, IMapper mapper) : ApiContr
     }
 
     [HttpPatch("{id:int}", Name = "PatchTask")]
-    public async Task<IActionResult> PatchTask(int id, [FromBody] JsonPatchDocument<UpdateTaskRequest> patch)
+    public async Task<IActionResult> PatchTask(int id, UpdateTaskRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var existing = await _taskService.GetByIdAsync(id, userId);
-        var dto = _mapper.Map<UpdateTaskRequest>(existing);
-        patch.ApplyTo(dto, (error) =>
-        {
-            var key = error.AffectedObject.GetType().Name;
-            ModelState.AddModelError(key, error.ErrorMessage);
-        });
-
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
         await _taskService.UpdateAsync(id, dto, userId);
         return NoContent();
     }
