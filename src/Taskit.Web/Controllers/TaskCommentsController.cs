@@ -1,8 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.JsonPatch;
-using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
@@ -10,10 +8,9 @@ namespace Taskit.Web.Controllers;
 
 [Authorize]
 [Route("api/tasks/{taskId:int}/comments")]
-public class TaskCommentsController(TaskCommentService service, IMapper mapper) : ApiControllerBase
+public class TaskCommentsController(TaskCommentService service) : ApiControllerBase
 {
     private readonly TaskCommentService _service = service;
-    private readonly IMapper _mapper = mapper;
 
     [HttpGet(Name = "GetTaskComments")]
     public async Task<ActionResult<IEnumerable<TaskCommentDto>>> GetComments(int taskId)
@@ -48,22 +45,9 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
     }
 
     [HttpPatch("{id:int}", Name = "PatchTaskComment")]
-    public async Task<IActionResult> PatchComment(
-        int taskId, int id,
-        [FromBody] JsonPatchDocument<UpdateTaskCommentRequest> patch)
+    public async Task<IActionResult> PatchComment(int taskId, int id, UpdateTaskCommentRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var existing = await _service.GetByIdAsync(taskId, id, userId);
-        var dto = _mapper.Map<UpdateTaskCommentRequest>(existing);
-        patch.ApplyTo(dto, (error) =>
-        {
-            var key = error.AffectedObject.GetType().Name;
-            ModelState.AddModelError(key, error.ErrorMessage);
-        });
-
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
-
         await _service.UpdateAsync(taskId, id, dto, userId);
         return NoContent();
     }
