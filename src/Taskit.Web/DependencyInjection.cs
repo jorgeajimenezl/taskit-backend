@@ -41,6 +41,7 @@ public static class DependencyInjection
                 Type = SecuritySchemeType.Http,
                 Scheme = "Bearer"
             });
+            options.SupportNonNullableReferenceTypes();
         });
 
         builder.Services.AddRateLimiter(options =>
