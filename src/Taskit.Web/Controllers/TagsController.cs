@@ -10,14 +10,14 @@ public class TagsController(TagService service) : ApiControllerBase
 {
     private readonly TagService _service = service;
 
-    [HttpGet]
+    [HttpGet(Name = "GetTags")]
     public async Task<ActionResult<IEnumerable<TagDto>>> GetTags()
     {
         var tags = await _service.GetAllAsync();
         return Ok(tags);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "CreateTag")]
     public async Task<ActionResult<TagDto>> CreateTag(CreateTagRequest dto)
     {
         var tag = await _service.CreateAsync(dto);

@@ -14,7 +14,7 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
     private readonly MediaService _mediaService = mediaService;
 
     [AllowAnonymous]
-    [HttpGet("{mediaId:int}")]
+    [HttpGet("{mediaId:int}", Name = "GetMediaFile")]
     public async Task<IActionResult> Download(int mediaId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -22,7 +22,7 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
         return PhysicalFile(path, mime, enableRangeProcessing: true);
     }
 
-    [HttpPost]
+    [HttpPost("upload", Name = "UploadMediaFile")]
     public async Task<ActionResult<MediaDto>> Upload(IFormFile file)
     {
         if (file == null)
@@ -33,7 +33,7 @@ public class MediaController(MediaService mediaService) : ApiControllerBase
         return Created($"http://localhost:5152/api/media/{media.Id}", media);
     }
 
-    [HttpDelete("{mediaId:int}")]
+    [HttpDelete("{mediaId:int}", Name = "DeleteMediaFile")]
     public async Task<IActionResult> Delete(int mediaId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
