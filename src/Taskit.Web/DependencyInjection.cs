@@ -42,6 +42,7 @@ public static class DependencyInjection
                 Scheme = "Bearer"
             });
             options.SupportNonNullableReferenceTypes();
+            options.NonNullableReferenceTypesAsRequired();
         });
 
         builder.Services.AddRateLimiter(options =>
