@@ -42,9 +42,9 @@ public class AuthServiceTests
         var config = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<AppUser, UserDto>()
-                .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => s.Avatar != null ? $"/media/{s.Avatar.FileName}" : null));
+                .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => s.Avatar != null ? $"/media/{s.Avatar.Id}" : null));
             cfg.CreateMap<AppUser, UserProfileDto>()
-                .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => s.Avatar != null ? $"/media/{s.Avatar.FileName}" : null));
+                .ForMember(d => d.AvatarUrl, o => o.MapFrom(s => s.Avatar != null ? $"/media/{s.Avatar.Id}" : null));
         }, factory.Object);
         return config.CreateMapper();
     }

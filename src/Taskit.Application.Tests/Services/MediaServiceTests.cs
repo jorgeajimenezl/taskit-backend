@@ -25,9 +25,9 @@ public class MediaServiceTests
     {
         var mapper = new Mock<IMapper>();
         mapper.Setup(m => m.Map<MediaDto>(It.IsAny<Media>()))
-            .Returns<Media>(m => new MediaDto { Id = m.Id, Url = $"/media/{m.FileName}" });
+            .Returns<Media>(m => new MediaDto { Id = m.Id, Url = $"/media/{m.Id}" });
         mapper.Setup(m => m.Map<IEnumerable<MediaDto>>(It.IsAny<IEnumerable<Media>>()))
-            .Returns<IEnumerable<Media>>(list => list.Select(m => new MediaDto { Id = m.Id, Url = $"/media/{m.FileName}" }).ToList());
+            .Returns<IEnumerable<Media>>(list => list.Select(m => new MediaDto { Id = m.Id, Url = $"/media/{m.Id}" }).ToList());
         return mapper.Object;
     }
 
@@ -87,7 +87,7 @@ public class MediaServiceTests
         var result = await service.GetByIdAsync(1);
 
         Assert.NotNull(result);
-        Assert.Equal($"/media/{media.FileName}", result!.Url);
+        Assert.Equal($"/media/{media.Id}", result!.Url);
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class MediaServiceTests
             Assert.NotNull(saved);
             var path = Path.Combine(temp, "uploads", saved!.FileName);
             Assert.True(File.Exists(path));
-            Assert.Equal($"/media/{saved.FileName}", dto.Url);
+            Assert.Equal($"/media/{saved.Id}", dto.Url);
         }
         finally
         {
