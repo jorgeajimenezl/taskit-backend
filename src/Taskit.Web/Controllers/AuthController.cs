@@ -15,7 +15,7 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
 
     private CookieOptions AccessCookieOptions => new()
     {
-        HttpOnly = false,
+        HttpOnly = true,
         Secure = true,
         SameSite = SameSiteMode.Strict,
         Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
