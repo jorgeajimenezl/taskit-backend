@@ -87,13 +87,11 @@ public static class DependencyInjection
                     {
                         context.Token = token;
                     }
-                    else
+                    else if (context.Request.Headers.Authorization.ToString() is { } authorization &&
+                             !string.IsNullOrEmpty(authorization) &&
+                             authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                     {
-                        var authorization = context.Request.Headers.Authorization.ToString();
-                        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                        {
-                            context.Token = authorization["Bearer ".Length..].Trim();
-                        }
+                        context.Token = authorization["Bearer ".Length..].Trim();
                     }
 
                     return Task.CompletedTask;
