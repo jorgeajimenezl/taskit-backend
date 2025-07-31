@@ -1,8 +1,5 @@
 using AutoMapper;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using Taskit.Domain.Entities;
 
 using TaskStatus = Taskit.Domain.Enums.TaskStatus;

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 using Taskit.Domain.Enums;
 
 namespace Taskit.Domain.Entities;

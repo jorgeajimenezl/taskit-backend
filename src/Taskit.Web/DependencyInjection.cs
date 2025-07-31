@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.OpenApi.Models;
@@ -17,9 +15,11 @@ public static class DependencyInjection
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new LowercaseParameterTransformer()));
         })
-        .AddJsonOptions(options =>
+        .AddNewtonsoftJson(options =>
         {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower, allowIntegerValues: false));
+            options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter(
+                new Newtonsoft.Json.Serialization.KebabCaseNamingStrategy(), allowIntegerValues: false)
+            );
         });
 
         builder.Services.AddOpenApi();
