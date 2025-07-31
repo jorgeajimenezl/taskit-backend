@@ -7,8 +7,8 @@ namespace Taskit.Application.DTOs;
 
 public record UpdateProjectMemberRequest
 {
-    [EnumDataType(typeof(ProjectRole))]
-    public ProjectRole? Role { get; init; }
+    [Required, EnumDataType(typeof(ProjectRole))]
+    public ProjectRole Role { get; init; }
 
     private class Mapping : Profile
     {

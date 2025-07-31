@@ -2,8 +2,6 @@ using System.Security.Claims;
 using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.JsonPatch;
-using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Common.Models;
 using Taskit.Application.Services;
@@ -11,10 +9,9 @@ using Taskit.Application.Services;
 namespace Taskit.Web.Controllers;
 
 [Authorize]
-public class ProjectsController(ProjectService projectService, IMapper mapper) : ApiControllerBase
+public class ProjectsController(ProjectService projectService) : ApiControllerBase
 {
     private readonly ProjectService _projectService = projectService;
-    private readonly IMapper _mapper = mapper;
 
     [HttpGet(Name = "GetProjects")]
     public async Task<ActionResult<Paging<ProjectDto>>> GetProjects([FromQuery] GridifyQuery query)
@@ -49,22 +46,9 @@ public class ProjectsController(ProjectService projectService, IMapper mapper) :
     }
 
     [HttpPatch("{id:int}", Name = "PatchProject")]
-    public async Task<IActionResult> PatchProject(int id, JsonPatchDocument<UpdateProjectRequest> patch)
+    public async Task<IActionResult> PatchProject(int id, UpdateProjectRequest dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var project = await _projectService.GetByIdAsync(id, userId);
-        var dto = _mapper.Map<UpdateProjectRequest>(project);
-        patch.ApplyTo(dto, (error) =>
-        {
-            var key = error.AffectedObject.GetType().Name;
-            ModelState.AddModelError(key, error.ErrorMessage);
-        });
-
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
         await _projectService.UpdateAsync(id, dto, userId);
         return NoContent();
     }

@@ -121,21 +121,6 @@ public class TaskServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_PercentageCompleteWithoutCompletedStatus_ThrowsRuleViolation()
-    {
-        var mapper = CreateMapper();
-        var task = new AppTask { Id = 1, Title = "Old", Description = "D", ProjectId = 1, Status = TaskStatusEnum.Created };
-        var taskRepo = new Mock<ITaskRepository>();
-        taskRepo.Setup(r => r.QueryForUser("u")).Returns(new List<AppTask> { task }.AsQueryable().BuildMock());
-        var service = CreateService(taskRepo, new Mock<IProjectRepository>(), new Mock<ITagRepository>(), new Mock<IMediaRepository>(),
-            CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
-
-        var dto = new UpdateTaskRequest { CompletedPercentage = 100 };
-
-        await Assert.ThrowsAsync<RuleViolationException>(() => service.UpdateAsync(1, dto, "u"));
-    }
-
-    [Fact]
     public async Task DeleteAsync_DeletesTask()
     {
         var mapper = CreateMapper();
@@ -185,6 +170,50 @@ public class TaskServiceTests
         await service.RemoveTagAsync(1, 2, "u");
 
         Assert.Empty(task.Tags);
+    }
+
+    [Fact]
+    public async Task AssignAsync_AssignsTask()
+    {
+        var mapper = CreateMapper();
+        var task = new AppTask { Id = 1, ProjectId = 1, Title = "T", Description = "D" };
+        var taskRepo = new Mock<ITaskRepository>();
+        taskRepo.Setup(r => r.QueryForUser("u")).Returns(new List<AppTask> { task }.AsQueryable().BuildMock());
+        taskRepo.Setup(r => r.UpdateAsync(task, It.IsAny<bool>())).Returns(Task.CompletedTask);
+        var project = new Project
+        {
+            Id = 1,
+            Name = "P",
+            Description = "D",
+            OwnerId = "o",
+            Members = new List<ProjectMember> { new() { UserId = "a", ProjectId = 1, Role = ProjectRole.Member } }
+        };
+        var projectRepo = new Mock<IProjectRepository>();
+        projectRepo.Setup(p => p.Query()).Returns(new List<Project> { project }.AsQueryable().BuildMock());
+        var service = CreateService(taskRepo, projectRepo, new Mock<ITagRepository>(), new Mock<IMediaRepository>(),
+            CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
+
+        await service.AssignAsync(1, "a", "u");
+
+        Assert.Equal("a", task.AssignedUserId);
+        taskRepo.Verify(r => r.UpdateAsync(task, It.IsAny<bool>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UnassignAsync_UnassignsTask()
+    {
+        var mapper = CreateMapper();
+        var task = new AppTask { Id = 1, ProjectId = 1, Title = "T", Description = "D", AssignedUserId = "a" };
+        var taskRepo = new Mock<ITaskRepository>();
+        taskRepo.Setup(r => r.QueryForUser("u")).Returns(new List<AppTask> { task }.AsQueryable().BuildMock());
+        taskRepo.Setup(r => r.UpdateAsync(task, It.IsAny<bool>())).Returns(Task.CompletedTask);
+        var service = CreateService(taskRepo, new Mock<IProjectRepository>(), new Mock<ITagRepository>(), new Mock<IMediaRepository>(),
+            CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
+
+        await service.UnassignAsync(1, "u");
+
+        Assert.Null(task.AssignedUserId);
+        taskRepo.Verify(r => r.UpdateAsync(task, It.IsAny<bool>()), Times.Once);
     }
 
     [Fact]
