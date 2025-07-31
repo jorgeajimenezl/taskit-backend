@@ -1,8 +1,10 @@
-using System.Text.Json;
+using Newtonsoft.Json;
 using MassTransit;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Domain.Entities;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Taskit.Infrastructure;
 
@@ -24,6 +26,21 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // NOTE: Fallback to JSON serialization for IDictionary properties
+        // This is very slow, use with caution
+        // Change it to a db that supports JSON natively (like PostgreSQL) for better performance
+        var converter = new ValueConverter<IDictionary<string, object?>?, string>(
+            v => JsonConvert.SerializeObject(v),
+            v => JsonConvert.DeserializeObject<Dictionary<string, object?>>(v) ?? new Dictionary<string, object?>()
+        );
+
+        var dictionaryComparer = new ValueComparer<IDictionary<string, object?>>(
+            (a, b) => a != null && b != null && a.SequenceEqual(b),
+            v => v.Aggregate(0, (hash, p) =>
+                HashCode.Combine(hash, p.Key.GetHashCode(), p.Value == null ? 0 : p.Value.GetHashCode())),
+            v => v.ToDictionary(p => p.Key, kvp => kvp.Value)
+        );
+
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<AppUser>()
@@ -94,17 +111,15 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<Media>()
             .Property(m => m.Metadata)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-                v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
-            );
+            .HasColumnType("jsonb")
+            .HasConversion(converter)
+            .Metadata.SetValueComparer(dictionaryComparer);
 
         modelBuilder.Entity<ProjectActivityLog>()
             .Property(a => a.Data)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-                v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
-            );
+            .HasColumnType("jsonb")
+            .HasConversion(converter)
+            .Metadata.SetValueComparer(dictionaryComparer);
 
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.User)
@@ -114,10 +129,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<Notification>()
             .Property(n => n.Data)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-                v => JsonSerializer.Deserialize<IDictionary<string, object?>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, object?>()
-            );
+            .HasColumnType("jsonb")
+            .HasConversion(converter)
+            .Metadata.SetValueComparer(dictionaryComparer);
 
         modelBuilder.AddInboxStateEntity();
         modelBuilder.AddOutboxMessageEntity();
