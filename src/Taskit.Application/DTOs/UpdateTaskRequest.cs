@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-
-
 using AutoMapper;
 using Taskit.Domain.Entities;
+using TaskStatus = Taskit.Domain.Enums.TaskStatus;
 using TaskPriority = Taskit.Domain.Enums.TaskPriority;
 
 namespace Taskit.Application.DTOs;
