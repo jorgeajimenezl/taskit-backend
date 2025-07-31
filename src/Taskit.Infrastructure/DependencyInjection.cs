@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,10 +83,17 @@ public static class DependencyInjection
             {
                 OnMessageReceived = context =>
                 {
-                    if (string.IsNullOrEmpty(context.Token)
-                        && context.Request.Cookies.TryGetValue("accessToken", out var token))
+                    if (context.Request.Cookies.TryGetValue("accessToken", out var token))
                     {
                         context.Token = token;
+                    }
+                    else
+                    {
+                        var authorization = context.Request.Headers.Authorization.ToString();
+                        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Token = authorization["Bearer ".Length..].Trim();
+                        }
                     }
 
                     return Task.CompletedTask;
