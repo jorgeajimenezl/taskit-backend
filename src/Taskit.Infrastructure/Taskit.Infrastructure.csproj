@@ -25,5 +25,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Taskit.Application\Taskit.Application.csproj" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <None Update="SeedData/seed-data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

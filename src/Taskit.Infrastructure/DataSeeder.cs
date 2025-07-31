@@ -1,9 +1,11 @@
+using System;
+using System.IO;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
-using System.Linq;
 
 namespace Taskit.Infrastructure;
 
@@ -53,542 +55,142 @@ public class DataSeeder(
                 await _users.AddToRoleAsync(admin, role);
         }
 
-        await AddSampleUsersAsync();
-
-        await AddSampleDataAsync();
+        await SeedFromJsonAsync();
 
         _logger.LogInformation("Database seeding completed");
     }
 
-    public async Task AddSampleUsersAsync()
+    private record SeedData(
+        List<SeedUser> Users,
+        List<SeedTag> Tags,
+        ProjectSeed Project,
+        List<SeedTask> Tasks);
+
+    private record SeedUser(string UserName, string Email, string FullName);
+    private record SeedTag(string Name, string Color);
+    private record ProjectSeed(string Name, string Description, string Owner);
+    private record SeedComment(string Author, string Content, DateTime CreatedAt, DateTime UpdatedAt);
+    private record SeedTask(
+        string Title,
+        string Description,
+        string Status,
+        string Priority,
+        DateTime CreatedAt,
+        DateTime UpdatedAt,
+        string Author,
+        string? Assigned,
+        List<string> Tags,
+        string Summary,
+        List<SeedComment> Comments);
+
+    private async Task SeedFromJsonAsync()
     {
-        var sampleUsers = new List<AppUser>
+        if (await _context.Projects.AnyAsync())
+            return;
+
+        var path = Path.Combine(AppContext.BaseDirectory, "SeedData", "seed-data.json");
+        if (!File.Exists(path))
         {
-            new() { UserName = "user1", Email = "user1@taskit.com", FullName = "User One" },
-            new() { UserName = "user2", Email = "user2@taskit.com", FullName = "User Two" },
-            new() { UserName = "user3", Email = "user3@taskit.com", FullName = "User Three" },
-            new() { UserName = "user4", Email = "user4@taskit.com", FullName = "User Four" },
-        };
-        foreach (var user in sampleUsers)
+            _logger.LogWarning("Seed data file not found at {Path}", path);
+            return;
+        }
+
+        var json = await File.ReadAllTextAsync(path);
+        var seed = JsonConvert.DeserializeObject<SeedData>(json);
+        if (seed == null)
+            return;
+
+        foreach (var u in seed.Users)
         {
-            if (await _users.FindByEmailAsync(user.Email!) == null)
+            if (await _users.FindByNameAsync(u.UserName) == null)
             {
+                var user = new AppUser { UserName = u.UserName, Email = u.Email, FullName = u.FullName };
                 var result = await _users.CreateAsync(user, "User123!");
                 if (!result.Succeeded)
                     throw new InvalidOperationException(string.Join(";", result.Errors.Select(e => e.Description)));
             }
         }
-    }
-
-    public async Task AddSampleDataAsync()
-    {
-        if (await _context.Projects.AnyAsync())
-            return;
-
-        var user1 = await _users.FindByNameAsync("user1");
-        var user2 = await _users.FindByNameAsync("user2");
-        var user3 = await _users.FindByNameAsync("user3");
-        var user4 = await _users.FindByNameAsync("user4");
-
-        if (user1 == null || user2 == null || user3 == null || user4 == null)
-            return;
-
-        var tags = new List<TaskTag>
-        {
-            new() { Name = "bug", Color = "#dc2626" },
-            new() { Name = "feature", Color = "#16a34a" },
-            new() { Name = "docs", Color = "#2563eb" }
-        };
-        _context.TaskTags.AddRange(tags);
         await _context.SaveChangesAsync();
 
-
-        var project1 = new Project
+        foreach (var t in seed.Tags)
         {
-            Name = "Demo project",
-            Description = "Sample project created by seed data",
-            OwnerId = user1.Id
-        };
-
-        var project2 = new Project
-        {
-            Name = "Secondary project",
-            Description = "Another sample project",
-            OwnerId = user2.Id
-        };
-
-        _context.Projects.AddRange(project1, project2);
-        await _context.SaveChangesAsync();
-
-        var members = new List<ProjectMember>
-        {
-            new() { ProjectId = project1.Id, UserId = user2.Id, Role = Domain.Enums.ProjectRole.Admin },
-            new() { ProjectId = project1.Id, UserId = user3.Id, Role = Domain.Enums.ProjectRole.Member },
-            new() { ProjectId = project2.Id, UserId = user1.Id, Role = Domain.Enums.ProjectRole.Member }
-        };
-
-        _context.ProjectMembers.AddRange(members);
-        await _context.SaveChangesAsync();
-
-        var memberLogs = new List<ProjectActivityLog>
-        {
-            new()
+            if (!await _context.TaskTags.AnyAsync(x => x.Name == t.Name))
             {
-                EventType = ProjectActivityLogEventType.UserJoinedProject,
-                UserId = user1.Id,
-                ProjectId = project1.Id,
-                Data = new Dictionary<string, object?>
-                {
-                    ["memberId"] = members[0].Id,
-                    ["addedUserId"] = user2.Id
-                }
-            },
-            new()
-            {
-                EventType = ProjectActivityLogEventType.UserJoinedProject,
-                UserId = user1.Id,
-                ProjectId = project1.Id,
-                Data = new Dictionary<string, object?>
-                {
-                    ["memberId"] = members[1].Id,
-                    ["addedUserId"] = user3.Id
-                }
-            },
-            new()
-            {
-                EventType = ProjectActivityLogEventType.UserJoinedProject,
-                UserId = user2.Id,
-                ProjectId = project2.Id,
-                Data = new Dictionary<string, object?>
-                {
-                    ["memberId"] = members[2].Id,
-                    ["addedUserId"] = user1.Id
-                }
+                _context.TaskTags.Add(new TaskTag { Name = t.Name, Color = t.Color });
             }
-        };
+        }
+        await _context.SaveChangesAsync();
+        var tagMap = await _context.TaskTags.ToDictionaryAsync(x => x.Name);
 
-        // Seed tasks with varied properties
-        var task1 = new AppTask
+        var owner = await _users.FindByNameAsync(seed.Project.Owner) ?? throw new InvalidOperationException("Owner user not found");
+        var project = new Project
         {
-            Title = "Set up environment",
-            Description = "Install dependencies and configure the project.",
-            ProjectId = project1.Id,
-            AuthorId = user1.Id,
-            AssignedUserId = user2.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 2,
-            CompletedPercentage = 50
+            Name = seed.Project.Name,
+            Description = seed.Project.Description,
+            OwnerId = owner.Id
         };
-
-        var task2 = new AppTask
-        {
-            Title = "Fix login bug",
-            Description = "Users cannot login with correct credentials.",
-            ProjectId = project1.Id,
-            AuthorId = user2.Id,
-            AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 3,
-            CompletedPercentage = 0
-        };
-
-        var task3 = new AppTask
-        {
-            Title = "Write documentation",
-            Description = "Create user guide",
-            ProjectId = project2.Id,
-            AuthorId = user2.Id,
-            AssignedUserId = user4.Id,
-            Status = Domain.Enums.TaskStatus.Pending,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 1,
-            CompletedPercentage = 20
-        };
-
-        var task4 = new AppTask
-        {
-            Title = "Implement user profile",
-            Description = "Allow users to edit their profile details.",
-            ProjectId = project1.Id,
-            AuthorId = user3.Id,
-            AssignedUserId = user1.Id,
-            Status = Domain.Enums.TaskStatus.Created,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 2,
-            CompletedPercentage = 0
-        };
-
-        var task5 = new AppTask
-        {
-            Title = "Add authentication tests",
-            Description = "Cover login and registration with integration tests.",
-            ProjectId = project1.Id,
-            AuthorId = user1.Id,
-            AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 3,
-            CompletedPercentage = 40
-        };
-
-        var task6 = new AppTask
-        {
-            Title = "Design landing page",
-            Description = "Create layout for the marketing page.",
-            ProjectId = project2.Id,
-            AuthorId = user4.Id,
-            AssignedUserId = user2.Id,
-            Status = Domain.Enums.TaskStatus.Completed,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 2,
-            CompletedPercentage = 100
-        };
-
-        var task7 = new AppTask
-        {
-            Title = "Setup CI pipeline",
-            Description = "Automate builds and tests on push.",
-            ProjectId = project1.Id,
-            AuthorId = user2.Id,
-            AssignedUserId = user1.Id,
-            Status = Domain.Enums.TaskStatus.Pending,
-            Priority = Domain.Enums.TaskPriority.High,
-            Complexity = 3,
-            CompletedPercentage = 10
-        };
-
-        var task8 = new AppTask
-        {
-            Title = "Optimize database queries",
-            Description = "Improve performance on heavy endpoints.",
-            ProjectId = project1.Id,
-            AuthorId = user3.Id,
-            AssignedUserId = user2.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 4,
-            CompletedPercentage = 60
-        };
-
-        var task9 = new AppTask
-        {
-            Title = "Create marketing materials",
-            Description = "Prepare brochures and slides.",
-            ProjectId = project2.Id,
-            AuthorId = user1.Id,
-            AssignedUserId = user4.Id,
-            Status = Domain.Enums.TaskStatus.Created,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 1,
-            CompletedPercentage = 0
-        };
-
-        var task10 = new AppTask
-        {
-            Title = "Refactor task module",
-            Description = "Clean up task management components.",
-            ProjectId = project1.Id,
-            AuthorId = user4.Id,
-            AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.Cancelled,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 2,
-            CompletedPercentage = 0
-        };
-
-        // Additional seed tasks
-        var task11 = new AppTask
-        {
-            Title = "Conduct code review",
-            Description = "Review codebase for best practices and consistency.",
-            ProjectId = project1.Id,
-            AuthorId = user3.Id,
-            AssignedUserId = user2.Id,
-            Status = Domain.Enums.TaskStatus.Pending,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 2,
-            CompletedPercentage = 20
-        };
-
-        var task12 = new AppTask
-        {
-            Title = "Implement caching layer",
-            Description = "Add Redis caching to improve response times.",
-            ProjectId = project1.Id,
-            AuthorId = user2.Id,
-            AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.Created,
-            Priority = Domain.Enums.TaskPriority.High,
-            Complexity = 3,
-            CompletedPercentage = 0
-        };
-
-        var task13 = new AppTask
-        {
-            Title = "Design database schema",
-            Description = "Create ER diagrams and define tables.",
-            ProjectId = project2.Id,
-            AuthorId = user4.Id,
-            AssignedUserId = user1.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 4,
-            CompletedPercentage = 50
-        };
-
-        var task14 = new AppTask
-        {
-            Title = "Setup monitoring tools",
-            Description = "Integrate Application Insights and logging.",
-            ProjectId = project2.Id,
-            AuthorId = user1.Id,
-            AssignedUserId = user4.Id,
-            Status = Domain.Enums.TaskStatus.Pending,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 2,
-            CompletedPercentage = 10
-        };
-
-        var task15 = new AppTask
-        {
-            Title = "Upgrade dependencies",
-            Description = "Update NuGet packages to latest stable versions.",
-            ProjectId = project1.Id,
-            AuthorId = user1.Id,
-            AssignedUserId = user2.Id,
-            Status = Domain.Enums.TaskStatus.Completed,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 1,
-            CompletedPercentage = 100
-        };
-
-        var task16 = new AppTask
-        {
-            Title = "Write API documentation",
-            Description = "Document REST endpoints using Swagger.",
-            ProjectId = project1.Id,
-            AuthorId = user3.Id,
-            AssignedUserId = user1.Id,
-            Status = Domain.Enums.TaskStatus.Created,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 2,
-            CompletedPercentage = 0
-        };
-
-        var task17 = new AppTask
-        {
-            Title = "Implement file upload",
-            Description = "Allow users to attach files to tasks.",
-            ProjectId = project2.Id,
-            AuthorId = user4.Id,
-            AssignedUserId = user2.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.High,
-            Complexity = 4,
-            CompletedPercentage = 30
-        };
-
-        var task18 = new AppTask
-        {
-            Title = "Fix UI bugs",
-            Description = "Address layout issues in the web client.",
-            ProjectId = project2.Id,
-            AuthorId = user2.Id,
-            AssignedUserId = user3.Id,
-            Status = Domain.Enums.TaskStatus.InProgress,
-            Priority = Domain.Enums.TaskPriority.Medium,
-            Complexity = 2,
-            CompletedPercentage = 0
-        };
-
-        var task19 = new AppTask
-        {
-            Title = "Optimize images",
-            Description = "Compress and optimize images in assets.",
-            ProjectId = project1.Id,
-            AuthorId = user3.Id,
-            AssignedUserId = user4.Id,
-            Status = Domain.Enums.TaskStatus.Pending,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 1,
-            CompletedPercentage = 0
-        };
-
-        var task20 = new AppTask
-        {
-            Title = "Finalize release notes",
-            Description = "Compile and finalize release notes for deployment.",
-            ProjectId = project2.Id,
-            AuthorId = user2.Id,
-            AssignedUserId = user1.Id,
-            Status = Domain.Enums.TaskStatus.Created,
-            Priority = Domain.Enums.TaskPriority.Low,
-            Complexity = 1,
-            CompletedPercentage = 0
-        };
-
-        var tasks = new[]
-        {
-            task1, task2, task3, task4, task5, task6, task7, task8, task9, task10,
-            task11, task12, task13, task14, task15, task16, task17, task18, task19, task20
-        };
-
-        _context.Tasks.AddRange(tasks);
+        _context.Projects.Add(project);
         await _context.SaveChangesAsync();
 
-        var taskLogs = new List<ProjectActivityLog>();
-        foreach (var t in tasks)
+        foreach (var u in seed.Users)
         {
-            taskLogs.Add(new ProjectActivityLog
+            var user = await _users.FindByNameAsync(u.UserName);
+            if (user != null)
             {
-                EventType = ProjectActivityLogEventType.TaskCreated,
-                UserId = t.AuthorId,
-                ProjectId = t.ProjectId,
-                TaskId = t.Id,
-                Data = new Dictionary<string, object?> { ["title"] = t.Title }
-            });
-
-            if (t.AssignedUserId != null)
-            {
-                taskLogs.Add(new ProjectActivityLog
+                _context.ProjectMembers.Add(new ProjectMember
                 {
-                    EventType = ProjectActivityLogEventType.TaskAssigned,
-                    UserId = t.AuthorId,
-                    ProjectId = t.ProjectId,
-                    TaskId = t.Id,
-                    Data = new Dictionary<string, object?>
-                    {
-                        ["assignedTo"] = t.AssignedUserId
-                    }
+                    ProjectId = project.Id,
+                    UserId = user.Id,
+                    Role = u.UserName == seed.Project.Owner ? ProjectRole.Owner : ProjectRole.Member
                 });
             }
         }
-
-        // Tag assignments for all seeded tasks
-        task1.Tags.Add(tags[1]);
-        task2.Tags.Add(tags[0]);
-        task3.Tags.Add(tags[2]);
-        task4.Tags.Add(tags[1]);
-        task5.Tags.Add(tags[2]);
-        task6.Tags.Add(tags[1]);
-        task7.Tags.Add(tags[1]);
-        task8.Tags.Add(tags[0]);
-        task9.Tags.Add(tags[2]);
-        task10.Tags.Add(tags[1]);
-        task11.Tags.Add(tags[0]);
-        task12.Tags.Add(tags[1]);
-        task13.Tags.Add(tags[2]);
-        task14.Tags.Add(tags[0]);
-        task15.Tags.Add(tags[1]);
-        task16.Tags.Add(tags[2]);
-        task17.Tags.Add(tags[0]);
-        task18.Tags.Add(tags[1]);
-        task19.Tags.Add(tags[2]);
-        task20.Tags.Add(tags[0]);
         await _context.SaveChangesAsync();
 
-        var comments = new List<TaskComment>
+        foreach (var t in seed.Tasks)
         {
-            new() { TaskId = task1.Id, AuthorId = user2.Id, Content = "I'll start with the backend setup." },
-            new() { TaskId = task1.Id, AuthorId = user1.Id, Content = "Make sure to document the process." },
-            new() { TaskId = task2.Id, AuthorId = user3.Id, Content = "Working on fix." },
-            new() { TaskId = task3.Id, AuthorId = user4.Id, Content = "First draft ready." },
-            new() { TaskId = task4.Id, AuthorId = user1.Id, Content = "Looking forward to implementing this." },
-            new() { TaskId = task5.Id, AuthorId = user3.Id, Content = "Tests are crucial." },
-            new() { TaskId = task6.Id, AuthorId = user2.Id, Content = "Need some inspiration." },
-            new() { TaskId = task7.Id, AuthorId = user1.Id, Content = "CI pipeline will use GitHub Actions." },
-            new() { TaskId = task8.Id, AuthorId = user4.Id, Content = "Investigating slow queries." },
-            new() { TaskId = task9.Id, AuthorId = user2.Id, Content = "Marketing assets in progress." },
-            new() { TaskId = task10.Id, AuthorId = user3.Id, Content = "Refactoring for better maintainability." },
-        };
-        _context.TaskComments.AddRange(comments);
-        await _context.SaveChangesAsync();
-
-        var commentLogs = comments.Select(c => new ProjectActivityLog
-        {
-            EventType = ProjectActivityLogEventType.CommentAdded,
-            UserId = c.AuthorId!,
-            ProjectId = tasks.First(t => t.Id == c.TaskId).ProjectId,
-            TaskId = c.TaskId,
-            Data = new Dictionary<string, object?>
+            var author = await _users.FindByNameAsync(t.Author);
+            if (author == null)
+                continue;
+            var assignedUser = string.IsNullOrEmpty(t.Assigned) ? null : await _users.FindByNameAsync(t.Assigned);
+            var task = new AppTask
             {
-                ["commentId"] = c.Id
+                Title = t.Title,
+                Description = t.Description,
+                GeneratedSummary = t.Summary,
+                Status = Enum.Parse<TaskStatus>(t.Status),
+                Priority = Enum.Parse<TaskPriority>(t.Priority),
+                AuthorId = author.Id,
+                AssignedUserId = assignedUser?.Id,
+                ProjectId = project.Id,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt
+            };
+
+            foreach (var tagName in t.Tags)
+            {
+                if (tagMap.TryGetValue(tagName, out var tag))
+                    task.Tags.Add(tag);
             }
-        }).ToList();
 
-        var media1 = new Media
-        {
-            Uuid = Guid.NewGuid(),
-            CollectionName = "attachments",
-            Name = "design.png",
-            FileName = "design.png",
-            MimeType = "image/png",
-            Disk = "local",
-            Size = 2048,
-            AccessScope = AccessScope.Private,
-            ModelId = task1.Id.ToString(),
-            ModelType = nameof(AppTask),
-            UploadedById = user1.Id
-        };
-
-        _context.Media.Add(media1);
-        await _context.SaveChangesAsync();
-
-        var fileLogs = new List<ProjectActivityLog>
-        {
-            new()
+            foreach (var c in t.Comments)
             {
-                EventType = ProjectActivityLogEventType.FileUploaded,
-                UserId = user1.Id,
-                ProjectId = project1.Id,
-                TaskId = task1.Id,
-                Data = new Dictionary<string, object?>
+                var commentAuthor = await _users.FindByNameAsync(c.Author);
+                if (commentAuthor != null)
                 {
-                    ["mediaId"] = media1.Id,
-                    ["collectionName"] = media1.CollectionName,
-                    ["size"] = media1.Size,
-                    ["fileName"] = media1.FileName
+                    task.Comments.Add(new TaskComment
+                    {
+                        AuthorId = commentAuthor.Id,
+                        Content = c.Content,
+                        CreatedAt = c.CreatedAt,
+                        UpdatedAt = c.UpdatedAt
+                    });
                 }
             }
-        };
 
+            _context.Tasks.Add(task);
+        }
 
-        var projectLogs = new List<ProjectActivityLog>
-        {
-            new()
-            {
-                EventType = ProjectActivityLogEventType.ProjectCreated,
-                UserId = user1.Id,
-                ProjectId = project1.Id,
-                Data = new Dictionary<string, object?>
-                {
-                    ["projectId"] = project1.Id,
-                    ["name"] = project1.Name
-                }
-            },
-            new()
-            {
-                EventType = ProjectActivityLogEventType.ProjectCreated,
-                UserId = user2.Id,
-                ProjectId = project2.Id,
-                Data = new Dictionary<string, object?>
-                {
-                    ["projectId"] = project2.Id,
-                    ["name"] = project2.Name
-                }
-            }
-        };
-
-        var logs = new List<ProjectActivityLog>();
-        logs.AddRange(projectLogs);
-        logs.AddRange(memberLogs);
-        logs.AddRange(taskLogs);
-        logs.AddRange(commentLogs);
-        logs.AddRange(fileLogs);
-
-        _context.ProjectActivityLogs.AddRange(logs);
         await _context.SaveChangesAsync();
     }
 
