@@ -37,6 +37,8 @@ public static class DependencyInjection
             options.NonNullableReferenceTypesAsRequired();
         });
 
+        builder.Services.AddSwaggerGenNewtonsoftSupport();
+
         builder.Services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
