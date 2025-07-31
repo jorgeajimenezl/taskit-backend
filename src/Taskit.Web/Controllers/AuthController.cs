@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Taskit.Application.Common.Settings;
 using Taskit.Application.DTOs;
@@ -11,6 +12,14 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
 {
     private readonly AuthService _auth = authService;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
+
+    private CookieOptions AccessCookieOptions => new()
+    {
+        HttpOnly = false,
+        Secure = true,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
+    };
 
     private CookieOptions RefreshCookieOptions => new()
     {
@@ -37,6 +46,11 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
         if (!Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) || noCookie != "true")
         {
             Response.Cookies.Append(
+                "accessToken",
+                result.AccessToken!,
+                AccessCookieOptions
+            );
+            Response.Cookies.Append(
                 "refreshToken",
                 result.RefreshToken!,
                 RefreshCookieOptions
@@ -45,8 +59,8 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
 
         return Ok(new LoginResponse
         {
-            AccessToken = result.AccessToken,
-            RefreshToken = noCookie == "true" ? null : result.RefreshToken,
+            AccessToken = noCookie == "true" ? result.AccessToken : null,
+            RefreshToken = noCookie == "true" ? result.RefreshToken : null,
             User = result.User
         });
     }
@@ -56,6 +70,7 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
     public async Task<IActionResult> Logout()
     {
         await _auth.LogoutAsync();
+        Response.Cookies.Delete("accessToken");
         Response.Cookies.Delete("refreshToken");
         return Ok();
     }
@@ -75,6 +90,11 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
         if (!Request.Headers.TryGetValue("X-No-Cookie", out var noCookie) || noCookie != "true")
         {
             Response.Cookies.Append(
+                "accessToken",
+                result.AccessToken!,
+                AccessCookieOptions
+            );
+            Response.Cookies.Append(
                 "refreshToken",
                 result.RefreshToken!,
                 RefreshCookieOptions
@@ -83,8 +103,8 @@ public class AuthController(AuthService authService, IOptions<JwtSettings> jwtSe
 
         return Ok(new RefreshResponse
         {
-            AccessToken = result.AccessToken,
-            RefreshToken = noCookie == "true" ? null : result.RefreshToken
+            AccessToken = noCookie == "true" ? result.AccessToken : null,
+            RefreshToken = noCookie == "true" ? result.RefreshToken : null
         });
     }
 }
