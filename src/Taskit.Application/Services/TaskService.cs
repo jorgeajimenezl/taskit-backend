@@ -109,31 +109,8 @@ public class TaskService(
         var task = await _tasks.QueryForUser(userId)
             .Where(t => t.Id == id)
             .FirstOrDefaultAsync();
+
         Guard.Against.NotFound(id, task);
-
-        if (dto.ParentTaskId is not null)
-        {
-            var parentAllowed = await _tasks.QueryForUser(userId)
-                .AsNoTracking()
-                .AnyAsync(t => t.Id == dto.ParentTaskId);
-            if (!parentAllowed)
-                throw new ForbiddenAccessException();
-        }
-
-        if (dto.AssignedUserId is not null)
-        {
-            var assignedAllowed = await _projects.Query()
-                .Include(p => p.Members)
-                .AsNoTracking()
-                .AnyAsync(p => p.Members.Any(m => m.UserId == dto.AssignedUserId));
-            if (!assignedAllowed)
-                throw new ForbiddenAccessException();
-        }
-
-        if (dto.CompletedPercentage == 100 && dto.Status is not TaskStatus.Completed && task.Status != TaskStatus.Completed)
-            throw new RuleViolationException("Status must be Completed when progress reaches 100%");
-
-        var oldAssigned = task.AssignedUserId;
         var oldStatus = task.Status;
 
         _mapper.Map(dto, task);
@@ -145,14 +122,6 @@ public class TaskService(
 
         task.UpdateTimestamps();
         await _tasks.UpdateAsync(task);
-
-        if (task.AssignedUserId != oldAssigned && task.AssignedUserId != null)
-        {
-            await _activity.RecordAsync(ProjectActivityLogEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
-            {
-                ["assignedTo"] = task.AssignedUserId!
-            });
-        }
 
         if (task.Status != oldStatus)
         {
@@ -219,6 +188,56 @@ public class TaskService(
         return await queryable.GridifyToAsync<AppTask, TaskDto>(_mapper, query);
     }
 
+    public async Task AssignAsync(int taskId, string assignedUserId, string userId)
+    {
+        var task = await _tasks.QueryForUser(userId)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
+        Guard.Against.NotFound(taskId, task);
+
+        var assignedAllowed = await _projects.Query()
+            .Include(p => p.Members)
+            .AsNoTracking()
+            .AnyAsync(p => p.Id == task.ProjectId && p.Members.Any(m => m.UserId == assignedUserId));
+        if (!assignedAllowed)
+            throw new ForbiddenAccessException();
+
+        task.AssignedUserId = assignedUserId;
+        task.UpdateTimestamps();
+
+        await _tasks.UpdateAsync(task);
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+        {
+            ["assignedTo"] = assignedUserId,
+        });
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+        {
+            ["title"] = task.Title,
+        });
+    }
+
+    public async Task UnassignAsync(int taskId, string userId)
+    {
+        var task = await _tasks.QueryForUser(userId)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
+        Guard.Against.NotFound(taskId, task);
+
+        if (task.AssignedUserId == null)
+            return;
+
+        task.AssignedUserId = null;
+        task.UpdateTimestamps();
+
+        await _tasks.UpdateAsync(task);
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskAssigned, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+        {
+            ["assignedTo"] = null,
+        });
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
+        {
+            ["title"] = task.Title,
+        });
+    }
+
     public async Task<IEnumerable<TaskDto>> GetSubTasksAsync(int taskId, string userId)
     {
         var subtasks = await _tasks.QueryForUser(userId)
@@ -232,6 +251,30 @@ public class TaskService(
             throw new ForbiddenAccessException();
 
         return subtasks;
+    }
+
+    public async Task AttachSubTaskAsync(int parentTaskId, int subTaskId, string userId)
+    {
+        var subTask = await _tasks.QueryForUser(userId)
+            .FirstOrDefaultAsync(t => t.Id == subTaskId);
+        var parentTask = await _tasks.QueryForUser(userId)
+            .FirstOrDefaultAsync(t => t.Id == parentTaskId);
+
+        if (subTask?.ProjectId != parentTask?.ProjectId)
+            throw new ForbiddenAccessException();
+
+        Guard.Against.NotFound(parentTaskId, parentTask);
+        Guard.Against.NotFound(subTaskId, subTask);
+
+        subTask.ParentTaskId = parentTaskId;
+        subTask.UpdateTimestamps();
+
+        await _tasks.UpdateAsync(subTask);
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, parentTask.ProjectId, parentTask.Id, new Dictionary<string, object?>
+        {
+            ["title"] = parentTask.Title,
+            ["subTaskId"] = subTaskId,
+        });
     }
 
     public async Task DetachSubTaskAsync(int parentTaskId, int subTaskId, string userId)

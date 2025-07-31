@@ -76,12 +76,36 @@ public class TasksController(TaskService taskService) : ApiControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:int}/assign/{assigneeId}", Name = "AssignTask")]
+    public async Task<IActionResult> AssignTask(int id, string assigneeId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        await _taskService.AssignAsync(id, assigneeId, userId);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}/assign", Name = "UnassignTask")]
+    public async Task<IActionResult> UnassignTask(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        await _taskService.UnassignAsync(id, userId);
+        return NoContent();
+    }
+
     [HttpGet("{id:int}/subtasks", Name = "GetSubTasks")]
     public async Task<ActionResult<IEnumerable<TaskDto>>> GetSubTasks(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var tasks = await _taskService.GetSubTasksAsync(id, userId);
         return Ok(tasks);
+    }
+
+    [HttpGet("{parentId:int}/subtasks/{subTaskId:int}", Name = "AttachSubTask")]
+    public async Task<ActionResult<IEnumerable<TaskDto>>> AttachSubTask(int parentId, int subTaskId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        await _taskService.AttachSubTaskAsync(parentId, subTaskId, userId);
+        return NoContent();
     }
 
     [HttpDelete("{parentId:int}/subtasks/{subTaskId:int}", Name = "DetachSubTask")]
