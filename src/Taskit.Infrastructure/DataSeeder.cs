@@ -158,7 +158,7 @@ public class DataSeeder(
                 Title = t.Title,
                 Description = t.Description,
                 GeneratedSummary = t.Summary,
-                Status = Enum.Parse<TaskStatus>(t.Status),
+                Status = Enum.Parse<Domain.Enums.TaskStatus>(t.Status),
                 Priority = Enum.Parse<TaskPriority>(t.Priority),
                 AuthorId = author.Id,
                 AssignedUserId = assignedUser?.Id,
@@ -180,6 +180,7 @@ public class DataSeeder(
                 {
                     task.Comments.Add(new TaskComment
                     {
+                        TaskId = task.Id,
                         AuthorId = commentAuthor.Id,
                         Content = c.Content,
                         CreatedAt = c.CreatedAt,
