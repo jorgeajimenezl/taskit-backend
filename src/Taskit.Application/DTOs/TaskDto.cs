@@ -17,6 +17,8 @@ public record TaskDto
     [Required]
     public required string Description { get; init; }
 
+    public string? GeneratedSummary { get; init; } = null;
+
     [Required]
     public required string ProjectName { get; init; }
 

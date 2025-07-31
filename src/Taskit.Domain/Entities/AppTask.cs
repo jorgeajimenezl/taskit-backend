@@ -13,6 +13,9 @@ public class AppTask : BaseEntity<int>
     [Required, MaxLength(2000)]
     public string Description { get; set; } = string.Empty;
 
+    [MaxLength(2000)]
+    public string? GeneratedSummary { get; set; } = null;
+
     public DateTime? DueDate { get; set; }
     public DateTime? CompletedAt { get; set; }
 
