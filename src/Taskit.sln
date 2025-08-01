@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Application", "Taski
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Notification.Worker", "Taskit.Notification.Worker\Taskit.Notification.Worker.csproj", "{97E1A20E-F28D-4C49-B437-57BB4F3F348A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.AI.Orchestrator", "Taskit.AI.Orchestrator\Taskit.AI.Orchestrator.csproj", "{58717D33-63A4-4E82-AE24-BC65D63317B4}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taskit.Application.Tests", "Taskit.Application.Tests\Taskit.Application.Tests.csproj", "{B1330151-70F0-498B-85FA-92A14491A10C}"
 EndProject
 Global
@@ -87,6 +89,18 @@ Global
 		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Release|x64.Build.0 = Release|Any CPU
 		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Release|x86.ActiveCfg = Release|Any CPU
 		{97E1A20E-F28D-4C49-B437-57BB4F3F348A}.Release|x86.Build.0 = Release|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Debug|x64.ActiveCfg = Debug|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Debug|x64.Build.0 = Debug|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Debug|x86.ActiveCfg = Debug|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Debug|x86.Build.0 = Debug|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Release|Any CPU.Build.0 = Release|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Release|x64.ActiveCfg = Release|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Release|x64.Build.0 = Release|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Release|x86.ActiveCfg = Release|Any CPU
+                {58717D33-63A4-4E82-AE24-BC65D63317B4}.Release|x86.Build.0 = Release|Any CPU
 		{B1330151-70F0-498B-85FA-92A14491A10C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1330151-70F0-498B-85FA-92A14491A10C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1330151-70F0-498B-85FA-92A14491A10C}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -109,6 +123,7 @@ Global
 		{462FE568-4A5B-4D78-B4F9-B1C294762FCC} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 		{6D96622D-F76A-44AC-AEEE-2AFD4302994D} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 		{97E1A20E-F28D-4C49-B437-57BB4F3F348A} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
+                {58717D33-63A4-4E82-AE24-BC65D63317B4} = {C4B0ECCE-7BBE-8C77-B1CE-4F0F99A91FA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE9325F6-E848-4A70-8464-D029E0E0899A}

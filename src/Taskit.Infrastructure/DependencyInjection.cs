@@ -142,7 +142,6 @@ public static class DependencyInjection
         if (!string.IsNullOrWhiteSpace(openAiKey))
         {
             builder.Services.AddSingleton(new OpenAIClient(openAiKey));
-            builder.Services.AddHostedService<AiSummaryService>();
         }
 
         // Background services
