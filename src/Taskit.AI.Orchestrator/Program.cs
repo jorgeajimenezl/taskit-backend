@@ -15,10 +15,9 @@ var host = Host.CreateDefaultBuilder(args)
             context.Configuration.GetSection("Features:SummaryGeneration"));
 
         var openAiKey = context.Configuration["OpenAI:ApiKey"];
-        if (!string.IsNullOrWhiteSpace(openAiKey))
-        {
-            services.AddSingleton(new OpenAIClient(openAiKey));
-        }
+        if (string.IsNullOrWhiteSpace(openAiKey))
+            throw new ArgumentException("OpenAI API key is not configured.");
+        services.AddSingleton(new OpenAIClient(openAiKey));
 
         services.AddMassTransit(x =>
         {
