@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using OpenAI.Chat;
+using Taskit.Domain.Entities;
+using Polly;
 
 namespace Taskit.Infrastructure.Workers;
 
@@ -21,6 +23,17 @@ public class AiSummaryService(
         configuration.GetValue<int>("AISummaryIntervalMinutes", 5));
     private readonly string _model = configuration["OpenAI:Model"] ?? "gpt-4o-mini";
     private readonly int _batchSize = configuration.GetValue<int>("AISummaryBatchSize", 50);
+    private readonly TimeSpan _requestDelay = TimeSpan.FromMilliseconds(
+        configuration.GetValue<int>("AISummaryDelayMilliseconds", 1000));
+    private readonly AsyncPolicy _retryPolicy = Policy
+        .Handle<Exception>()
+        .WaitAndRetryAsync(
+            configuration.GetValue<int>("AISummaryRetryCount", 3),
+            attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+            (exception, delay, attempt, _) =>
+                logger.LogWarning(exception,
+                    "Retrying summary generation in {Delay} (attempt {Attempt})",
+                    delay, attempt));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -50,6 +63,7 @@ public class AiSummaryService(
         while (!cancellationToken.IsCancellationRequested)
         {
             var batch = await context.Tasks
+                .AsNoTracking()
                 .Where(t => t.Id > lastId && string.IsNullOrEmpty(t.GeneratedSummary) && !string.IsNullOrEmpty(t.Description))
                 .OrderBy(t => t.Id)
                 .Take(_batchSize)
@@ -58,20 +72,24 @@ public class AiSummaryService(
             if (batch.Count == 0)
                 break;
 
+            var tasksToUpdate = new List<AppTask>();
+
             foreach (var task in batch)
             {
                 try
                 {
-                    var completion = await chatClient.CompleteChatAsync([
-                        new SystemChatMessage("You create concise summaries of task descriptions."),
-                        new UserChatMessage($"Title: {task.Title}\nDescription: {task.Description}")
-                    ], cancellationToken: cancellationToken);
+                    var completion = await _retryPolicy.ExecuteAsync(
+                        ct => chatClient.CompleteChatAsync([
+                            new SystemChatMessage("You create concise summaries of task descriptions."),
+                            new UserChatMessage($"Title: {task.Title}\nDescription: {task.Description}")
+                        ], cancellationToken: ct),
+                        cancellationToken);
 
                     var summary = completion.Value.Content.FirstOrDefault()?.Text?.Trim();
                     if (!string.IsNullOrWhiteSpace(summary))
                     {
                         task.GeneratedSummary = summary;
-                        context.Tasks.Update(task);
+                        tasksToUpdate.Add(task);
                         _logger.LogInformation("Generated summary for task {TaskId}", task.Id);
                     }
                 }
@@ -80,8 +98,11 @@ public class AiSummaryService(
                     _logger.LogWarning(ex, "Failed to generate summary for task {TaskId}", task.Id);
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await Task.Delay(_requestDelay, cancellationToken);
             }
+
+            if (tasksToUpdate.Count > 0)
+                context.Tasks.UpdateRange(tasksToUpdate);
 
             await context.SaveChangesAsync(cancellationToken);
             lastId = batch[^1].Id;
