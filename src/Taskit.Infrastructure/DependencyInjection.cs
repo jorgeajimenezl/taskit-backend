@@ -15,6 +15,7 @@ using Taskit.Application.Interfaces;
 using Taskit.Infrastructure.Repositories;
 using MassTransit;
 using Taskit.Infrastructure.Workers;
+using OpenAI;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -135,6 +136,14 @@ public static class DependencyInjection
         builder.Services.AddScoped<ITagRepository, TagRepository>();
         builder.Services.AddScoped<IProjectActivityLogRepository, ProjectActivityLogRepository>();
         builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        // OpenAI
+        var openAiKey = builder.Configuration["OpenAI:ApiKey"];
+        if (!string.IsNullOrWhiteSpace(openAiKey))
+        {
+            builder.Services.AddSingleton(new OpenAIClient(openAiKey));
+            builder.Services.AddHostedService<AiSummaryService>();
+        }
 
         // Background services
         builder.Services.AddHostedService<MediaCleanupService>();
