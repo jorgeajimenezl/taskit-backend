@@ -22,7 +22,7 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<AiSummaryConsumer>();
+            x.AddConsumer<SummaryGeneratorConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {

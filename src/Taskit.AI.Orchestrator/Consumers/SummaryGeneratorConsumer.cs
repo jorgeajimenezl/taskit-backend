@@ -15,15 +15,15 @@ using Taskit.Infrastructure;
 
 namespace Taskit.AI.Orchestrator.Consumers;
 
-public class AiSummaryConsumer(
+public class SummaryGeneratorConsumer(
     OpenAIClient openAiClient,
     AppDbContext db,
     IOptions<SummaryGeneratorSettings> settings,
-    ILogger<AiSummaryConsumer> logger) : IConsumer<ProjectActivityLogCreated>
+    ILogger<SummaryGeneratorConsumer> logger) : IConsumer<ProjectActivityLogCreated>
 {
     private readonly OpenAIClient _openAiClient = openAiClient;
     private readonly AppDbContext _db = db;
-    private readonly ILogger<AiSummaryConsumer> _logger = logger;
+    private readonly ILogger<SummaryGeneratorConsumer> _logger = logger;
     private readonly SummaryGeneratorSettings _settings = settings.Value;
 
     public async Task Consume(ConsumeContext<ProjectActivityLogCreated> context)
