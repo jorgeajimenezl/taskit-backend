@@ -1,8 +1,8 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using OpenAI;
 using Taskit.AI.Orchestrator.Consumers;
+using Taskit.AI.Orchestrator.Settings;
 using Taskit.Infrastructure;
 
 var host = Host.CreateDefaultBuilder(args)
@@ -10,6 +10,9 @@ var host = Host.CreateDefaultBuilder(args)
     {
         var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+
+        services.Configure<SummaryGeneratorSettings>(
+            context.Configuration.GetSection("Features:SummaryGeneration"));
 
         var openAiKey = context.Configuration["OpenAI:ApiKey"];
         if (!string.IsNullOrWhiteSpace(openAiKey))
