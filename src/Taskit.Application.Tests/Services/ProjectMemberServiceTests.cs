@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AutoMapper;
+using Gridify;
 using MockQueryable.Moq;
 using Moq;
 using Taskit.Application.DTOs;
@@ -79,10 +80,10 @@ public class ProjectMemberServiceTests
         var userManager = MockUserManager();
         var service = CreateService(memberRepo, projectRepo, userManager, mapper);
 
-        var result = await service.GetAllAsync(1, "owner");
+        var result = await service.GetAllAsync(1, "owner", new GridifyQuery());
 
-        Assert.Single(result);
-        Assert.Equal(1, result.First().Id);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.Data.First().Id);
     }
 
     [Fact]
@@ -96,7 +97,7 @@ public class ProjectMemberServiceTests
         var userManager = MockUserManager();
         var service = CreateService(memberRepo, projectRepo, userManager, mapper);
 
-        await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.GetAllAsync(1, "u"));
+        await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.GetAllAsync(1, "u", new GridifyQuery()));
     }
 
     [Fact]

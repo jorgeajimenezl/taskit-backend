@@ -1,8 +1,10 @@
 using System.Security.Claims;
+using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Taskit.Application.DTOs;
+using Taskit.Application.Common.Models;
 using Taskit.Application.Services;
 
 namespace Taskit.Web.Controllers;
@@ -15,10 +17,10 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
     private readonly IMapper _mapper = mapper;
 
     [HttpGet(Name = "GetProjectMembers")]
-    public async Task<ActionResult<IEnumerable<ProjectMemberDto>>> GetMembers(int projectId)
+    public async Task<ActionResult<Paging<ProjectMemberDto>>> GetMembers(int projectId, [FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var members = await _service.GetAllAsync(projectId, userId);
+        var members = await _service.GetAllAsync(projectId, userId, query);
         return Ok(members);
     }
 

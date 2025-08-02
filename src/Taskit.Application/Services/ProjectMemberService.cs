@@ -1,13 +1,14 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ardalis.GuardClauses;
+using Gridify;
+using Taskit.Application.Common.Exceptions;
+using Taskit.Application.Common.Mappings;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
-using Taskit.Application.Common.Exceptions;
 
 namespace Taskit.Application.Services;
 
@@ -45,7 +46,7 @@ public class ProjectMemberService(
             .FirstOrDefaultAsync(p => p.Id == projectId);
     }
 
-    public async Task<IEnumerable<ProjectMemberDto>> GetAllAsync(int projectId, string userId)
+    public async Task<Paging<ProjectMemberDto>> GetAllAsync(int projectId, string userId, IGridifyQuery query)
     {
         var project = await GetProjectAsync(projectId);
         Guard.Against.NotFound(projectId, project);
@@ -53,11 +54,11 @@ public class ProjectMemberService(
         if (!CanRead(project, userId))
             throw new ForbiddenAccessException();
 
-        return await _members.QueryForProject(projectId)
+        var q = _members.QueryForProject(projectId)
             .Include(m => m.User)
-            .AsNoTracking()
-            .ProjectTo<ProjectMemberDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsNoTracking();
+
+        return await q.GridifyToAsync<ProjectMember, ProjectMemberDto>(_mapper, query);
     }
 
     public async Task<ProjectMemberDto> GetByIdAsync(int projectId, int id, string userId)
