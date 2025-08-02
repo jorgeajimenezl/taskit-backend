@@ -1,18 +1,57 @@
 {
   "users": [
-    { "userName": "ada", "email": "ada@mozilla.org", "fullName": "Ada Lovelace" },
-    { "userName": "linus", "email": "linus@mozilla.org", "fullName": "Linus Wright" },
-    { "userName": "sarah", "email": "sarah@mozilla.org", "fullName": "Sarah Gomez" },
-    { "userName": "miguel", "email": "miguel@mozilla.org", "fullName": "Miguel Oliveira" },
-    { "userName": "yuki", "email": "yuki@mozilla.org", "fullName": "Yuki Tanaka" },
-    { "userName": "omar", "email": "omar@mozilla.org", "fullName": "Omar Al-Farsi" }
+    {
+      "userName": "ada",
+      "email": "ada@mozilla.org",
+      "fullName": "Ada Lovelace"
+    },
+    {
+      "userName": "linus",
+      "email": "linus@mozilla.org",
+      "fullName": "Linus Wright"
+    },
+    {
+      "userName": "sarah",
+      "email": "sarah@mozilla.org",
+      "fullName": "Sarah Gomez"
+    },
+    {
+      "userName": "miguel",
+      "email": "miguel@mozilla.org",
+      "fullName": "Miguel Oliveira"
+    },
+    {
+      "userName": "yuki",
+      "email": "yuki@mozilla.org",
+      "fullName": "Yuki Tanaka"
+    },
+    {
+      "userName": "omar",
+      "email": "omar@mozilla.org",
+      "fullName": "Omar Al-Farsi"
+    }
   ],
   "tags": [
-    { "name": "layout", "color": "#e11d48" },
-    { "name": "performance", "color": "#0ea5e9" },
-    { "name": "security", "color": "#f97316" },
-    { "name": "documentation", "color": "#10b981" },
-    { "name": "testing", "color": "#9333ea" }
+    {
+      "name": "layout",
+      "color": "#e11d48"
+    },
+    {
+      "name": "performance",
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "security",
+      "color": "#f97316"
+    },
+    {
+      "name": "documentation",
+      "color": "#10b981"
+    },
+    {
+      "name": "testing",
+      "color": "#9333ea"
+    }
   ],
   "project": {
     "name": "Servo",
@@ -22,333 +61,704 @@
   "tasks": [
     {
       "title": "Integrate layout engine with Rust components",
-      "description": "### Background\nOur parallel layout engine requires tighter integration with the Rust core libraries to unlock concurrent flow computations.\n\n### Requirements\n- Create binding layer between existing C++ shims and the Rust layout module.\n- Write extensive benchmarks to measure layout throughput with realistic pages.\n- Document any architectural trade-offs and follow-up tasks.\n\n### Acceptance Criteria\n- Source compiles on supported platforms.\n- Layout tests demonstrate at least 15% improvement over baseline.\n- Notes are captured in the architecture log.",
+      "description": "### Background\nOur parallel layout engine requires tighter integration with the Rust core libraries to unlock concurrent flow computations.\n\n### Requirements\n- Create binding layer between existing C++ shims and the Rust layout module.\n- Write extensive benchmarks to measure layout throughput with realistic pages.\n- Document any architectural trade-offs and follow-up tasks.\n\n### Acceptance Criteria\n- Source compiles on supported platforms.\n- Layout tests demonstrate at least 15% improvement over baseline.\n- Notes are captured in the architecture log.\n\n### References\n- PR: https://github.com/servo/servo/pull/421\n- Code: `components/layout/rust_bridge.rs`\n- Docs: https://servo.dev/docs/integrate-layout-engine-with-rust-components",
       "status": "InProgress",
       "priority": "High",
       "createdAt": "2024-06-01T09:00:00Z",
       "updatedAt": "2024-06-05T14:00:00Z",
       "author": "ada",
       "assigned": "linus",
-      "tags": ["layout", "performance"],
+      "tags": [
+        "layout",
+        "performance"
+      ],
       "summary": "Integrating the new layout engine with Rust core to improve throughput.",
       "comments": [
-        { "author": "linus", "content": "Started exploring the binding layer and preparing benchmarks.", "createdAt": "2024-06-02T10:00:00Z", "updatedAt": "2024-06-02T10:00:00Z" },
-        { "author": "ada", "content": "Please capture the pitfalls around FFI boundary.", "createdAt": "2024-06-03T15:30:00Z", "updatedAt": "2024-06-03T15:30:00Z" },
-        { "author": "sarah", "content": "I'll help with benchmark scripts later this week.", "createdAt": "2024-06-04T08:45:00Z", "updatedAt": "2024-06-04T08:45:00Z" }
+        {
+          "author": "linus",
+          "content": "Started exploring the binding layer and preparing benchmarks.",
+          "createdAt": "2024-06-02T10:00:00Z",
+          "updatedAt": "2024-06-02T10:00:00Z"
+        },
+        {
+          "author": "ada",
+          "content": "Please capture the pitfalls around FFI boundary.",
+          "createdAt": "2024-06-03T15:30:00Z",
+          "updatedAt": "2024-06-03T15:30:00Z"
+        },
+        {
+          "author": "sarah",
+          "content": "I'll help with benchmark scripts later this week.",
+          "createdAt": "2024-06-04T08:45:00Z",
+          "updatedAt": "2024-06-04T08:45:00Z"
+        }
       ]
     },
     {
       "title": "Optimize startup time for compositor",
-      "description": "### Background\nCold start of the compositor has grown sluggish as new features landed over the last quarter. We need to shave off seconds to maintain a fluid developer loop.\n\n### Requirements\n- Profile startup sequence and identify blocking operations.\n- Defer non-critical initialization steps.\n- Provide before-and-after measurements.\n\n### Notes\nOptimization should not compromise feature parity or introduce race conditions.",
+      "description": "### Background\nCold start of the compositor has grown sluggish as new features landed over the last quarter. We need to shave off seconds to maintain a fluid developer loop.\n\n### Requirements\n- Profile startup sequence and identify blocking operations.\n- Defer non-critical initialization steps.\n- Provide before-and-after measurements.\n\n### Notes\nOptimization should not compromise feature parity or introduce race conditions.\n\n### References\n- PR: https://github.com/servo/servo/pull/422\n- Code: `components/compositor/startup.rs`\n- Docs: https://servo.dev/docs/optimize-startup-time-for-compositor",
       "status": "Pending",
       "priority": "Medium",
       "createdAt": "2024-06-02T09:15:00Z",
       "updatedAt": "2024-06-06T11:00:00Z",
       "author": "linus",
       "assigned": "miguel",
-      "tags": ["performance"],
+      "tags": [
+        "performance"
+      ],
       "summary": "Investigate and reduce compositor startup time.",
       "comments": [
-        { "author": "miguel", "content": "Initial profiling shows shader warm-up as major cost.", "createdAt": "2024-06-03T12:20:00Z", "updatedAt": "2024-06-03T12:20:00Z" },
-        { "author": "yuki", "content": "Consider lazy loading for texture caches.", "createdAt": "2024-06-04T16:40:00Z", "updatedAt": "2024-06-04T16:40:00Z" }
+        {
+          "author": "miguel",
+          "content": "Initial profiling shows shader warm-up as major cost.",
+          "createdAt": "2024-06-03T12:20:00Z",
+          "updatedAt": "2024-06-03T12:20:00Z"
+        },
+        {
+          "author": "yuki",
+          "content": "Consider lazy loading for texture caches.",
+          "createdAt": "2024-06-04T16:40:00Z",
+          "updatedAt": "2024-06-04T16:40:00Z"
+        }
       ]
     },
     {
       "title": "Implement CSS Grid support",
-      "description": "### Background\nModern sites rely on CSS Grid for responsive layouts and the engine currently falls back to table simulation.\n\n### Requirements\n- Parse grid definitions including repeat and auto-fill syntaxes.\n- Handle placement algorithms for nested grids.\n- Create thorough WPT coverage for grid scenarios.\n\n### Notes\nThis is a major feature and should land behind an experimental flag first.",
+      "description": "### Background\nModern sites rely on CSS Grid for responsive layouts and the engine currently falls back to table simulation.\n\n### Requirements\n- Parse grid definitions including repeat and auto-fill syntaxes.\n- Handle placement algorithms for nested grids.\n- Create thorough WPT coverage for grid scenarios.\n\n### Notes\nThis is a major feature and should land behind an experimental flag first.\n\n### References\n- PR: https://github.com/servo/servo/pull/423\n- Code: `style/grid.rs`\n- Docs: https://servo.dev/docs/implement-css-grid-support",
       "status": "Created",
       "priority": "High",
       "createdAt": "2024-06-03T10:00:00Z",
       "updatedAt": "2024-06-03T10:00:00Z",
       "author": "sarah",
       "assigned": "yuki",
-      "tags": ["layout"],
+      "tags": [
+        "layout"
+      ],
       "summary": "Add first-class CSS Grid layout capabilities.",
       "comments": [
-        { "author": "yuki", "content": "Starting with the parser changes today.", "createdAt": "2024-06-04T09:30:00Z", "updatedAt": "2024-06-04T09:30:00Z" },
-        { "author": "sarah", "content": "I will draft the feature flag proposal.", "createdAt": "2024-06-04T17:10:00Z", "updatedAt": "2024-06-04T17:10:00Z" },
-        { "author": "omar", "content": "Can help with WPT integration once parser is ready.", "createdAt": "2024-06-05T13:25:00Z", "updatedAt": "2024-06-05T13:25:00Z" }
+        {
+          "author": "yuki",
+          "content": "Starting with the parser changes today.",
+          "createdAt": "2024-06-04T09:30:00Z",
+          "updatedAt": "2024-06-04T09:30:00Z"
+        },
+        {
+          "author": "sarah",
+          "content": "I will draft the feature flag proposal.",
+          "createdAt": "2024-06-04T17:10:00Z",
+          "updatedAt": "2024-06-04T17:10:00Z"
+        },
+        {
+          "author": "omar",
+          "content": "Can help with WPT integration once parser is ready.",
+          "createdAt": "2024-06-05T13:25:00Z",
+          "updatedAt": "2024-06-05T13:25:00Z"
+        }
       ]
     },
     {
       "title": "Refactor networking module",
-      "description": "### Background\nThe networking stack still carries legacy abstractions that hinder concurrency and reuse across components.\n\n### Requirements\n- Replace outdated stream handlers with async equivalents.\n- Split transport and protocol responsibilities into dedicated layers.\n- Ensure existing tests run against the refactored module.\n\n### Notes\nCoordinated changes in the downloader and cache subsystems will be necessary.",
+      "description": "### Background\nThe networking stack still carries legacy abstractions that hinder concurrency and reuse across components.\n\n### Requirements\n- Replace outdated stream handlers with async equivalents.\n- Split transport and protocol responsibilities into dedicated layers.\n- Ensure existing tests run against the refactored module.\n\n### Notes\nCoordinated changes in the downloader and cache subsystems will be necessary.\n\n### References\n- PR: https://github.com/servo/servo/pull/424\n- Code: `net/async/stream.rs`\n- Docs: https://servo.dev/docs/refactor-networking-module",
       "status": "InProgress",
       "priority": "Medium",
       "createdAt": "2024-06-04T08:00:00Z",
       "updatedAt": "2024-06-10T09:45:00Z",
       "author": "miguel",
       "assigned": "ada",
-      "tags": ["performance", "security"],
+      "tags": [
+        "performance",
+        "security"
+      ],
       "summary": "Modernize networking module with async layers and clear separation.",
       "comments": [
-        { "author": "ada", "content": "Please keep the legacy interfaces until the cache layer is migrated.", "createdAt": "2024-06-05T11:00:00Z", "updatedAt": "2024-06-05T11:00:00Z" },
-        { "author": "miguel", "content": "Understood; will use adapter pattern for transition.", "createdAt": "2024-06-06T15:10:00Z", "updatedAt": "2024-06-06T15:10:00Z" }
+        {
+          "author": "ada",
+          "content": "Please keep the legacy interfaces until the cache layer is migrated.",
+          "createdAt": "2024-06-05T11:00:00Z",
+          "updatedAt": "2024-06-05T11:00:00Z"
+        },
+        {
+          "author": "miguel",
+          "content": "Understood; will use adapter pattern for transition.",
+          "createdAt": "2024-06-06T15:10:00Z",
+          "updatedAt": "2024-06-06T15:10:00Z"
+        }
       ]
     },
     {
       "title": "Add security checks for URL parsing",
-      "description": "### Background\nRecent audit uncovered weaknesses in the URL parser when handling edge-case encodings and exotic schemes.\n\n### Requirements\n- Harden parsing against embedded null characters and overlong sequences.\n- Add allowlist for custom schemes.\n- Provide fuzz tests exercising high-risk inputs.\n\n### Notes\nChanges must not regress standard compliance or existing integrations.",
+      "description": "### Background\nRecent audit uncovered weaknesses in the URL parser when handling edge-case encodings and exotic schemes.\n\n### Requirements\n- Harden parsing against embedded null characters and overlong sequences.\n- Add allowlist for custom schemes.\n- Provide fuzz tests exercising high-risk inputs.\n\n### Notes\nChanges must not regress standard compliance or existing integrations.\n\n### References\n- PR: https://github.com/servo/servo/pull/425\n- Code: `net/url/parser.rs`\n- Docs: https://servo.dev/docs/add-security-checks-for-url-parsing",
       "status": "InProgress",
       "priority": "High",
       "createdAt": "2024-06-05T09:30:00Z",
       "updatedAt": "2024-06-09T12:15:00Z",
       "author": "yuki",
       "assigned": "omar",
-      "tags": ["security"],
+      "tags": [
+        "security"
+      ],
       "summary": "Strengthen URL parsing logic against malformed inputs.",
       "comments": [
-        { "author": "omar", "content": "Drafted fuzzing corpus covering Unicode ambiguities.", "createdAt": "2024-06-06T10:45:00Z", "updatedAt": "2024-06-06T10:45:00Z" },
-        { "author": "yuki", "content": "Adding checks for scheme allowlist now.", "createdAt": "2024-06-07T14:20:00Z", "updatedAt": "2024-06-07T14:20:00Z" },
-        { "author": "linus", "content": "Watch out for data URLs used in tests.", "createdAt": "2024-06-08T16:00:00Z", "updatedAt": "2024-06-08T16:00:00Z" }
+        {
+          "author": "omar",
+          "content": "Drafted fuzzing corpus covering Unicode ambiguities.",
+          "createdAt": "2024-06-06T10:45:00Z",
+          "updatedAt": "2024-06-06T10:45:00Z"
+        },
+        {
+          "author": "yuki",
+          "content": "Adding checks for scheme allowlist now.",
+          "createdAt": "2024-06-07T14:20:00Z",
+          "updatedAt": "2024-06-07T14:20:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "Watch out for data URLs used in tests.",
+          "createdAt": "2024-06-08T16:00:00Z",
+          "updatedAt": "2024-06-08T16:00:00Z"
+        }
       ]
     },
     {
       "title": "Write contributor guide",
-      "description": "### Background\nNew contributors often struggle to find consolidated information about coding standards and workflow expectations.\n\n### Requirements\n- Summarize repository structure and build steps.\n- Provide guidance on writing tests and submitting patches.\n- Include troubleshooting tips for common setup issues.\n\n### Notes\nGuide should be living document hosted in the docs site.",
+      "description": "### Background\nNew contributors often struggle to find consolidated information about coding standards and workflow expectations.\n\n### Requirements\n- Summarize repository structure and build steps.\n- Provide guidance on writing tests and submitting patches.\n- Include troubleshooting tips for common setup issues.\n\n### Notes\nGuide should be living document hosted in the docs site.\n\n### References\n- PR: https://github.com/servo/servo/pull/426\n- Code: `docs/CONTRIBUTING.md`\n- Docs: https://servo.dev/docs/write-contributor-guide",
       "status": "Completed",
       "priority": "Low",
       "createdAt": "2024-06-06T09:00:00Z",
       "updatedAt": "2024-06-07T08:30:00Z",
       "author": "sarah",
       "assigned": "sarah",
-      "tags": ["documentation"],
+      "tags": [
+        "documentation"
+      ],
       "summary": "Comprehensive onboarding guide for new contributors.",
       "comments": [
-        { "author": "ada", "content": "Great structure, added a minor note about linting.", "createdAt": "2024-06-07T09:15:00Z", "updatedAt": "2024-06-07T09:15:00Z" },
-        { "author": "linus", "content": "This will save us lots of review cycles.", "createdAt": "2024-06-07T10:20:00Z", "updatedAt": "2024-06-07T10:20:00Z" }
+        {
+          "author": "ada",
+          "content": "Great structure, added a minor note about linting.",
+          "createdAt": "2024-06-07T09:15:00Z",
+          "updatedAt": "2024-06-07T09:15:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "This will save us lots of review cycles.",
+          "createdAt": "2024-06-07T10:20:00Z",
+          "updatedAt": "2024-06-07T10:20:00Z"
+        }
       ]
     },
     {
       "title": "Establish end-to-end testing suite",
-      "description": "### Background\nWhile unit tests cover most modules, we lack full-stack scenarios that simulate real user workflows.\n\n### Requirements\n- Set up harness to drive the browser through typical navigation flows.\n- Record performance metrics alongside functional assertions.\n- Integrate suite with nightly builds.\n\n### Notes\nTests should run in headless mode to reduce resource needs.",
+      "description": "### Background\nWhile unit tests cover most modules, we lack full-stack scenarios that simulate real user workflows.\n\n### Requirements\n- Set up harness to drive the browser through typical navigation flows.\n- Record performance metrics alongside functional assertions.\n- Integrate suite with nightly builds.\n\n### Notes\nTests should run in headless mode to reduce resource needs.\n\n### References\n- PR: https://github.com/servo/servo/pull/427\n- Code: `tests/e2e/`\n- Docs: https://servo.dev/docs/establish-end-to-end-testing-suite",
       "status": "Pending",
       "priority": "High",
       "createdAt": "2024-06-07T11:00:00Z",
       "updatedAt": "2024-06-07T11:00:00Z",
       "author": "omar",
       "assigned": "sarah",
-      "tags": ["testing"],
+      "tags": [
+        "testing"
+      ],
       "summary": "Introduce comprehensive end-to-end test coverage.",
       "comments": [
-        { "author": "miguel", "content": "We can reuse some tooling from the mobile team.", "createdAt": "2024-06-08T09:30:00Z", "updatedAt": "2024-06-08T09:30:00Z" },
-        { "author": "omar", "content": "Good idea; I'll sync with them this week.", "createdAt": "2024-06-08T15:45:00Z", "updatedAt": "2024-06-08T15:45:00Z" },
-        { "author": "yuki", "content": "Remember to capture video artifacts for flaky cases.", "createdAt": "2024-06-09T13:05:00Z", "updatedAt": "2024-06-09T13:05:00Z" }
+        {
+          "author": "miguel",
+          "content": "We can reuse some tooling from the mobile team.",
+          "createdAt": "2024-06-08T09:30:00Z",
+          "updatedAt": "2024-06-08T09:30:00Z"
+        },
+        {
+          "author": "omar",
+          "content": "Good idea; I'll sync with them this week.",
+          "createdAt": "2024-06-08T15:45:00Z",
+          "updatedAt": "2024-06-08T15:45:00Z"
+        },
+        {
+          "author": "yuki",
+          "content": "Remember to capture video artifacts for flaky cases.",
+          "createdAt": "2024-06-09T13:05:00Z",
+          "updatedAt": "2024-06-09T13:05:00Z"
+        }
       ]
     },
     {
       "title": "Improve memory diagnostics tooling",
-      "description": "### Background\nTracking memory regressions is difficult without visibility into allocator hotspots.\n\n### Requirements\n- Add heap snapshotting utilities to the diagnostic crate.\n- Provide diffing support to compare snapshots across builds.\n- Surface findings in the dashboard.\n\n### Notes\nTooling should be lightweight to avoid skewing measurements.",
+      "description": "### Background\nTracking memory regressions is difficult without visibility into allocator hotspots.\n\n### Requirements\n- Add heap snapshotting utilities to the diagnostic crate.\n- Provide diffing support to compare snapshots across builds.\n- Surface findings in the dashboard.\n\n### Notes\nTooling should be lightweight to avoid skewing measurements.\n\n### References\n- PR: https://github.com/servo/servo/pull/428\n- Code: `tools/memory_profiler/`\n- Docs: https://servo.dev/docs/improve-memory-diagnostics-tooling",
       "status": "Created",
       "priority": "Medium",
       "createdAt": "2024-06-08T10:20:00Z",
       "updatedAt": "2024-06-08T10:20:00Z",
       "author": "ada",
       "assigned": "miguel",
-      "tags": ["performance", "testing"],
+      "tags": [
+        "performance",
+        "testing"
+      ],
       "summary": "Provide better insight into allocator behavior via snapshots.",
       "comments": [
-        { "author": "miguel", "content": "Investigating existing tools we can leverage.", "createdAt": "2024-06-09T09:00:00Z", "updatedAt": "2024-06-09T09:00:00Z" },
-        { "author": "linus", "content": "Would love CLI integration for quick checks.", "createdAt": "2024-06-09T14:25:00Z", "updatedAt": "2024-06-09T14:25:00Z" }
+        {
+          "author": "miguel",
+          "content": "Investigating existing tools we can leverage.",
+          "createdAt": "2024-06-09T09:00:00Z",
+          "updatedAt": "2024-06-09T09:00:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "Would love CLI integration for quick checks.",
+          "createdAt": "2024-06-09T14:25:00Z",
+          "updatedAt": "2024-06-09T14:25:00Z"
+        }
       ]
     },
     {
       "title": "Implement WebGL shader caching",
-      "description": "### Background\nCompiling complex shaders on every page load wastes time and battery on low-end devices.\n\n### Requirements\n- Cache compiled shader binaries keyed by source hash.\n- Invalidate cache when driver or build version changes.\n- Measure impact on popular demo scenes.\n\n### Notes\nBe mindful of GPU vendor quirks during cache serialization.",
+      "description": "### Background\nCompiling complex shaders on every page load wastes time and battery on low-end devices.\n\n### Requirements\n- Cache compiled shader binaries keyed by source hash.\n- Invalidate cache when driver or build version changes.\n- Measure impact on popular demo scenes.\n\n### Notes\nBe mindful of GPU vendor quirks during cache serialization.\n\n### References\n- PR: https://github.com/servo/servo/pull/429\n- Code: `gfx/webgl/shader_cache.rs`\n- Docs: https://servo.dev/docs/implement-webgl-shader-caching",
       "status": "InProgress",
       "priority": "High",
       "createdAt": "2024-06-09T08:45:00Z",
       "updatedAt": "2024-06-12T17:00:00Z",
       "author": "linus",
       "assigned": "yuki",
-      "tags": ["performance"],
+      "tags": [
+        "performance"
+      ],
       "summary": "Cache WebGL shaders to avoid redundant compilation.",
       "comments": [
-        { "author": "yuki", "content": "Prototype cache writes working locally.", "createdAt": "2024-06-10T11:10:00Z", "updatedAt": "2024-06-10T11:10:00Z" },
-        { "author": "linus", "content": "Let's test on a wider set of GPUs next.", "createdAt": "2024-06-11T16:45:00Z", "updatedAt": "2024-06-11T16:45:00Z" }
+        {
+          "author": "yuki",
+          "content": "Prototype cache writes working locally.",
+          "createdAt": "2024-06-10T11:10:00Z",
+          "updatedAt": "2024-06-10T11:10:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "Let's test on a wider set of GPUs next.",
+          "createdAt": "2024-06-11T16:45:00Z",
+          "updatedAt": "2024-06-11T16:45:00Z"
+        }
       ]
     },
     {
       "title": "Migrate build scripts to new CI",
-      "description": "### Background\nLegacy Jenkins jobs are brittle and slow; the new CI platform promises better isolation and caching.\n\n### Requirements\n- Convert existing shell scripts to portable tasks.\n- Ensure cache artifacts are preserved between runs.\n- Update documentation with new badge links.\n\n### Notes\nMigration should include rollback plan in case of failures.",
+      "description": "### Background\nLegacy Jenkins jobs are brittle and slow; the new CI platform promises better isolation and caching.\n\n### Requirements\n- Convert existing shell scripts to portable tasks.\n- Ensure cache artifacts are preserved between runs.\n- Update documentation with new badge links.\n\n### Notes\nMigration should include rollback plan in case of failures.\n\n### References\n- PR: https://github.com/servo/servo/pull/430\n- Code: `.ci/build.yml`\n- Docs: https://servo.dev/docs/migrate-build-scripts-to-new-ci",
       "status": "Completed",
       "priority": "Medium",
       "createdAt": "2024-06-10T09:00:00Z",
       "updatedAt": "2024-06-15T18:00:00Z",
       "author": "miguel",
       "assigned": "omar",
-      "tags": ["testing", "documentation"],
+      "tags": [
+        "testing",
+        "documentation"
+      ],
       "summary": "Switch project builds over to the new CI pipeline.",
       "comments": [
-        { "author": "sarah", "content": "Docs updated with new badge link.", "createdAt": "2024-06-16T08:30:00Z", "updatedAt": "2024-06-16T08:30:00Z" },
-        { "author": "omar", "content": "All jobs green after migration.", "createdAt": "2024-06-16T14:10:00Z", "updatedAt": "2024-06-16T14:10:00Z" }
+        {
+          "author": "sarah",
+          "content": "Docs updated with new badge link.",
+          "createdAt": "2024-06-16T08:30:00Z",
+          "updatedAt": "2024-06-16T08:30:00Z"
+        },
+        {
+          "author": "omar",
+          "content": "All jobs green after migration.",
+          "createdAt": "2024-06-16T14:10:00Z",
+          "updatedAt": "2024-06-16T14:10:00Z"
+        }
       ]
     },
     {
       "title": "Document architecture overview",
-      "description": "### Background\nAs the codebase grows, a high-level architecture guide will help newcomers orient themselves.\n\n### Requirements\n- Outline major subsystems and their responsibilities.\n- Include diagrams showing thread and process boundaries.\n- Link to deeper design documents where available.\n\n### Notes\nTarget audience is engineers onboarding to the project.",
+      "description": "### Background\nAs the codebase grows, a high-level architecture guide will help newcomers orient themselves.\n\n### Requirements\n- Outline major subsystems and their responsibilities.\n- Include diagrams showing thread and process boundaries.\n- Link to deeper design documents where available.\n\n### Notes\nTarget audience is engineers onboarding to the project.\n\n### References\n- PR: https://github.com/servo/servo/pull/431\n- Code: `docs/architecture.md`\n- Docs: https://servo.dev/docs/document-architecture-overview",
       "status": "Pending",
       "priority": "Low",
       "createdAt": "2024-06-11T10:00:00Z",
       "updatedAt": "2024-06-11T10:00:00Z",
       "author": "yuki",
       "assigned": "sarah",
-      "tags": ["documentation"],
+      "tags": [
+        "documentation"
+      ],
       "summary": "Create a bird's-eye view of project architecture.",
       "comments": [
-        { "author": "sarah", "content": "Will draft the subsystem section first.", "createdAt": "2024-06-12T09:15:00Z", "updatedAt": "2024-06-12T09:15:00Z" },
-        { "author": "yuki", "content": "I'll supply diagrams once the outline is ready.", "createdAt": "2024-06-12T14:40:00Z", "updatedAt": "2024-06-12T14:40:00Z" },
-        { "author": "ada", "content": "Don't forget the concurrency model appendix.", "createdAt": "2024-06-13T10:25:00Z", "updatedAt": "2024-06-13T10:25:00Z" }
+        {
+          "author": "sarah",
+          "content": "Will draft the subsystem section first.",
+          "createdAt": "2024-06-12T09:15:00Z",
+          "updatedAt": "2024-06-12T09:15:00Z"
+        },
+        {
+          "author": "yuki",
+          "content": "I'll supply diagrams once the outline is ready.",
+          "createdAt": "2024-06-12T14:40:00Z",
+          "updatedAt": "2024-06-12T14:40:00Z"
+        },
+        {
+          "author": "ada",
+          "content": "Don't forget the concurrency model appendix.",
+          "createdAt": "2024-06-13T10:25:00Z",
+          "updatedAt": "2024-06-13T10:25:00Z"
+        }
       ]
     },
     {
       "title": "Research new font rendering pipeline",
-      "description": "### Background\nFont rendering quality varies across platforms and we want a unified pipeline that balances speed and fidelity.\n\n### Requirements\n- Compare FreeType upgrades with proprietary alternatives.\n- Prototype subpixel positioning strategies.\n- Evaluate caching schemes for glyph rasterization.\n\n### Notes\nFindings should inform Q3 roadmap decisions.",
+      "description": "### Background\nFont rendering quality varies across platforms and we want a unified pipeline that balances speed and fidelity.\n\n### Requirements\n- Compare FreeType upgrades with proprietary alternatives.\n- Prototype subpixel positioning strategies.\n- Evaluate caching schemes for glyph rasterization.\n\n### Notes\nFindings should inform Q3 roadmap decisions.\n\n### References\n- PR: https://github.com/servo/servo/pull/432\n- Code: `gfx/font/pipeline.md`\n- Docs: https://servo.dev/docs/research-new-font-rendering-pipeline",
       "status": "Created",
       "priority": "Medium",
       "createdAt": "2024-06-12T11:00:00Z",
       "updatedAt": "2024-06-12T11:00:00Z",
       "author": "omar",
       "assigned": "linus",
-      "tags": ["performance"],
+      "tags": [
+        "performance"
+      ],
       "summary": "Investigate approaches for consistent font rendering.",
       "comments": [
-        { "author": "linus", "content": "Gathering data on FreeType's latest release.", "createdAt": "2024-06-13T09:00:00Z", "updatedAt": "2024-06-13T09:00:00Z" },
-        { "author": "omar", "content": "I'll check licensing for proprietary engines.", "createdAt": "2024-06-13T15:30:00Z", "updatedAt": "2024-06-13T15:30:00Z" },
-        { "author": "miguel", "content": "Look at potential caching savings too.", "createdAt": "2024-06-14T12:50:00Z", "updatedAt": "2024-06-14T12:50:00Z" }
+        {
+          "author": "linus",
+          "content": "Gathering data on FreeType's latest release.",
+          "createdAt": "2024-06-13T09:00:00Z",
+          "updatedAt": "2024-06-13T09:00:00Z"
+        },
+        {
+          "author": "omar",
+          "content": "I'll check licensing for proprietary engines.",
+          "createdAt": "2024-06-13T15:30:00Z",
+          "updatedAt": "2024-06-13T15:30:00Z"
+        },
+        {
+          "author": "miguel",
+          "content": "Look at potential caching savings too.",
+          "createdAt": "2024-06-14T12:50:00Z",
+          "updatedAt": "2024-06-14T12:50:00Z"
+        }
       ]
     },
     {
       "title": "Prototype DOM virtualization",
-      "description": "### Background\nLarge documents still incur heavy DOM costs even when offscreen. Virtualization could defer work until nodes are visible.\n\n### Requirements\n- Create prototype that replaces offscreen nodes with lightweight placeholders.\n- Measure impact on scrolling and memory usage.\n- Document edge cases like script interaction.\n\n### Notes\nPrototype may live in a branch until design is settled.",
+      "description": "### Background\nLarge documents still incur heavy DOM costs even when offscreen. Virtualization could defer work until nodes are visible.\n\n### Requirements\n- Create prototype that replaces offscreen nodes with lightweight placeholders.\n- Measure impact on scrolling and memory usage.\n- Document edge cases like script interaction.\n\n### Notes\nPrototype may live in a branch until design is settled.\n\n### References\n- PR: https://github.com/servo/servo/pull/433\n- Code: `dom/virtualization.rs`\n- Docs: https://servo.dev/docs/prototype-dom-virtualization",
       "status": "InProgress",
       "priority": "High",
       "createdAt": "2024-06-13T08:00:00Z",
       "updatedAt": "2024-06-17T10:00:00Z",
       "author": "sarah",
       "assigned": "ada",
-      "tags": ["performance", "layout"],
+      "tags": [
+        "performance",
+        "layout"
+      ],
       "summary": "Experiment with skipping DOM work for offscreen content.",
       "comments": [
-        { "author": "ada", "content": "Check compatibility with accessibility tree.", "createdAt": "2024-06-14T09:40:00Z", "updatedAt": "2024-06-14T09:40:00Z" },
-        { "author": "yuki", "content": "Curious about memory savings on long articles.", "createdAt": "2024-06-15T13:10:00Z", "updatedAt": "2024-06-15T13:10:00Z" },
-        { "author": "sarah", "content": "Preliminary results show 30% reduction.", "createdAt": "2024-06-16T17:55:00Z", "updatedAt": "2024-06-16T17:55:00Z" }
+        {
+          "author": "ada",
+          "content": "Check compatibility with accessibility tree.",
+          "createdAt": "2024-06-14T09:40:00Z",
+          "updatedAt": "2024-06-14T09:40:00Z"
+        },
+        {
+          "author": "yuki",
+          "content": "Curious about memory savings on long articles.",
+          "createdAt": "2024-06-15T13:10:00Z",
+          "updatedAt": "2024-06-15T13:10:00Z"
+        },
+        {
+          "author": "sarah",
+          "content": "Preliminary results show 30% reduction.",
+          "createdAt": "2024-06-16T17:55:00Z",
+          "updatedAt": "2024-06-16T17:55:00Z"
+        }
       ]
     },
     {
       "title": "Audit third-party dependencies",
-      "description": "### Background\nKeeping our dependency tree healthy reduces supply-chain risks and build times.\n\n### Requirements\n- Generate list of all crates and licenses.\n- Flag outdated or unmaintained packages.\n- Propose replacements or removal strategies.\n\n### Notes\nReport should highlight any security advisories.",
+      "description": "### Background\nKeeping our dependency tree healthy reduces supply-chain risks and build times.\n\n### Requirements\n- Generate list of all crates and licenses.\n- Flag outdated or unmaintained packages.\n- Propose replacements or removal strategies.\n\n### Notes\nReport should highlight any security advisories.\n\n### References\n- PR: https://github.com/servo/servo/pull/434\n- Code: `scripts/audit-deps.sh`\n- Docs: https://servo.dev/docs/audit-third-party-dependencies",
       "status": "Pending",
       "priority": "High",
       "createdAt": "2024-06-14T09:00:00Z",
       "updatedAt": "2024-06-14T09:00:00Z",
       "author": "miguel",
       "assigned": "yuki",
-      "tags": ["security"],
+      "tags": [
+        "security"
+      ],
       "summary": "Review external dependencies for risks and maintenance.",
       "comments": [
-        { "author": "yuki", "content": "Starting license inventory today.", "createdAt": "2024-06-15T10:00:00Z", "updatedAt": "2024-06-15T10:00:00Z" },
-        { "author": "omar", "content": "I'll check for known CVEs in the list.", "createdAt": "2024-06-15T16:20:00Z", "updatedAt": "2024-06-15T16:20:00Z" }
+        {
+          "author": "yuki",
+          "content": "Starting license inventory today.",
+          "createdAt": "2024-06-15T10:00:00Z",
+          "updatedAt": "2024-06-15T10:00:00Z"
+        },
+        {
+          "author": "omar",
+          "content": "I'll check for known CVEs in the list.",
+          "createdAt": "2024-06-15T16:20:00Z",
+          "updatedAt": "2024-06-15T16:20:00Z"
+        }
       ]
     },
     {
       "title": "Add internationalization framework",
-      "description": "### Background\nGlobal audience requires translations and locale-sensitive formatting across UI components.\n\n### Requirements\n- Evaluate existing Rust crates for message catalogs.\n- Provide placeholder strings and extraction tooling.\n- Document process for adding new locales.\n\n### Notes\nInitial focus is on English, Spanish, and Japanese.",
+      "description": "### Background\nGlobal audience requires translations and locale-sensitive formatting across UI components.\n\n### Requirements\n- Evaluate existing Rust crates for message catalogs.\n- Provide placeholder strings and extraction tooling.\n- Document process for adding new locales.\n\n### Notes\nInitial focus is on English, Spanish, and Japanese.\n\n### References\n- PR: https://github.com/servo/servo/pull/435\n- Code: `i18n/framework.rs`\n- Docs: https://servo.dev/docs/add-internationalization-framework",
       "status": "Created",
       "priority": "Medium",
       "createdAt": "2024-06-15T09:30:00Z",
       "updatedAt": "2024-06-15T09:30:00Z",
       "author": "ada",
       "assigned": "omar",
-      "tags": ["documentation"],
+      "tags": [
+        "documentation"
+      ],
       "summary": "Lay groundwork for localizing the UI.",
       "comments": [
-        { "author": "omar", "content": "Researching Fluent integration options.", "createdAt": "2024-06-16T10:05:00Z", "updatedAt": "2024-06-16T10:05:00Z" },
-        { "author": "linus", "content": "We should automate string extraction.", "createdAt": "2024-06-16T15:45:00Z", "updatedAt": "2024-06-16T15:45:00Z" },
-        { "author": "ada", "content": "Let's schedule a sync once prototype is ready.", "createdAt": "2024-06-17T09:50:00Z", "updatedAt": "2024-06-17T09:50:00Z" }
+        {
+          "author": "omar",
+          "content": "Researching Fluent integration options.",
+          "createdAt": "2024-06-16T10:05:00Z",
+          "updatedAt": "2024-06-16T10:05:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "We should automate string extraction.",
+          "createdAt": "2024-06-16T15:45:00Z",
+          "updatedAt": "2024-06-16T15:45:00Z"
+        },
+        {
+          "author": "ada",
+          "content": "Let's schedule a sync once prototype is ready.",
+          "createdAt": "2024-06-17T09:50:00Z",
+          "updatedAt": "2024-06-17T09:50:00Z"
+        }
       ]
     },
     {
       "title": "Design plugin API",
-      "description": "### Background\nCommunity demand for extensibility is growing, and a stable plugin API would open new integration possibilities.\n\n### Requirements\n- Define sandbox boundaries for plugins.\n- Expose rendering hooks without compromising stability.\n- Provide example plugins demonstrating capabilities.\n\n### Notes\nAPI should evolve in a backward-compatible fashion.",
+      "description": "### Background\nCommunity demand for extensibility is growing, and a stable plugin API would open new integration possibilities.\n\n### Requirements\n- Define sandbox boundaries for plugins.\n- Expose rendering hooks without compromising stability.\n- Provide example plugins demonstrating capabilities.\n\n### Notes\nAPI should evolve in a backward-compatible fashion.\n\n### References\n- PR: https://github.com/servo/servo/pull/436\n- Code: `plugin/api.rs`\n- Docs: https://servo.dev/docs/design-plugin-api",
       "status": "Pending",
       "priority": "Medium",
       "createdAt": "2024-06-16T12:00:00Z",
       "updatedAt": "2024-06-16T12:00:00Z",
       "author": "linus",
       "assigned": "sarah",
-      "tags": ["layout"],
+      "tags": [
+        "layout"
+      ],
       "summary": "Establish a safe extension mechanism through plugins.",
       "comments": [
-        { "author": "sarah", "content": "Will draft initial API surface proposal.", "createdAt": "2024-06-17T11:20:00Z", "updatedAt": "2024-06-17T11:20:00Z" },
-        { "author": "miguel", "content": "Security review will be essential.", "createdAt": "2024-06-17T15:35:00Z", "updatedAt": "2024-06-17T15:35:00Z" },
-        { "author": "linus", "content": "Agree; let's loop in the security team early.", "createdAt": "2024-06-18T09:10:00Z", "updatedAt": "2024-06-18T09:10:00Z" }
+        {
+          "author": "sarah",
+          "content": "Will draft initial API surface proposal.",
+          "createdAt": "2024-06-17T11:20:00Z",
+          "updatedAt": "2024-06-17T11:20:00Z"
+        },
+        {
+          "author": "miguel",
+          "content": "Security review will be essential.",
+          "createdAt": "2024-06-17T15:35:00Z",
+          "updatedAt": "2024-06-17T15:35:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "Agree; let's loop in the security team early.",
+          "createdAt": "2024-06-18T09:10:00Z",
+          "updatedAt": "2024-06-18T09:10:00Z"
+        }
       ]
     },
     {
       "title": "Improve error reporting UX",
-      "description": "### Background\nCurrent error dialogs provide little actionable information for users and developers.\n\n### Requirements\n- Collect additional context such as build ID and last actions.\n- Offer direct links to documentation or bug filing.\n- Ensure sensitive data is scrubbed before submission.\n\n### Notes\nUX mocks are available in the design repo for reference.",
+      "description": "### Background\nCurrent error dialogs provide little actionable information for users and developers.\n\n### Requirements\n- Collect additional context such as build ID and last actions.\n- Offer direct links to documentation or bug filing.\n- Ensure sensitive data is scrubbed before submission.\n\n### Notes\nUX mocks are available in the design repo for reference.\n\n### References\n- PR: https://github.com/servo/servo/pull/437\n- Code: `ui/error_reporting.rs`\n- Docs: https://servo.dev/docs/improve-error-reporting-ux",
       "status": "InProgress",
       "priority": "Medium",
       "createdAt": "2024-06-17T09:00:00Z",
       "updatedAt": "2024-06-19T14:00:00Z",
       "author": "yuki",
       "assigned": "miguel",
-      "tags": ["documentation", "testing"],
+      "tags": [
+        "documentation",
+        "testing"
+      ],
       "summary": "Enhance error dialogs with context and safe reporting.",
       "comments": [
-        { "author": "miguel", "content": "Working on metadata collection now.", "createdAt": "2024-06-18T10:30:00Z", "updatedAt": "2024-06-18T10:30:00Z" },
-        { "author": "yuki", "content": "I'll review the scrubbed data flow.", "createdAt": "2024-06-19T11:20:00Z", "updatedAt": "2024-06-19T11:20:00Z" }
+        {
+          "author": "miguel",
+          "content": "Working on metadata collection now.",
+          "createdAt": "2024-06-18T10:30:00Z",
+          "updatedAt": "2024-06-18T10:30:00Z"
+        },
+        {
+          "author": "yuki",
+          "content": "I'll review the scrubbed data flow.",
+          "createdAt": "2024-06-19T11:20:00Z",
+          "updatedAt": "2024-06-19T11:20:00Z"
+        }
       ]
     },
     {
       "title": "Introduce incremental rendering",
-      "description": "### Background\nRendering whole documents for minor changes wastes cycles and hampers responsiveness.\n\n### Requirements\n- Detect minimal layout regions affected by DOM mutations.\n- Repaint only the impacted regions.\n- Compare frame times against full rerender baseline.\n\n### Notes\nTechnique should play nicely with existing compositor pipeline.",
+      "description": "### Background\nRendering whole documents for minor changes wastes cycles and hampers responsiveness.\n\n### Requirements\n- Detect minimal layout regions affected by DOM mutations.\n- Repaint only the impacted regions.\n- Compare frame times against full rerender baseline.\n\n### Notes\nTechnique should play nicely with existing compositor pipeline.\n\n### References\n- PR: https://github.com/servo/servo/pull/438\n- Code: `render/incremental.rs`\n- Docs: https://servo.dev/docs/introduce-incremental-rendering",
       "status": "Created",
       "priority": "High",
       "createdAt": "2024-06-18T10:00:00Z",
       "updatedAt": "2024-06-18T10:00:00Z",
       "author": "omar",
       "assigned": "ada",
-      "tags": ["performance", "layout"],
+      "tags": [
+        "performance",
+        "layout"
+      ],
       "summary": "Render only changed regions to improve responsiveness.",
       "comments": [
-        { "author": "ada", "content": "Need to ensure layer invalidation is precise.", "createdAt": "2024-06-19T09:15:00Z", "updatedAt": "2024-06-19T09:15:00Z" },
-        { "author": "omar", "content": "I'll prototype on a simplified DOM tree.", "createdAt": "2024-06-19T16:40:00Z", "updatedAt": "2024-06-19T16:40:00Z" },
-        { "author": "sarah", "content": "Happy to help craft benchmark scenarios.", "createdAt": "2024-06-20T12:05:00Z", "updatedAt": "2024-06-20T12:05:00Z" }
+        {
+          "author": "ada",
+          "content": "Need to ensure layer invalidation is precise.",
+          "createdAt": "2024-06-19T09:15:00Z",
+          "updatedAt": "2024-06-19T09:15:00Z"
+        },
+        {
+          "author": "omar",
+          "content": "I'll prototype on a simplified DOM tree.",
+          "createdAt": "2024-06-19T16:40:00Z",
+          "updatedAt": "2024-06-19T16:40:00Z"
+        },
+        {
+          "author": "sarah",
+          "content": "Happy to help craft benchmark scenarios.",
+          "createdAt": "2024-06-20T12:05:00Z",
+          "updatedAt": "2024-06-20T12:05:00Z"
+        }
       ]
     },
     {
       "title": "Reduce binary size",
-      "description": "### Background\nShipping large binaries slows down updates and wastes storage on constrained devices.\n\n### Requirements\n- Audit build flags and remove unnecessary debug symbols.\n- Explore link-time optimization strategies.\n- Track size metrics across nightly builds.\n\n### Notes\nAny reduction must not impact crash diagnostics.",
+      "description": "### Background\nShipping large binaries slows down updates and wastes storage on constrained devices.\n\n### Requirements\n- Audit build flags and remove unnecessary debug symbols.\n- Explore link-time optimization strategies.\n- Track size metrics across nightly builds.\n\n### Notes\nAny reduction must not impact crash diagnostics.\n\n### References\n- PR: https://github.com/servo/servo/pull/439\n- Code: `build/strip_symbols.sh`\n- Docs: https://servo.dev/docs/reduce-binary-size",
       "status": "Pending",
       "priority": "Medium",
       "createdAt": "2024-06-19T08:00:00Z",
       "updatedAt": "2024-06-20T13:00:00Z",
       "author": "linus",
       "assigned": "yuki",
-      "tags": ["performance"],
+      "tags": [
+        "performance"
+      ],
       "summary": "Shrink the delivered binary without losing debug usefulness.",
       "comments": [
-        { "author": "yuki", "content": "Investigating LTO configuration options.", "createdAt": "2024-06-20T09:30:00Z", "updatedAt": "2024-06-20T09:30:00Z" },
-        { "author": "linus", "content": "We might strip symbols in release archives only.", "createdAt": "2024-06-20T17:15:00Z", "updatedAt": "2024-06-20T17:15:00Z" },
-        { "author": "miguel", "content": "I'll track size metrics in the build dashboard.", "createdAt": "2024-06-21T08:40:00Z", "updatedAt": "2024-06-21T08:40:00Z" }
+        {
+          "author": "yuki",
+          "content": "Investigating LTO configuration options.",
+          "createdAt": "2024-06-20T09:30:00Z",
+          "updatedAt": "2024-06-20T09:30:00Z"
+        },
+        {
+          "author": "linus",
+          "content": "We might strip symbols in release archives only.",
+          "createdAt": "2024-06-20T17:15:00Z",
+          "updatedAt": "2024-06-20T17:15:00Z"
+        },
+        {
+          "author": "miguel",
+          "content": "I'll track size metrics in the build dashboard.",
+          "createdAt": "2024-06-21T08:40:00Z",
+          "updatedAt": "2024-06-21T08:40:00Z"
+        }
       ]
     },
     {
       "title": "Cleanup obsolete branches",
-      "description": "### Background\nNumerous stale branches clutter the repository and confuse contributors.\n\n### Requirements\n- Identify branches merged over 6 months ago.\n- Notify owners before deletion.\n- Archive relevant patches in case they are needed later.\n\n### Notes\nCleanup should run monthly as a scheduled task.",
+      "description": "### Background\nNumerous stale branches clutter the repository and confuse contributors.\n\n### Requirements\n- Identify branches merged over 6 months ago.\n- Notify owners before deletion.\n- Archive relevant patches in case they are needed later.\n\n### Notes\nCleanup should run monthly as a scheduled task.\n\n### References\n- PR: https://github.com/servo/servo/pull/440\n- Code: `scripts/cleanup_branches.sh`\n- Docs: https://servo.dev/docs/cleanup-obsolete-branches",
       "status": "Completed",
       "priority": "Low",
       "createdAt": "2024-06-20T10:00:00Z",
       "updatedAt": "2024-06-21T07:30:00Z",
       "author": "sarah",
       "assigned": "sarah",
-      "tags": ["documentation", "testing"],
+      "tags": [
+        "documentation",
+        "testing"
+      ],
       "summary": "Remove outdated branches to keep repository tidy.",
       "comments": [
-        { "author": "ada", "content": "Repository looks much cleaner now.", "createdAt": "2024-06-21T08:00:00Z", "updatedAt": "2024-06-21T08:00:00Z" },
-        { "author": "sarah", "content": "Scheduled cron job for monthly cleanup.", "createdAt": "2024-06-21T09:10:00Z", "updatedAt": "2024-06-21T09:10:00Z" }
+        {
+          "author": "ada",
+          "content": "Repository looks much cleaner now.",
+          "createdAt": "2024-06-21T08:00:00Z",
+          "updatedAt": "2024-06-21T08:00:00Z"
+        },
+        {
+          "author": "sarah",
+          "content": "Scheduled cron job for monthly cleanup.",
+          "createdAt": "2024-06-21T09:10:00Z",
+          "updatedAt": "2024-06-21T09:10:00Z"
+        }
+      ]
+    },
+    {
+      "title": "Implement WebSocket debugging console",
+      "description": "### Background\nDevelopers lack visibility into live WebSocket traffic during tests. A debugging console would expose inbound/outbound frames and connection metadata.\n\n### Requirements\n- Hook into the existing `WebSocketServer` to stream messages to a local Web UI.\n- Ensure console is gated behind `--debug-websocket` flag.\n- Persist logs to `/tmp/ws-session.log` for further analysis.\n\n### Notes\nInitial prototype discussed in PR #512 and relies on `net/websocket/debug_console.rs`.",
+      "status": "Created",
+      "priority": "High",
+      "createdAt": "2024-06-21T12:00:00Z",
+      "updatedAt": "2024-06-21T12:00:00Z",
+      "author": "linus",
+      "assigned": "ada",
+      "tags": [
+        "testing"
+      ],
+      "summary": "Add developer-facing console for WebSocket traffic.",
+      "comments": [
+        {
+          "author": "ada",
+          "content": "Check compatibility with Chrome DevTools protocol.",
+          "createdAt": "2024-06-21T12:00:00Z",
+          "updatedAt": "2024-06-21T12:00:00Z"
+        }
+      ]
+    },
+    {
+      "title": "Upgrade database layer to PostgreSQL 15 features",
+      "description": "### Background\nOur current database abstraction targets PostgreSQL 13 and misses opportunities for performance gains available in v15.\n\n### Requirements\n- Adopt `MERGE` statements for upserts in `Repository.cs`.\n- Utilize `pg_stat_io` for I/O profiling.\n- Add migration script `v15_add_indexes.sql` using `GENERATED ALWAYS` columns.\n\n### Notes\nWork continues from discussion in issue #789 and previous spike in PR #820. Documentation at https://www.postgresql.org/docs/15/ .",
+      "status": "Pending",
+      "priority": "Medium",
+      "createdAt": "2024-06-21T12:00:00Z",
+      "updatedAt": "2024-06-21T12:00:00Z",
+      "author": "miguel",
+      "assigned": "sarah",
+      "tags": [
+        "performance",
+        "testing"
+      ],
+      "summary": "Leverage PostgreSQL 15 capabilities in ORM.",
+      "comments": [
+        {
+          "author": "sarah",
+          "content": "I'll draft the migration plan.",
+          "createdAt": "2024-06-21T12:00:00Z",
+          "updatedAt": "2024-06-21T12:00:00Z"
+        }
+      ]
+    },
+    {
+      "title": "Add telemetry dashboard",
+      "description": "### Background\nStakeholders request real-time insight into task processing metrics.\n\n### Requirements\n- Stream `metrics` crate counters into Prometheus endpoint `/metrics`.\n- Provide Grafana dashboards with panel JSON stored under `tools/telemetry/dashboard/`.\n- Include alerting rules for processing latency > 500ms.\n\n### Notes\nReference implementation in PR #900 and design doc at https://github.com/org/infra/wiki/Telemetry .",
+      "status": "InProgress",
+      "priority": "Medium",
+      "createdAt": "2024-06-21T12:00:00Z",
+      "updatedAt": "2024-06-21T12:00:00Z",
+      "author": "yuki",
+      "assigned": "omar",
+      "tags": [
+        "documentation",
+        "performance"
+      ],
+      "summary": "Expose runtime metrics via Prometheus and Grafana.",
+      "comments": [
+        {
+          "author": "omar",
+          "content": "Working on Grafana provisioning scripts.",
+          "createdAt": "2024-06-21T12:00:00Z",
+          "updatedAt": "2024-06-21T12:00:00Z"
+        }
       ]
     }
   ]
