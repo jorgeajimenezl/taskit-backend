@@ -28,7 +28,7 @@ public class ProjectActivityLogService(
         if (projectId != null)
             q = q.Where(a => a.ProjectId == projectId);
         q = q.OrderByDescending(a => a.Timestamp);
-        return await q.GridifyToAsync<ProjectActivityLog, ProjectActivityLogDto>(_mapper, query);
+        return await q.GridifyToAsync<ProjectActivityLog, ProjectActivityLogDto>(_mapper, query, GridifyMappings.ProjectActivityLogMapper);
     }
 
     public async Task RecordAsync(
