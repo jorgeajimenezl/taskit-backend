@@ -135,6 +135,8 @@ public class TaskService(
 
         var oldAssigned = task.AssignedUserId;
         var oldStatus = task.Status;
+        var oldTitle = task.Title;
+        var oldDescription = task.Description;
 
         _mapper.Map(dto, task);
 
@@ -163,10 +165,13 @@ public class TaskService(
             });
         }
 
-        await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, task.ProjectId, task.Id, new Dictionary<string, object?>
-        {
-            ["title"] = task.Title,
-        });
+        var data = new Dictionary<string, object?>();
+        if (task.Title != oldTitle)
+            data["title"] = task.Title;
+        if (task.Description != oldDescription)
+            data["description"] = task.Description;
+
+        await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, task.ProjectId, task.Id, data);
     }
 
     public async Task DeleteAsync(int id, string userId)
@@ -246,7 +251,6 @@ public class TaskService(
         await _tasks.UpdateAsync(subTask);
         await _activity.RecordAsync(ProjectActivityLogEventType.TaskUpdated, userId, subTask.ProjectId, subTask.Id, new Dictionary<string, object?>
         {
-            ["title"] = subTask.Title,
             ["parentTaskId"] = null,
         });
     }
