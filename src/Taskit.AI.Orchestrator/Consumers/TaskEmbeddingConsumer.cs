@@ -82,9 +82,20 @@ public class TaskEmbeddingConsumer(
             await _db.SaveChangesAsync(context.CancellationToken);
             _logger.LogInformation("Generated embeddings for task {TaskId}", task.Id);
         }
+        catch (OpenAIException ex)
+        {
+            _logger.LogError(ex, "OpenAI API error while generating embeddings for task {TaskId}", evt.TaskId);
+            throw; // Rethrow to trigger retry via MassTransit
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Database error while saving embeddings for task {TaskId}", evt.TaskId);
+            throw; // Rethrow to trigger retry via MassTransit
+        }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to generate embeddings for task {TaskId}", evt.TaskId);
+            _logger.LogError(ex, "Unexpected error while processing embeddings for task {TaskId}", evt.TaskId);
+            throw; // Rethrow to trigger retry via MassTransit
         }
     }
 }
