@@ -34,13 +34,6 @@ services:
     networks:
       - taskit
 
-networks:
-  taskit:
-    driver: bridge
-
-volumes:
-  postgres-data:
-    driver: local
   api:
     build:
       context: .
@@ -53,6 +46,8 @@ volumes:
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
+    volumes:
+      - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -74,6 +69,8 @@ volumes:
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
+    volumes:
+      - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -92,6 +89,8 @@ volumes:
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
       OpenAI__ApiKey: "${OpenAI__ApiKey:-}"
+    volumes:
+      - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -103,3 +102,7 @@ volumes:
 networks:
   taskit:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
