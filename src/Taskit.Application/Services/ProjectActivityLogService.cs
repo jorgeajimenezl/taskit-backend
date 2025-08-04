@@ -10,6 +10,7 @@ using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
 using MassTransit;
 using Taskit.Domain.Events;
+using System.Threading;
 
 namespace Taskit.Application.Services;
 
@@ -22,7 +23,7 @@ public class ProjectActivityLogService(
     private readonly IProjectActivityLogRepository _activityLogs = activityRepository;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<Paging<ProjectActivityLogDto>> GetForUserAsync(string userId, IGridifyQuery query, int? projectId = null)
+    public async Task<Paging<ProjectActivityLogDto>> GetForUserAsync(string userId, IGridifyQuery query, int? projectId = null, CancellationToken cancellationToken = default)
     {
         var q = _activityLogs.QueryForUser(userId).AsNoTracking();
         if (projectId != null)
@@ -36,7 +37,8 @@ public class ProjectActivityLogService(
         string userId,
         int? projectId = null,
         int? taskId = null,
-        IDictionary<string, object?>? data = null)
+        IDictionary<string, object?>? data = null,
+        CancellationToken cancellationToken = default)
     {
         var activity = new ProjectActivityLog
         {
@@ -56,7 +58,7 @@ public class ProjectActivityLogService(
             projectId,
             taskId,
             activity.Data,
-            activity.Timestamp));
+            activity.Timestamp), cancellationToken);
         await _activityLogs.SaveChangesAsync();
     }
 }

@@ -6,6 +6,7 @@ using AutoMapper;
 using Taskit.Application.DTOs;
 using Taskit.Application.Common.Models;
 using Taskit.Application.Services;
+using System.Threading;
 
 namespace Taskit.Web.Controllers;
 
@@ -17,42 +18,42 @@ public class ProjectMembersController(ProjectMemberService service, IMapper mapp
     private readonly IMapper _mapper = mapper;
 
     [HttpGet(Name = "GetProjectMembers")]
-    public async Task<ActionResult<Paging<ProjectMemberDto>>> GetMembers(int projectId, [FromQuery] GridifyQuery query)
+    public async Task<ActionResult<Paging<ProjectMemberDto>>> GetMembers(int projectId, [FromQuery] GridifyQuery query, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var members = await _service.GetAllAsync(projectId, userId, query);
+        var members = await _service.GetAllAsync(projectId, userId, query, cancellationToken);
         return Ok(members);
     }
 
     [HttpGet("{id:int}", Name = "GetProjectMember")]
-    public async Task<ActionResult<ProjectMemberDto>> GetMember(int projectId, int id)
+    public async Task<ActionResult<ProjectMemberDto>> GetMember(int projectId, int id, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var member = await _service.GetByIdAsync(projectId, id, userId);
+        var member = await _service.GetByIdAsync(projectId, id, userId, cancellationToken);
         return Ok(member);
     }
 
     [HttpPost(Name = "AddProjectMember")]
-    public async Task<ActionResult<ProjectMemberDto>> AddMember(int projectId, AddProjectMemberRequest dto)
+    public async Task<ActionResult<ProjectMemberDto>> AddMember(int projectId, AddProjectMemberRequest dto, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var member = await _service.AddAsync(projectId, dto, userId);
+        var member = await _service.AddAsync(projectId, dto, userId, cancellationToken);
         return CreatedAtAction(nameof(GetMember), new { projectId, id = member.Id }, member);
     }
 
     [HttpPut("{id:int}", Name = "UpdateProjectMember")]
-    public async Task<IActionResult> UpdateMember(int projectId, int id, UpdateProjectMemberRequest dto)
+    public async Task<IActionResult> UpdateMember(int projectId, int id, UpdateProjectMemberRequest dto, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        await _service.UpdateAsync(projectId, id, dto, userId);
+        await _service.UpdateAsync(projectId, id, dto, userId, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("{id:int}", Name = "RemoveProjectMember")]
-    public async Task<IActionResult> RemoveMember(int projectId, int id)
+    public async Task<IActionResult> RemoveMember(int projectId, int id, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        await _service.DeleteAsync(projectId, id, userId);
+        await _service.DeleteAsync(projectId, id, userId, cancellationToken);
         return NoContent();
     }
 }

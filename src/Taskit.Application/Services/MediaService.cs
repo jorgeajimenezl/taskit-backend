@@ -10,6 +10,7 @@ using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
 using Taskit.Domain.Enums;
+using System.Threading;
 
 namespace Taskit.Application.Services;
 
@@ -37,12 +38,12 @@ public class MediaService(
         _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"),
         "uploads");
 
-    public Task AddAsync(Media media)
+    public Task AddAsync(Media media, CancellationToken cancellationToken = default)
     {
         return _mediaRepository.AddAsync(media);
     }
 
-    public async Task<MediaDto?> GetByIdAsync(int id)
+    public async Task<MediaDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var media = await _mediaRepository.GetByIdAsync(id);
         return media is null ? null : _mapper.Map<MediaDto>(media);
@@ -55,7 +56,8 @@ public class MediaService(
         string? modelType = null,
         string? collectionName = null,
         AccessScope accessScope = AccessScope.Private,
-        Func<IFormFile, Task<bool>>? validate = null
+        Func<IFormFile, Task<bool>>? validate = null,
+        CancellationToken cancellationToken = default
     )
     {
         if (!IsValidFile(file))
@@ -80,7 +82,7 @@ public class MediaService(
         {
             Directory.CreateDirectory(UploadsPath);
             using var stream = File.Create(path);
-            await file.CopyToAsync(stream);
+            await file.CopyToAsync(stream, cancellationToken);
         }
         catch (IOException ex)
         {
@@ -112,7 +114,7 @@ public class MediaService(
             ["collectionName"] = collectionName ?? "default",
             ["size"] = media.Size,
             ["fileName"] = media.FileName
-        });
+        }, cancellationToken);
         return _mapper.Map<MediaDto>(media);
     }
 
@@ -131,27 +133,27 @@ public class MediaService(
         return true;
     }
 
-    public async Task<IEnumerable<Media>> GetMediaAsync(string modelType, string modelId, string? collectionName = null)
+    public async Task<IEnumerable<Media>> GetMediaAsync(string modelType, string modelId, string? collectionName = null, CancellationToken cancellationToken = default)
     {
         var query = _mediaRepository.Query()
             .Where(m => m.ModelType == modelType && m.ModelId == modelId)
             .AsNoTracking();
         if (!string.IsNullOrEmpty(collectionName))
             query = query.Where(m => m.CollectionName == collectionName);
-        return await query.ToListAsync();
+        return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<Media?> GetFirstMediaAsync(string modelType, string modelId, string? collectionName = null)
+    public async Task<Media?> GetFirstMediaAsync(string modelType, string modelId, string? collectionName = null, CancellationToken cancellationToken = default)
     {
         var query = _mediaRepository.Query()
             .Where(m => m.ModelType == modelType && m.ModelId == modelId)
             .AsNoTracking();
         if (!string.IsNullOrEmpty(collectionName))
             query = query.Where(m => m.CollectionName == collectionName);
-        return await query.FirstOrDefaultAsync();
+        return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<(string Path, string MimeType)> GetFileAsync(int id, string? userId)
+    public async Task<(string Path, string MimeType)> GetFileAsync(int id, string? userId, CancellationToken cancellationToken = default)
     {
         var media = await _mediaRepository.GetByIdAsync(id);
         Guard.Against.NotFound(id, media);
@@ -168,7 +170,7 @@ public class MediaService(
                 {
                     allowed = await _tasks.QueryForUser(userId)
                         .AsNoTracking()
-                        .AnyAsync(t => t.Id == taskId);
+                        .AnyAsync(t => t.Id == taskId, cancellationToken);
                 }
             }
             else if (media.UploadedById == userId)
@@ -188,7 +190,7 @@ public class MediaService(
         return (path, media.MimeType ?? "application/octet-stream");
     }
 
-    public async Task DeleteAsync(int id, string userId)
+    public async Task DeleteAsync(int id, string userId, CancellationToken cancellationToken = default)
     {
         var media = await _mediaRepository.GetByIdAsync(id);
         Guard.Against.NotFound(id, media);
@@ -211,26 +213,26 @@ public class MediaService(
             ["mediaId"] = id,
             ["collectionName"] = media.CollectionName,
             ["fileName"] = sanitizedFileName
-        });
+        }, cancellationToken);
     }
 
-    public async Task ClearMediaCollectionAsync(string modelType, string modelId, string collectionName)
+    public async Task ClearMediaCollectionAsync(string modelType, string modelId, string collectionName, CancellationToken cancellationToken = default)
     {
         var mediaItems = await _mediaRepository.Query()
             .Where(m => m.ModelType == modelType &&
                         m.ModelId == modelId &&
                         m.CollectionName == collectionName)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         if (mediaItems.Count != 0)
             await _mediaRepository.DeleteRangeAsync(mediaItems);
     }
 
-    public Task ClearMediaCollectionAsync<TModel>(string modelId, string collectionName)
+    public Task ClearMediaCollectionAsync<TModel>(string modelId, string collectionName, CancellationToken cancellationToken = default)
         where TModel : class
     {
-        return ClearMediaCollectionAsync(typeof(TModel).Name, modelId, collectionName);
+        return ClearMediaCollectionAsync(typeof(TModel).Name, modelId, collectionName, cancellationToken);
     }
 }
 

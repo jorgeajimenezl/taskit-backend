@@ -9,6 +9,7 @@ using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Application.Common.Exceptions;
 using Taskit.Domain.Enums;
+using System.Threading;
 
 namespace Taskit.Application.Services;
 
@@ -18,7 +19,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
     private readonly IProjectRepository _projects = projectRepository;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<Paging<ProjectDto>> GetAllForUserAsync(string userId, IGridifyQuery query)
+    public async Task<Paging<ProjectDto>> GetAllForUserAsync(string userId, IGridifyQuery query, CancellationToken cancellationToken = default)
     {
         var q = _projects.Query()
             .Include(p => p.Members)
@@ -27,19 +28,19 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         return await q.GridifyToAsync<Project, ProjectDto>(_mapper, query, GridifyMappings.ProjectMapper);
     }
 
-    public async Task<ProjectDto> GetByIdAsync(int id, string userId)
+    public async Task<ProjectDto> GetByIdAsync(int id, string userId, CancellationToken cancellationToken = default)
     {
         var project = await _projects.Query()
             .Include(p => p.Members)
             .Where(p => p.Id == id && (p.OwnerId == userId || p.Members.Any(m => m.UserId == userId)))
             .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
         Guard.Against.NotFound(id, project);
         return project;
     }
 
-    public async Task<ProjectDto> CreateAsync(CreateProjectRequest dto, string ownerId)
+    public async Task<ProjectDto> CreateAsync(CreateProjectRequest dto, string ownerId, CancellationToken cancellationToken = default)
     {
         var project = _mapper.Map<Project>(dto);
         project.OwnerId = ownerId;
@@ -49,12 +50,12 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         {
             ["projectId"] = project.Id,
             ["name"] = project.Name
-        });
+        }, cancellationToken);
 
         return _mapper.Map<ProjectDto>(project);
     }
 
-    public async Task UpdateAsync(int id, UpdateProjectRequest dto, string userId)
+    public async Task UpdateAsync(int id, UpdateProjectRequest dto, string userId, CancellationToken cancellationToken = default)
     {
         var project = await _projects.GetByIdAsync(id);
         Guard.Against.NotFound(id, project);
@@ -66,7 +67,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         {
             var exists = await _projects.Query()
                 .AsNoTracking()
-                .AnyAsync(p => p.OwnerId == userId && p.Name == dto.Name && p.Id != id);
+                .AnyAsync(p => p.OwnerId == userId && p.Name == dto.Name && p.Id != id, cancellationToken);
             if (exists)
                 throw new RuleViolationException("A project with this name already exists");
         }
@@ -79,10 +80,10 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         {
             ["projectId"] = id,
             ["name"] = project.Name
-        });
+        }, cancellationToken);
     }
 
-    public async Task DeleteAsync(int id, string userId)
+    public async Task DeleteAsync(int id, string userId, CancellationToken cancellationToken = default)
     {
         var project = await _projects.GetByIdAsync(id);
         Guard.Against.NotFound(id, project);
@@ -95,6 +96,6 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
         {
             ["projectId"] = id,
             ["name"] = project.Name
-        });
+        }, cancellationToken);
     }
 }

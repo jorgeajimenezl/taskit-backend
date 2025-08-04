@@ -9,6 +9,7 @@ using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
+using System.Threading;
 
 namespace Taskit.Application.Services;
 
@@ -38,17 +39,17 @@ public class ProjectMemberService(
         return member is not null && member.Role <= ProjectRole.Admin;
     }
 
-    private async Task<Project?> GetProjectAsync(int projectId)
+    private async Task<Project?> GetProjectAsync(int projectId, CancellationToken cancellationToken = default)
     {
         return await _projects.Query()
             .Include(p => p.Members)
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == projectId);
+            .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
     }
 
-    public async Task<Paging<ProjectMemberDto>> GetAllAsync(int projectId, string userId, IGridifyQuery query)
+    public async Task<Paging<ProjectMemberDto>> GetAllAsync(int projectId, string userId, IGridifyQuery query, CancellationToken cancellationToken = default)
     {
-        var project = await GetProjectAsync(projectId);
+        var project = await GetProjectAsync(projectId, cancellationToken);
         Guard.Against.NotFound(projectId, project);
 
         if (!CanRead(project, userId))
@@ -61,9 +62,9 @@ public class ProjectMemberService(
         return await q.GridifyToAsync<ProjectMember, ProjectMemberDto>(_mapper, query, GridifyMappings.ProjectMemberMapper);
     }
 
-    public async Task<ProjectMemberDto> GetByIdAsync(int projectId, int id, string userId)
+    public async Task<ProjectMemberDto> GetByIdAsync(int projectId, int id, string userId, CancellationToken cancellationToken = default)
     {
-        var project = await GetProjectAsync(projectId);
+        var project = await GetProjectAsync(projectId, cancellationToken);
         Guard.Against.NotFound(projectId, project);
 
         if (!CanRead(project, userId))
@@ -72,15 +73,15 @@ public class ProjectMemberService(
         var member = await _members.QueryForProject(projectId)
             .Include(m => m.User)
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id);
+            .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 
         Guard.Against.NotFound(id, member);
         return _mapper.Map<ProjectMemberDto>(member);
     }
 
-    public async Task<ProjectMemberDto> AddAsync(int projectId, AddProjectMemberRequest dto, string userId)
+    public async Task<ProjectMemberDto> AddAsync(int projectId, AddProjectMemberRequest dto, string userId, CancellationToken cancellationToken = default)
     {
-        var project = await GetProjectAsync(projectId);
+        var project = await GetProjectAsync(projectId, cancellationToken);
         Guard.Against.NotFound(projectId, project);
 
         if (!CanManage(project, userId))
@@ -101,17 +102,17 @@ public class ProjectMemberService(
         {
             ["memberId"] = member.Id,
             ["addedUserId"] = dto.UserId
-        });
+        }, cancellationToken);
         return _mapper.Map<ProjectMemberDto>(member);
     }
 
-    public async Task UpdateAsync(int projectId, int id, UpdateProjectMemberRequest dto, string userId)
+    public async Task UpdateAsync(int projectId, int id, UpdateProjectMemberRequest dto, string userId, CancellationToken cancellationToken = default)
     {
         var member = await _members.Query()
             .Include(m => m.Project)
             .ThenInclude(p => p!.Members)
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
+            .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId, cancellationToken);
         Guard.Against.NotFound(id, member);
 
         if (!CanManage(member.Project!, userId))
@@ -125,13 +126,13 @@ public class ProjectMemberService(
         await _members.UpdateAsync(member);
     }
 
-    public async Task DeleteAsync(int projectId, int id, string userId)
+    public async Task DeleteAsync(int projectId, int id, string userId, CancellationToken cancellationToken = default)
     {
         var member = await _members.Query()
             .Include(m => m.Project)
             .ThenInclude(p => p!.Members)
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId);
+            .FirstOrDefaultAsync(m => m.Id == id && m.ProjectId == projectId, cancellationToken);
         Guard.Against.NotFound(id, member);
 
         if (!CanManage(member.Project!, userId))
@@ -141,6 +142,6 @@ public class ProjectMemberService(
         await _activity.RecordAsync(ProjectActivityLogEventType.UserLeftProject, userId, projectId, null, new Dictionary<string, object?>
         {
             ["memberId"] = id
-        });
+        }, cancellationToken);
     }
 }

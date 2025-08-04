@@ -15,6 +15,7 @@ using Taskit.Application.Common.Exceptions;
 using Microsoft.Extensions.Options;
 using Taskit.Application.Common.Settings;
 using System.Net;
+using System.Threading;
 
 namespace Taskit.Application.Services;
 
@@ -31,7 +32,7 @@ public class AuthService(
     private readonly IRefreshTokenRepository _refreshTokens = refreshTokenRepository;
     private readonly AutoMapper.IMapper _mapper = mapper;
 
-    public async Task RegisterAsync(RegisterRequest dto)
+    public async Task RegisterAsync(RegisterRequest dto, CancellationToken cancellationToken = default)
     {
         var user = new AppUser { UserName = dto.Username, Email = dto.Email, FullName = dto.FullName };
         var result = await _userManager.CreateAsync(user, dto.Password);
@@ -39,7 +40,7 @@ public class AuthService(
             throw new ValidationException(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
     }
 
-    public async Task<LoginResponse> LoginAsync(LoginRequest dto, string? userAgent = null, IPAddress? ipAddress = null)
+    public async Task<LoginResponse> LoginAsync(LoginRequest dto, string? userAgent = null, IPAddress? ipAddress = null, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email) ?? throw new UnauthorizedAccessException();
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
@@ -47,7 +48,7 @@ public class AuthService(
             throw new UnauthorizedAccessException("Invalid email or password");
 
         var token = GenerateJwtToken(user);
-        var refreshToken = await CreateRefreshTokenAsync(user, userAgent, ipAddress);
+        var refreshToken = await CreateRefreshTokenAsync(user, userAgent, ipAddress, cancellationToken);
 
         var response = new LoginResponse
         {
@@ -59,12 +60,12 @@ public class AuthService(
         return response;
     }
 
-    public async Task LogoutAsync()
+    public async Task LogoutAsync(CancellationToken cancellationToken = default)
     {
         await _signInManager.SignOutAsync();
     }
 
-    public async Task<RefreshResponse> RefreshAsync(string refreshToken, string? userAgent = null, IPAddress? ipAddress = null)
+    public async Task<RefreshResponse> RefreshAsync(string refreshToken, string? userAgent = null, IPAddress? ipAddress = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(refreshToken))
             throw new UnauthorizedAccessException("Refresh token is required");
@@ -77,7 +78,7 @@ public class AuthService(
         stored.RevokedAt = DateTime.UtcNow;
         await _refreshTokens.UpdateAsync(stored);
 
-        var newRefreshToken = await CreateRefreshTokenAsync(stored.User!, userAgent, ipAddress);
+        var newRefreshToken = await CreateRefreshTokenAsync(stored.User!, userAgent, ipAddress, cancellationToken);
         var token = GenerateJwtToken(stored.User!);
 
         var response = new RefreshResponse
@@ -114,7 +115,7 @@ public class AuthService(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private async Task<string> CreateRefreshTokenAsync(AppUser user, string? userAgent = null, IPAddress? ipAddress = null)
+    private async Task<string> CreateRefreshTokenAsync(AppUser user, string? userAgent = null, IPAddress? ipAddress = null, CancellationToken cancellationToken = default)
     {
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var tokenHash = ComputeSha256Hash(token);
