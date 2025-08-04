@@ -52,21 +52,21 @@ public class TaskEmbeddingConsumer(
             Vector? descEmbedding = null;
             if (!string.IsNullOrWhiteSpace(task.Description))
             {
-                var resp = await client.GenerateEmbeddingAsync(task.Description, cancellationToken: context.CancellationToken);
-                var arr = resp.Value.ToFloats().ToArray();
-                descEmbedding = new Vector(arr);
+                var resp = await client.GenerateEmbeddingAsync(task.Description, new EmbeddingGenerationOptions()
+                {
+                    Dimensions = 1536,
+                }, cancellationToken: context.CancellationToken);
+                descEmbedding = new Vector(resp.Value.ToFloats());
             }
 
             Vector? titleEmbedding = null;
             if (!string.IsNullOrWhiteSpace(task.Title))
             {
-                var resp = await client.GenerateEmbeddingAsync(task.Title, cancellationToken: context.CancellationToken);
-                var arr = resp.Value.ToFloats().ToArray();
-                if (arr.Length > 500)
+                var resp = await client.GenerateEmbeddingAsync(task.Title, new EmbeddingGenerationOptions()
                 {
-                    Array.Resize(ref arr, 500);
-                }
-                titleEmbedding = new Vector(arr);
+                    Dimensions = 500,
+                }, cancellationToken: context.CancellationToken);
+                titleEmbedding = new Vector(resp.Value.ToFloats());
             }
 
             var existing = await _db.Set<TaskEmbeddings>().FirstOrDefaultAsync(e => e.TaskId == task.Id, context.CancellationToken);
