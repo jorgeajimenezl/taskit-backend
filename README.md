@@ -37,7 +37,7 @@ TaskIt is a backend service for managing projects and tasks. It is built with **
    ```bash
    dotnet run --project src/Taskit.Web
    ```
-3. The API listens on port `5152` by default. A SQLite database file named `taskit.db` will be created in the web project folder.
+3. The API listens on port `5152` by default.
 
 ## Running tests
 

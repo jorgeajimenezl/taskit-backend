@@ -43,6 +43,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         base.OnModelCreating(modelBuilder);
 
+        // Configure the database to use PostgreSQL extensions
+        modelBuilder.HasPostgresExtension("vector");
+
         modelBuilder.Entity<AppUser>()
             .HasOne(u => u.Avatar)
             .WithMany()
@@ -76,6 +79,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
         modelBuilder.Entity<AppTask>()
             .HasMany(t => t.Tags)
             .WithMany();
+
+        modelBuilder.Entity<TaskEmbeddings>()
+            .HasOne(te => te.Task)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Project>()
             .HasMany(p => p.Tasks)
