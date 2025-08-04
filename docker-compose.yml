@@ -15,6 +15,25 @@ services:
       timeout: 10s
       retries: 5
 
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskit
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taskit
+
   api:
     build:
       context: .
@@ -23,7 +42,7 @@ services:
       - '5152:5152'
     environment:
       ASPNETCORE_URLS: http://+:5152
-      ConnectionStrings__DefaultConnection: 'Data Source=/app/taskit.db'
+      ConnectionStrings__DefaultConnection: 'Host=postgres;Port=5432;Database=taskit;Username=postgres;Password=postgres'
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
@@ -31,6 +50,8 @@ services:
       - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
       worker:
         condition: service_started
@@ -44,7 +65,7 @@ services:
       context: .
       dockerfile: src/Taskit.Notification.Worker/Dockerfile
     environment:
-      ConnectionStrings__DefaultConnection: 'Data Source=/app/taskit.db'
+      ConnectionStrings__DefaultConnection: 'Host=postgres;Port=5432;Database=taskit;Username=postgres;Password=postgres'
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
@@ -52,6 +73,8 @@ services:
       - ./src/Taskit.Web/taskit.db:/app/taskit.db
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     networks:
       - taskit
@@ -61,7 +84,7 @@ services:
       context: .
       dockerfile: src/Taskit.AI.Orchestrator/Dockerfile
     environment:
-      ConnectionStrings__DefaultConnection: 'Data Source=/app/taskit.db'
+      ConnectionStrings__DefaultConnection: 'Host=postgres;Port=5432;Database=taskit;Username=postgres;Password=postgres'
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Username: guest
       RabbitMQ__Password: guest
@@ -71,9 +94,15 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     networks:
       - taskit
 
 networks:
   taskit:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
