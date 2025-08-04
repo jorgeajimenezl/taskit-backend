@@ -80,6 +80,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .HasMany(t => t.Tags)
             .WithMany();
 
+        modelBuilder.Entity<TaskEmbeddings>()
+            .HasOne(te => te.Task)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Project>()
             .HasMany(p => p.Tasks)
             .WithOne(t => t.Project)
