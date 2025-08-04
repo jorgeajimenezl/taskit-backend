@@ -41,7 +41,7 @@ public class TaskService(
         return await _tasks.QueryForUser(userId)
             .Include(p => p.Project)
             .AsNoTracking()
-            .GridifyToAsync<AppTask, TaskDto>(_mapper, query);
+            .GridifyToAsync<AppTask, TaskDto>(_mapper, query, GridifyMappings.TaskMapper);
     }
 
     public async Task<TaskDto?> GetByIdAsync(int id, string userId)
@@ -211,12 +211,14 @@ public class TaskService(
     public async Task<Paging<TaskDto>> GetByTagsAsync(IEnumerable<int> tagIds, string userId, IGridifyQuery query)
     {
         var tagIdSet = new HashSet<int>(tagIds);
-        var queryable = _tasks.QueryForUser(userId).AsNoTracking();
+        var queryable = _tasks.QueryForUser(userId)
+            .Include(t => t.Project)
+            .AsNoTracking();
         if (tagIds != null && tagIds.Any())
         {
             queryable = queryable.Where(t => t.Tags.Any(tag => tagIdSet.Contains(tag.Id)));
         }
-        return await queryable.GridifyToAsync<AppTask, TaskDto>(_mapper, query);
+        return await queryable.GridifyToAsync<AppTask, TaskDto>(_mapper, query, GridifyMappings.TaskMapper);
     }
 
     public async Task<IEnumerable<TaskDto>> GetSubTasksAsync(int taskId, string userId)

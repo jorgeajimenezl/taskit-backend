@@ -24,7 +24,7 @@ public class ProjectService(IProjectRepository projectRepository, IMapper mapper
             .Include(p => p.Members)
             .Where(p => p.OwnerId == userId || p.Members.Any(m => m.UserId == userId))
             .AsNoTracking();
-        return await q.GridifyToAsync<Project, ProjectDto>(_mapper, query);
+        return await q.GridifyToAsync<Project, ProjectDto>(_mapper, query, GridifyMappings.ProjectMapper);
     }
 
     public async Task<ProjectDto> GetByIdAsync(int id, string userId)

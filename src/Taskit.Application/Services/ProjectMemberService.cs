@@ -58,7 +58,7 @@ public class ProjectMemberService(
             .Include(m => m.User)
             .AsNoTracking();
 
-        return await q.GridifyToAsync<ProjectMember, ProjectMemberDto>(_mapper, query);
+        return await q.GridifyToAsync<ProjectMember, ProjectMemberDto>(_mapper, query, GridifyMappings.ProjectMemberMapper);
     }
 
     public async Task<ProjectMemberDto> GetByIdAsync(int projectId, int id, string userId)
