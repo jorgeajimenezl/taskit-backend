@@ -13,6 +13,8 @@ var host = Host.CreateDefaultBuilder(args)
 
         services.Configure<SummaryGeneratorSettings>(
             context.Configuration.GetSection("Features:SummaryGeneration"));
+        services.Configure<EmbeddingsGeneratorSettings>(
+            context.Configuration.GetSection("Features:EmbeddingsGeneration"));
 
         var openAiKey = context.Configuration["OpenAI:ApiKey"];
         if (string.IsNullOrWhiteSpace(openAiKey))
@@ -22,6 +24,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddMassTransit(x =>
         {
             x.AddConsumer<SummaryGeneratorConsumer>();
+            x.AddConsumer<TaskEmbeddingConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
