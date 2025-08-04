@@ -20,6 +20,8 @@ services:
     restart: always
     ports:
       - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -32,6 +34,13 @@ services:
     networks:
       - taskit
 
+networks:
+  taskit:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
   api:
     build:
       context: .
