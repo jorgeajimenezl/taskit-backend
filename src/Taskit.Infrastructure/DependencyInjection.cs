@@ -27,7 +27,7 @@ public static class DependencyInjection
 
         builder.Services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            options.UseSqlite(connectionString)
+            options.UseNpgsql(connectionString, o => o.UseVector())
                 .UseAsyncSeeding(async (context, _, cancellationToken) =>
                 {
                     var logger = sp.GetRequiredService<ILogger<DataSeeder>>();
@@ -106,7 +106,7 @@ public static class DependencyInjection
         {
             options.AddEntityFrameworkOutbox<AppDbContext>(cfg =>
             {
-                cfg.UseSqlite();
+                cfg.UsePostgres();
                 cfg.UseBusOutbox();
             });
 

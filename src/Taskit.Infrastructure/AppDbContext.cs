@@ -43,6 +43,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         base.OnModelCreating(modelBuilder);
 
+        // Configure the database to use PostgreSQL extensions
+        modelBuilder.HasPostgresExtension("vector");
+
         modelBuilder.Entity<AppUser>()
             .HasOne(u => u.Avatar)
             .WithMany()
