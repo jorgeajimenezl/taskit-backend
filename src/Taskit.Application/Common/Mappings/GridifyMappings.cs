@@ -31,7 +31,11 @@ public static class GridifyMappings
         .AddMap("status", q => q.Status)
         .AddMap("priority", q => q.Priority)
         .AddMap("complexity", q => q.Complexity)
-        .AddMap("completedPercentage", q => q.CompletedPercentage);
+        .AddMap("completedPercentage", q => q.CompletedPercentage)
+        .AddMap("authorId", q => q.AuthorId)
+        .AddMap("assignedUserId", q => q.AssignedUserId)
+        .AddMap("isArchived", q => q.IsArchived)
+        .AddMap("parentTaskId", q => q.ParentTaskId);
 
     public static readonly IGridifyMapper<ProjectActivityLog> ProjectActivityLogMapper = new GridifyMapper<ProjectActivityLog>()
         .AddMap("id", q => q.Id)
