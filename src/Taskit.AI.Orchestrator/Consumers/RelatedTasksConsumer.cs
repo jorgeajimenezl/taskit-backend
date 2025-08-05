@@ -14,30 +14,30 @@ public class RelatedTasksConsumer(AppDbContext db) : IConsumer<RelatedTasksQuery
     public async Task Consume(ConsumeContext<RelatedTasksQuery> context)
     {
         var message = context.Message;
-        var embedding = await _db.Set<TaskEmbeddings>()
+        var taskEmbd = await _db.Set<TaskEmbeddings>()
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.TaskId == message.TaskId, context.CancellationToken);
 
-        if (embedding is null || (embedding.DescriptionEmbedding is null && embedding.TitleEmbedding is null))
+        if (taskEmbd is null || (taskEmbd.DescriptionEmbedding is null && taskEmbd.TitleEmbedding is null))
         {
-            await context.RespondAsync(new RelatedTasksQueryResult(true, null));
+            await context.RespondAsync(OperationResult<RelatedTasksQueryResult>.Processing());
             return;
         }
 
         IQueryable<TaskEmbeddings> query;
-        if (embedding.DescriptionEmbedding is not null)
+        if (taskEmbd.DescriptionEmbedding is not null)
         {
             query = _db.Set<TaskEmbeddings>()
                 .AsNoTracking()
                 .Where(e => e.TaskId != message.TaskId && e.DescriptionEmbedding != null)
-                .OrderBy(e => EF.Functions.CosineDistance(e.DescriptionEmbedding!, embedding.DescriptionEmbedding!));
+                .OrderBy(e => taskEmbd.TitleEmbedding!.CosineDistance(e.DescriptionEmbedding!));
         }
         else
         {
             query = _db.Set<TaskEmbeddings>()
                 .AsNoTracking()
                 .Where(e => e.TaskId != message.TaskId && e.TitleEmbedding != null)
-                .OrderBy(e => EF.Functions.CosineDistance(e.TitleEmbedding!, embedding.TitleEmbedding!));
+                .OrderBy(e => taskEmbd.TitleEmbedding!.CosineDistance(e.TitleEmbedding!));
         }
 
         var relatedIds = await query
@@ -45,6 +45,6 @@ public class RelatedTasksConsumer(AppDbContext db) : IConsumer<RelatedTasksQuery
             .Take(message.Count)
             .ToListAsync(context.CancellationToken);
 
-        await context.RespondAsync(new RelatedTasksQueryResult(false, relatedIds));
+        await context.RespondAsync(OperationResult<RelatedTasksQueryResult>.Success(new(relatedIds)));
     }
 }

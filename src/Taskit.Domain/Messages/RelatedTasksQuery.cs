@@ -1,3 +1,7 @@
 namespace Taskit.Domain.Messages;
 
-public record RelatedTasksQuery(int TaskId, int Count = 5);
+public record RelatedTasksQuery
+{
+    public int TaskId { get; init; }
+    public int Count { get; init; } = 5;
+}

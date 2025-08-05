@@ -37,8 +37,8 @@ public class RecommendationServiceTests
     {
         var repo = new Mock<ITaskRepository>();
         var client = new Mock<IRequestClient<RelatedTasksQuery>>();
-        var response = Mock.Of<Response<RelatedTasksQueryResult>>(r => r.Message == new RelatedTasksQueryResult(true, null));
-        client.Setup(c => c.GetResponse<RelatedTasksQueryResult>(It.IsAny<RelatedTasksQuery>(), default, default))
+        var response = Mock.Of<Response<OperationResult<RelatedTasksQueryResult>>>(r => r.Message == OperationResult<RelatedTasksQueryResult>.Processing());
+        client.Setup(c => c.GetResponse<OperationResult<RelatedTasksQueryResult>>(It.IsAny<RelatedTasksQuery>(), default, default))
             .ReturnsAsync(response);
         var service = new RecommendationService(repo.Object, client.Object, CreateMapper());
 
@@ -56,8 +56,8 @@ public class RecommendationServiceTests
         repo.Setup(r => r.QueryForUser("u")).Returns(tasks.AsQueryable().BuildMock());
 
         var client = new Mock<IRequestClient<RelatedTasksQuery>>();
-        var response = Mock.Of<Response<RelatedTasksQueryResult>>(r => r.Message == new RelatedTasksQueryResult(false, new List<int> { 2 }));
-        client.Setup(c => c.GetResponse<RelatedTasksQueryResult>(It.IsAny<RelatedTasksQuery>(), default, default))
+        var response = Mock.Of<Response<OperationResult<RelatedTasksQueryResult>>>(r => r.Message == OperationResult<RelatedTasksQueryResult>.Success(new(new List<int> { 2 })));
+        client.Setup(c => c.GetResponse<OperationResult<RelatedTasksQueryResult>>(It.IsAny<RelatedTasksQuery>(), default, default))
             .ReturnsAsync(response);
 
         var service = new RecommendationService(repo.Object, client.Object, CreateMapper());
