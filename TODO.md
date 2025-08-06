@@ -4,3 +4,4 @@
 - Chore: create dummy interfaces for services to be DI compatible
 - Fix: media URL generation
 - Feat: save media in the cloud instead of local storage (Azure Blob Storage)
+- Feat: add an index to the TaskEmbeddings table for faster queries

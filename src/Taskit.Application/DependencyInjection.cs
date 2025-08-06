@@ -33,5 +33,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<ProjectActivityLogService>();
         builder.Services.AddScoped<NotificationService>();
         builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<RecommendationService>();
     }
 }
