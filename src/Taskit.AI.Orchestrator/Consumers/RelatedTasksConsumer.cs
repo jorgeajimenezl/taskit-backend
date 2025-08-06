@@ -33,7 +33,7 @@ public class RelatedTasksConsumer(AppDbContext db) : IConsumer<RelatedTasksQuery
             query = _db.Set<TaskEmbeddings>()
                 .AsNoTracking()
                 .Where(e => e.TaskId != message.TaskId && e.DescriptionEmbedding != null)
-                .OrderBy(e => taskEmbd.TitleEmbedding!.CosineDistance(e.DescriptionEmbedding!));
+                .OrderBy(e => taskEmbd.DescriptionEmbedding!.CosineDistance(e.DescriptionEmbedding!));
         }
         else
         {
