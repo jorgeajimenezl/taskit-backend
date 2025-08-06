@@ -11,12 +11,12 @@ public class SuggestionsController(RecommendationService recommendationService) 
     private readonly RecommendationService _recommendationService = recommendationService;
 
     [HttpGet("tasks/{taskId}/assignees", Name = "GetSuggestedAssignees")]
-    public async Task<ActionResult<IEnumerable<Application.DTOs.UserDto>>> GetSuggestedAssignees(int taskId)
+    public async Task<ActionResult<IEnumerable<Application.DTOs.UserProfileDto>>> GetSuggestedAssignees(int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var suggestions = await _recommendationService.GetAssigneeSuggestionsAsync(taskId, userId, count: 3);
 
-        if (suggestions == null || !suggestions.Any())
+        if (suggestions == null)
         {
             return NoContent();
         }

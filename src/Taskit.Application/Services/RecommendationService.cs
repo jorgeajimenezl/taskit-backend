@@ -24,25 +24,33 @@ public class RecommendationService(
     private async Task<IEnumerable<AppTask>?> GetRelatedTasksAsync(int taskId, string userId, int count = 5)
     {
         var response = await _client.
-            GetResponse<IOperationInProgress,
-                Fault<RelatedTasksQuery>,
-                IOperationSucceeded<RelatedTasksQueryResult>>
+            GetResponse<IOperationInProgress, IOperationSucceeded<RelatedTasksQueryResult>>
             (new RelatedTasksQuery
             {
                 TaskId = taskId,
                 Count = count
             });
 
-        var taskIds = response switch
-        {
-            (_, IOperationInProgress) => null,
-            (_, Fault<RelatedTasksQuery> fault) => throw new Exception(fault.Exceptions.FirstOrDefault()?.Message ??
-                "An error occurred while processing the request."),
-            (_, IOperationSucceeded<RelatedTasksQueryResult> res) => res.Result?.TaskIds ?? [],
-            _ => throw new NotImplementedException()
-        };
+        IReadOnlyCollection<int> taskIds = [];
 
-        if (taskIds == null) return null;
+        if (response.Is<IOperationInProgress>(out var _))
+        {
+            return null;
+        }
+        else if (response.Is<Fault<RelatedTasksQuery>>(out var fault))
+        {
+            throw new Exception(fault.Message.Exceptions.FirstOrDefault()?.Message ??
+                "An error occurred while processing the request.");
+        }
+        else if (response.Is<IOperationSucceeded<RelatedTasksQueryResult>>(out var result))
+        {
+            taskIds = result.Message.Result.TaskIds;
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+
         var tasks = await _tasks.QueryForUser(userId)
             .Where(t => taskIds.Contains(t.Id))
             .ToListAsync();
@@ -50,7 +58,7 @@ public class RecommendationService(
         return tasks;
     }
 
-    public async Task<IEnumerable<UserDto>?> GetAssigneeSuggestionsAsync(int taskId, string userId, int count = 5)
+    public async Task<IEnumerable<UserProfileDto>?> GetAssigneeSuggestionsAsync(int taskId, string userId, int count = 5)
     {
         var relatedTasks = await GetRelatedTasksAsync(taskId, userId, count);
 
@@ -67,7 +75,7 @@ public class RecommendationService(
 
         var users = await _userManager.Users
             .Where(u => assigneeIds.Contains(u.Id))
-            .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         return users;
