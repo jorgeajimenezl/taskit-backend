@@ -10,7 +10,7 @@ public class SuggestionsController(RecommendationService recommendationService) 
 {
     private readonly RecommendationService _recommendationService = recommendationService;
 
-    [HttpGet("tasks/{taskId}/assignees")]
+    [HttpGet("tasks/{taskId}/assignees", Name = "GetSuggestedAssignees")]
     public async Task<ActionResult<IEnumerable<Application.DTOs.UserDto>>> GetSuggestedAssignees(int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
