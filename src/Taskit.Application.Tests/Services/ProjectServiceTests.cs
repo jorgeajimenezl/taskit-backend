@@ -33,6 +33,7 @@ public class ProjectServiceTests
             cfg.CreateMap<CreateProjectRequest, Project>();
             cfg.CreateMap<UpdateProjectRequest, Project>()
                 .ForAllMembers(o => o.Condition((src, dest, member) => member != null));
+            cfg.CreateMap<AppUser, DTOs.UserDto>();
         }, mockLoggerFactory.Object);
         return config.CreateMapper();
     }
