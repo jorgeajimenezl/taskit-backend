@@ -1,9 +1,11 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
+using Taskit.Domain.Entities;
 using Taskit.Domain.Messages;
 
 namespace Taskit.Application.Services;
@@ -11,13 +13,15 @@ namespace Taskit.Application.Services;
 public class RecommendationService(
     ITaskRepository taskRepository,
     IRequestClient<RelatedTasksQuery> client,
+    UserManager<AppUser> userManager,
     IMapper mapper)
 {
     private readonly ITaskRepository _tasks = taskRepository;
     private readonly IRequestClient<RelatedTasksQuery> _client = client;
+    private readonly UserManager<AppUser> _userManager = userManager;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<RelatedTasksDto> GetRelatedTasksAsync(int taskId, string userId, int count = 5)
+    private async Task<IEnumerable<AppTask>?> GetRelatedTasksAsync(int taskId, string userId, int count = 5)
     {
         var response = await _client.
             GetResponse<IOperationInProgress,
@@ -31,7 +35,7 @@ public class RecommendationService(
 
         if (response.Is<IOperationInProgress>(out var _))
         {
-            return new RelatedTasksDto { IsProcessing = true, Tasks = [] };
+            return null;
         }
 
         if (response.Is<Fault<RelatedTasksQuery>>(out var failed))
@@ -45,9 +49,31 @@ public class RecommendationService(
 
         var tasks = await _tasks.QueryForUser(userId)
             .Where(t => taskIds.Contains(t.Id))
-            .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        return new RelatedTasksDto { IsProcessing = false, Tasks = tasks };
+        return tasks;
+    }
+
+    public async Task<IEnumerable<UserDto>?> GetAssigneeSuggestionsAsync(int taskId, string userId, int count = 5)
+    {
+        var relatedTasks = await GetRelatedTasksAsync(taskId, userId, count);
+
+        if (relatedTasks == null || !relatedTasks.Any())
+        {
+            return null;
+        }
+
+        var assigneeIds = relatedTasks
+            .Select(t => t.AssignedUserId)
+            .Where(id => id != null && id != userId)
+            .Distinct()
+            .Take(count);
+
+        var users = await _userManager.Users
+            .Where(u => assigneeIds.Contains(u.Id))
+            .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        return users;
     }
 }
