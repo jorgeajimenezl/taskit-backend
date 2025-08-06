@@ -43,7 +43,14 @@ public class RelatedTasksConsumer(AppDbContext db) : IConsumer<RelatedTasksQuery
                 .OrderBy(e => taskEmbd.TitleEmbedding!.CosineDistance(e.TitleEmbedding!));
         }
 
+        var projectId = await _db.Tasks
+            .Where(t => t.Id == message.TaskId)
+            .Select(t => t.ProjectId)
+            .FirstOrDefaultAsync(context.CancellationToken);
+
         var relatedIds = await query
+            .Include(e => e.Task)
+            .Where(e => e.Task != null && e.Task.ProjectId == projectId)
             .Select(e => e.TaskId)
             .Take(message.Count)
             .ToListAsync(context.CancellationToken);
