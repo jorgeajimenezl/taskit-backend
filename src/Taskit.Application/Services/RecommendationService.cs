@@ -33,20 +33,16 @@ public class RecommendationService(
                 Count = count
             });
 
-        if (response.Is<IOperationInProgress>(out var _))
+        var taskIds = response switch
         {
-            return null;
-        }
+            (_, IOperationInProgress) => null,
+            (_, Fault<RelatedTasksQuery> fault) => throw new Exception(fault.Exceptions.FirstOrDefault()?.Message ??
+                "An error occurred while processing the request."),
+            (_, IOperationSucceeded<RelatedTasksQueryResult> res) => res.Result?.TaskIds ?? [],
+            _ => throw new NotImplementedException()
+        };
 
-        if (response.Is<Fault<RelatedTasksQuery>>(out var failed))
-        {
-            throw new Exception(failed.Message.Exceptions.FirstOrDefault()?.Message ??
-                "An error occurred while processing the request.");
-        }
-
-        var succeeded = response.Message as IOperationSucceeded<RelatedTasksQueryResult>;
-        var taskIds = succeeded!.Result?.TaskIds ?? [];
-
+        if (taskIds == null) return null;
         var tasks = await _tasks.QueryForUser(userId)
             .Where(t => taskIds.Contains(t.Id))
             .ToListAsync();
