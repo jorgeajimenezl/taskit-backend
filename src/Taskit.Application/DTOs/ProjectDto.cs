@@ -15,7 +15,7 @@ public record ProjectDto
     public required string Description { get; init; }
 
     [Required]
-    public required string OwnerId { get; init; }
+    public required UserDto Owner { get; init; }
 
     private class Mapping : Profile
     {
