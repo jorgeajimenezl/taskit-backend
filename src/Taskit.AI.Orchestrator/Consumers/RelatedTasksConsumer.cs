@@ -20,7 +20,10 @@ public class RelatedTasksConsumer(AppDbContext db) : IConsumer<RelatedTasksQuery
 
         if (taskEmbd is null || (taskEmbd.DescriptionEmbedding is null && taskEmbd.TitleEmbedding is null))
         {
-            await context.RespondAsync(OperationResult<RelatedTasksQueryResult>.Processing());
+            // TODO: probably the embeddings are still being generated
+            // Respond with an in-progress status
+            // Anyway, we need to handle this case
+            await context.RespondAsync<IOperationInProgress>(new OperationInProgress(DateTime.UtcNow));
             return;
         }
 
@@ -45,6 +48,9 @@ public class RelatedTasksConsumer(AppDbContext db) : IConsumer<RelatedTasksQuery
             .Take(message.Count)
             .ToListAsync(context.CancellationToken);
 
-        await context.RespondAsync(OperationResult<RelatedTasksQueryResult>.Success(new(relatedIds)));
+        await context.RespondAsync(new OperationSucceeded<RelatedTasksQueryResult>(
+            DateTime.UtcNow,
+            new(relatedIds))
+        );
     }
 }

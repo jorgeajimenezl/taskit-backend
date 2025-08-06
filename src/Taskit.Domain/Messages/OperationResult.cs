@@ -1,10 +1,23 @@
 namespace Taskit.Domain.Messages;
 
-public record OperationResult<TValue>
+public interface IOperationResult
 {
-    public bool IsProcessing { get; init; }
-    public TValue? Result { get; init; }
-
-    public static OperationResult<TValue> Processing() => new() { IsProcessing = true };
-    public static OperationResult<TValue> Success(TValue result) => new() { IsProcessing = false, Result = result };
+    // Guid CorrelationId { get; }
+    DateTime Timestamp { get; }
 }
+
+public interface IOperationSucceeded<T> : IOperationResult
+{
+    T Result { get; }
+}
+
+public interface IOperationInProgress : IOperationResult
+{
+
+}
+
+public record OperationSucceeded<T>(DateTime Timestamp, T Result)
+    : IOperationSucceeded<T>;
+
+public record OperationInProgress(DateTime Timestamp)
+    : IOperationInProgress;
