@@ -15,6 +15,12 @@ public record TaskCommentDto
     [Required]
     public required UserDto Author { get; init; }
 
+    [Required]
+    public DateTime CreatedAt { get; init; }
+
+    [Required]
+    public DateTime UpdatedAt { get; init; }
+
     private class Mapping : Profile
     {
         public Mapping()
