@@ -47,7 +47,6 @@ public class InAppNotificationConsumer<TEvent>(
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to generate notification for user {UserId}", recipientUser.Id);
-                return;
             }
         }
 
