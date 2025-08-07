@@ -42,9 +42,9 @@ public class ProjectServiceTests
     {
         var mapper = CreateMapper();
         var publisher = new Mock<IPublishEndpoint>();
-        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>()))
+        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        repo.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        repo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         return new ProjectActivityLogService(repo.Object, mapper, publisher.Object);
     }
 
@@ -104,13 +104,13 @@ public class ProjectServiceTests
     {
         var mapper = CreateMapper();
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<Project>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.AddAsync(It.IsAny<Project>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         var dto = new CreateProjectRequest { Name = "N", Description = "D" };
         var result = await service.CreateAsync(dto, "u");
 
-        repo.Verify(r => r.AddAsync(It.Is<Project>(p => p.OwnerId == "u" && p.Name == "N"), It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.AddAsync(It.Is<Project>(p => p.OwnerId == "u" && p.Name == "N"), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Equal("N", result.Name);
     }
 
@@ -120,8 +120,8 @@ public class ProjectServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "Old", OwnerId = "u" };
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
-        repo.Setup(r => r.UpdateAsync(project, It.IsAny<bool>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(project);
+        repo.Setup(r => r.UpdateAsync(project, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         repo.Setup(r => r.Query()).Returns(new List<Project> { project }.AsQueryable().BuildMockDbSet().Object);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
@@ -129,7 +129,7 @@ public class ProjectServiceTests
         await service.UpdateAsync(1, dto, "u");
 
         Assert.Equal("New", project.Name);
-        repo.Verify(r => r.UpdateAsync(project, It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.UpdateAsync(project, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public class ProjectServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "P", OwnerId = "owner" };
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(project);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.UpdateAsync(1, new UpdateProjectRequest { Name = "N" }, "u"));
@@ -149,7 +149,7 @@ public class ProjectServiceTests
     {
         var mapper = CreateMapper();
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Project?)null);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync((Project?)null);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         await Assert.ThrowsAsync<NotFoundException>(() => service.UpdateAsync(1, new UpdateProjectRequest { Name = "N" }, "u"));
@@ -161,7 +161,7 @@ public class ProjectServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "Old", OwnerId = "u" };
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(project);
         repo.Setup(r => r.Query()).Returns(new List<Project>
         {
             project,
@@ -180,13 +180,13 @@ public class ProjectServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "P", OwnerId = "u" };
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
-        repo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(project);
+        repo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         await service.DeleteAsync(1, "u");
 
-        repo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public class ProjectServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "P", OwnerId = "owner" };
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(project);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(project);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.DeleteAsync(1, "u"));
@@ -206,7 +206,7 @@ public class ProjectServiceTests
     {
         var mapper = CreateMapper();
         var repo = new Mock<IProjectRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Project?)null);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync((Project?)null);
         var service = CreateService(repo, CreateActivityService(new Mock<IProjectActivityLogRepository>()), mapper);
 
         await Assert.ThrowsAsync<NotFoundException>(() => service.DeleteAsync(1, "u"));

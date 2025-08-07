@@ -34,9 +34,9 @@ public class MediaServiceTests
     private static ProjectActivityLogService CreateActivityService()
     {
         var repo = new Mock<IProjectActivityLogRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>()))
+        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        repo.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        repo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         var publisher = new Mock<IPublishEndpoint>();
         publisher.Setup(p => p.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -67,13 +67,13 @@ public class MediaServiceTests
     public async Task AddAsync_CallsRepository()
     {
         var repo = new Mock<IMediaRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<Media>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        repo.Setup(r => r.AddAsync(It.IsAny<Media>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
         var media = new Media { FileName = "f.jpg", Name = "f.jpg", Disk = "local", CollectionName = "c", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private };
 
         await service.AddAsync(media);
 
-        repo.Verify(r => r.AddAsync(media, It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.AddAsync(media, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class MediaServiceTests
     {
         var repo = new Mock<IMediaRepository>();
         var media = new Media { Id = 1, FileName = "f.jpg", Name = "f.jpg", Disk = "local", CollectionName = "c", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private };
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(media);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(media);
         var service = CreateService(repo, Path.GetTempPath());
 
         var result = await service.GetByIdAsync(1);
@@ -94,7 +94,7 @@ public class MediaServiceTests
     public async Task GetByIdAsync_WhenNotFound_ReturnsNull()
     {
         var repo = new Mock<IMediaRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Media?)null);
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync((Media?)null);
         var service = CreateService(repo, Path.GetTempPath());
 
         var result = await service.GetByIdAsync(1);
@@ -121,8 +121,8 @@ public class MediaServiceTests
         {
             var repo = new Mock<IMediaRepository>();
             Media? saved = null;
-            repo.Setup(r => r.AddAsync(It.IsAny<Media>(), It.IsAny<bool>()))
-                .Callback<Media, bool>((m, _) => saved = m)
+            repo.Setup(r => r.AddAsync(It.IsAny<Media>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .Callback<Media, bool, CancellationToken>((m, _, _) => saved = m)
                 .Returns(Task.CompletedTask);
             var service = CreateService(repo, temp);
             var file = CreateFormFile("img.jpg", "image/jpeg", Encoding.UTF8.GetBytes("img"));
@@ -187,7 +187,7 @@ public class MediaServiceTests
         try
         {
             var repo = new Mock<IMediaRepository>();
-            repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media
+            repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(new Media
             {
                 Id = 1,
                 FileName = stored,
@@ -200,13 +200,13 @@ public class MediaServiceTests
                 Uuid = Guid.NewGuid(),
                 AccessScope = AccessScope.Private
             });
-            repo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+            repo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
             var service = CreateService(repo, temp);
 
             await service.DeleteAsync(1, "u");
 
             Assert.False(File.Exists(fullPath));
-            repo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>()), Times.Once);
+            repo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
         }
         finally
         {
@@ -218,7 +218,7 @@ public class MediaServiceTests
     public async Task DeleteAsync_WrongUser_ThrowsForbidden()
     {
         var repo = new Mock<IMediaRepository>();
-        repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(new Media { Id = 1, FileName = "f.jpg", UploadedById = "other", CollectionName = "c", Name = "f.jpg", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private });
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(new Media { Id = 1, FileName = "f.jpg", UploadedById = "other", CollectionName = "c", Name = "f.jpg", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private });
         var service = CreateService(repo, Path.GetTempPath());
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.DeleteAsync(1, "u"));
@@ -230,12 +230,12 @@ public class MediaServiceTests
         var repo = new Mock<IMediaRepository>();
         var items = new List<Media> { new() { Id = 1, ModelType = nameof(AppTask), ModelId = "1", CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private } };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
-        repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
 
         await service.ClearMediaCollectionAsync(nameof(AppTask), "1", "c");
 
-        repo.Verify(r => r.DeleteRangeAsync(It.Is<IEnumerable<Media>>(m => m.Count() == 1), It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.DeleteRangeAsync(It.Is<IEnumerable<Media>>(m => m.Count() == 1), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -244,11 +244,11 @@ public class MediaServiceTests
         var repo = new Mock<IMediaRepository>();
         var items = new List<Media> { new() { Id = 1, ModelType = nameof(Project), ModelId = "1", CollectionName = "c", FileName = "a.jpg", Name = "a", Disk = "d", Uuid = Guid.NewGuid(), AccessScope = AccessScope.Private } };
         repo.Setup(r => r.Query()).Returns(items.AsQueryable().BuildMock());
-        repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        repo.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(repo, Path.GetTempPath());
 
         await service.ClearMediaCollectionAsync<Project>("1", "c");
 
-        repo.Verify(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Media>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
