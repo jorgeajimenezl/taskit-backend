@@ -40,9 +40,9 @@ public class TaskCommentServiceTests
     private static ProjectActivityLogService CreateActivityService(IMapper mapper)
     {
         var repo = new Mock<IProjectActivityLogRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>()))
+        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        repo.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        repo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         var publisher = new Mock<IPublishEndpoint>();
         return new ProjectActivityLogService(repo.Object, mapper, publisher.Object);
     }
@@ -149,7 +149,7 @@ public class TaskCommentServiceTests
         taskRepo.Setup(r => r.Query())
             .Returns(new List<AppTask> { task }.AsQueryable().BuildMock());
         var commentRepo = new Mock<ITaskCommentRepository>();
-        commentRepo.Setup(r => r.AddAsync(It.IsAny<TaskComment>(), It.IsAny<bool>()))
+        commentRepo.Setup(r => r.AddAsync(It.IsAny<TaskComment>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable();
         var service = CreateService(commentRepo, taskRepo, mapper);
@@ -157,7 +157,7 @@ public class TaskCommentServiceTests
         var dto = new CreateTaskCommentRequest { Content = "C" };
         var result = await service.CreateAsync(1, dto, "u");
 
-        commentRepo.Verify(r => r.AddAsync(It.Is<TaskComment>(c => c.TaskId == 1 && c.AuthorId == "u"), It.IsAny<bool>()), Times.Once);
+        commentRepo.Verify(r => r.AddAsync(It.Is<TaskComment>(c => c.TaskId == 1 && c.AuthorId == "u"), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Equal("C", result.Content);
     }
 
@@ -185,14 +185,14 @@ public class TaskCommentServiceTests
         var comment = new TaskComment { Id = 1, TaskId = 1, AuthorId = "u", Content = "Old" };
         var commentRepo = new Mock<ITaskCommentRepository>();
         commentRepo.Setup(r => r.QueryForTask(1)).Returns(new List<TaskComment> { comment }.AsQueryable().BuildMock());
-        commentRepo.Setup(r => r.UpdateAsync(comment, It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        commentRepo.Setup(r => r.UpdateAsync(comment, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(commentRepo, taskRepo, mapper);
 
         var dto = new UpdateTaskCommentRequest { Content = "New" };
         await service.UpdateAsync(1, 1, dto, "u");
 
         Assert.Equal("New", comment.Content);
-        commentRepo.Verify(r => r.UpdateAsync(comment, It.IsAny<bool>()), Times.Once);
+        commentRepo.Verify(r => r.UpdateAsync(comment, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -253,12 +253,12 @@ public class TaskCommentServiceTests
         var comment = new TaskComment { Id = 1, TaskId = 1, AuthorId = "u", Content = "C" };
         var commentRepo = new Mock<ITaskCommentRepository>();
         commentRepo.Setup(r => r.QueryForTask(1)).Returns(new List<TaskComment> { comment }.AsQueryable().BuildMock());
-        commentRepo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        commentRepo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var service = CreateService(commentRepo, taskRepo, mapper);
 
         await service.DeleteAsync(1, 1, "u");
 
-        commentRepo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>()), Times.Once);
+        commentRepo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

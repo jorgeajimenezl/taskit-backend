@@ -57,7 +57,7 @@ public class TagServiceTests
     {
         var mapper = CreateMapper();
         var repo = new Mock<ITagRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<TaskTag>(), It.IsAny<bool>()))
+        repo.Setup(r => r.AddAsync(It.IsAny<TaskTag>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask)
             .Verifiable();
         var service = CreateService(repo, mapper);
@@ -67,6 +67,6 @@ public class TagServiceTests
 
         Assert.Equal(request.Name, result.Name);
         Assert.Equal(request.Color, result.Color);
-        repo.Verify(r => r.AddAsync(It.Is<TaskTag>(t => t.Name == request.Name && t.Color == request.Color), It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.AddAsync(It.Is<TaskTag>(t => t.Name == request.Name && t.Color == request.Color), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
