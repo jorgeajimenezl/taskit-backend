@@ -1,11 +1,13 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Ardalis.GuardClauses;
+using Gridify;
+using Taskit.Application.Common.Exceptions;
+using Taskit.Application.Common.Mappings;
+using Taskit.Application.Common.Models;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
 using Taskit.Domain.Entities;
-using Taskit.Application.Common.Exceptions;
 using Taskit.Domain.Enums;
 
 namespace Taskit.Application.Services;
@@ -28,16 +30,16 @@ public class TaskCommentService(
             .AnyAsync(t => t.Id == taskId);
     }
 
-    public async Task<IEnumerable<TaskCommentDto>> GetAllAsync(int taskId, string userId)
+    public async Task<Paging<TaskCommentDto>> GetAllAsync(int taskId, string userId, IGridifyQuery query)
     {
         if (!await HasAccessToTask(taskId, userId))
             throw new ForbiddenAccessException();
 
-        return await _comments.QueryForTask(taskId)
+        var q = _comments.QueryForTask(taskId)
             .Include(c => c.Author)
-            .AsNoTracking()
-            .ProjectTo<TaskCommentDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsNoTracking();
+
+        return await q.GridifyToAsync<TaskComment, TaskCommentDto>(_mapper, query, GridifyMappings.TaskCommentMapper);
     }
 
     public async Task<TaskCommentDto> GetByIdAsync(int taskId, int id, string userId)

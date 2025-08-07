@@ -1,10 +1,11 @@
 using AutoMapper;
 using Ardalis.GuardClauses;
+using Gridify;
 using MockQueryable.Moq;
 using Moq;
+using Taskit.Application.Common.Exceptions;
 using Taskit.Application.DTOs;
 using Taskit.Application.Interfaces;
-using Taskit.Application.Common.Exceptions;
 using Taskit.Application.Services;
 using Taskit.Domain.Entities;
 using Taskit.Domain.Enums;
@@ -70,10 +71,10 @@ public class TaskCommentServiceTests
         commentRepo.Setup(r => r.QueryForTask(1)).Returns(comments.AsQueryable().BuildMock());
         var service = CreateService(commentRepo, taskRepo, mapper);
 
-        var result = await service.GetAllAsync(1, "u");
+        var result = await service.GetAllAsync(1, "u", new GridifyQuery());
 
-        Assert.Single(result);
-        Assert.Equal(1, result.First().Id);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.Data.First().Id);
     }
 
     [Fact]
@@ -86,7 +87,7 @@ public class TaskCommentServiceTests
         var commentRepo = new Mock<ITaskCommentRepository>();
         var service = CreateService(commentRepo, taskRepo, mapper);
 
-        await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.GetAllAsync(1, "u"));
+        await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.GetAllAsync(1, "u", new GridifyQuery()));
     }
 
     [Fact]

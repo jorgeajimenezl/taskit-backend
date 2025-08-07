@@ -1,8 +1,10 @@
 using System.Security.Claims;
+using Gridify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using AutoMapper;
+using Taskit.Application.Common.Models;
 using Taskit.Application.DTOs;
 using Taskit.Application.Services;
 
@@ -16,10 +18,10 @@ public class TaskCommentsController(TaskCommentService service, IMapper mapper) 
     private readonly IMapper _mapper = mapper;
 
     [HttpGet(Name = "GetTaskComments")]
-    public async Task<ActionResult<IEnumerable<TaskCommentDto>>> GetComments(int taskId)
+    public async Task<ActionResult<Paging<TaskCommentDto>>> GetComments(int taskId, [FromQuery] GridifyQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var comments = await _service.GetAllAsync(taskId, userId);
+        var comments = await _service.GetAllAsync(taskId, userId, query);
         return Ok(comments);
     }
 

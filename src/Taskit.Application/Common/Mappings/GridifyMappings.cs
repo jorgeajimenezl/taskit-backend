@@ -37,6 +37,16 @@ public static class GridifyMappings
         .AddMap("isArchived", q => q.IsArchived)
         .AddMap("parentTaskId", q => q.ParentTaskId);
 
+    public static readonly IGridifyMapper<TaskComment> TaskCommentMapper = new GridifyMapper<TaskComment>()
+        .AddMap("id", q => q.Id)
+        .AddMap("content", q => q.Content)
+        .AddMap("taskId", q => q.TaskId)
+        .AddMap("authorId", q => q.AuthorId)
+        .AddMap("authorUsername", q => q.Author!.UserName)
+        .AddMap("authorFullName", q => q.Author!.FullName)
+        .AddMap("createdAt", q => q.CreatedAt)
+        .AddMap("updatedAt", q => q.UpdatedAt);
+
     public static readonly IGridifyMapper<ProjectActivityLog> ProjectActivityLogMapper = new GridifyMapper<ProjectActivityLog>()
         .AddMap("id", q => q.Id)
         .AddMap("timestamp", q => q.Timestamp)
