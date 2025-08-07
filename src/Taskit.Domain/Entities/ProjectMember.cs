@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Taskit.Domain.Enums;
 
 namespace Taskit.Domain.Entities;
 
@@ -14,5 +15,5 @@ public class ProjectMember : BaseEntity<int>
     public AppUser? User { get; set; }
 
     [Required]
-    public required Enums.ProjectRole Role { get; set; } = Enums.ProjectRole.Member;
+    public required ProjectRole Role { get; set; } = ProjectRole.Member;
 }
