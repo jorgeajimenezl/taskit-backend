@@ -235,9 +235,6 @@ public class TaskService(
             .AsNoTracking()
             .ToListAsync();
 
-        if (subtasks.Count == 0)
-            throw new ForbiddenAccessException();
-
         return subtasks;
     }
 
