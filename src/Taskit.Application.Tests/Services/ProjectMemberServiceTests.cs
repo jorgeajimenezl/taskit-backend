@@ -48,9 +48,9 @@ public class ProjectMemberServiceTests
     private static ProjectActivityLogService CreateActivityService(IMapper mapper)
     {
         var repo = new Mock<IProjectActivityLogRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>()))
+        repo.Setup(r => r.AddAsync(It.IsAny<ProjectActivityLog>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        repo.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+        repo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         var publisher = new Mock<IPublishEndpoint>();
         return new ProjectActivityLogService(repo.Object, mapper, publisher.Object);
     }
@@ -139,7 +139,7 @@ public class ProjectMemberServiceTests
         var mapper = CreateMapper();
         var project = new Project { Id = 1, Name = "P", OwnerId = "owner", Members = new List<ProjectMember>() };
         var memberRepo = new Mock<IProjectMemberRepository>();
-        memberRepo.Setup(r => r.AddAsync(It.IsAny<ProjectMember>(), It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        memberRepo.Setup(r => r.AddAsync(It.IsAny<ProjectMember>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var projectRepo = new Mock<IProjectRepository>();
         projectRepo.Setup(r => r.Query()).Returns(new List<Project> { project }.AsQueryable().BuildMock());
         var userManager = MockUserManager();
@@ -150,7 +150,7 @@ public class ProjectMemberServiceTests
         var dto = new AddProjectMemberRequest { UserId = "u", Role = ProjectRole.Member };
         var result = await service.AddAsync(1, dto, "owner");
 
-        memberRepo.Verify(r => r.AddAsync(It.Is<ProjectMember>(m => m.UserId == "u" && m.ProjectId == 1), It.IsAny<bool>()), Times.Once);
+        memberRepo.Verify(r => r.AddAsync(It.Is<ProjectMember>(m => m.UserId == "u" && m.ProjectId == 1), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Equal("u", result.User.Id);
     }
 
@@ -179,7 +179,7 @@ public class ProjectMemberServiceTests
         project.Members = new List<ProjectMember> { member };
         var memberRepo = new Mock<IProjectMemberRepository>();
         memberRepo.Setup(r => r.Query()).Returns(new List<ProjectMember> { member }.AsQueryable().BuildMock());
-        memberRepo.Setup(r => r.UpdateAsync(member, It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        memberRepo.Setup(r => r.UpdateAsync(member, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var projectRepo = new Mock<IProjectRepository>();
         var userManager = MockUserManager();
         var service = CreateService(memberRepo, projectRepo, userManager, mapper);
@@ -188,7 +188,7 @@ public class ProjectMemberServiceTests
         await service.UpdateAsync(1, 1, dto, "owner");
 
         Assert.Equal(ProjectRole.Admin, member.Role);
-        memberRepo.Verify(r => r.UpdateAsync(member, It.IsAny<bool>()), Times.Once);
+        memberRepo.Verify(r => r.UpdateAsync(member, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -235,14 +235,14 @@ public class ProjectMemberServiceTests
         project.Members = new List<ProjectMember> { member };
         var memberRepo = new Mock<IProjectMemberRepository>();
         memberRepo.Setup(r => r.Query()).Returns(new List<ProjectMember> { member }.AsQueryable().BuildMock());
-        memberRepo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>())).Returns(Task.CompletedTask).Verifiable();
+        memberRepo.Setup(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask).Verifiable();
         var projectRepo = new Mock<IProjectRepository>();
         var userManager = MockUserManager();
         var service = CreateService(memberRepo, projectRepo, userManager, mapper);
 
         await service.DeleteAsync(1, 1, "owner");
 
-        memberRepo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>()), Times.Once);
+        memberRepo.Verify(r => r.DeleteAsync(1, It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

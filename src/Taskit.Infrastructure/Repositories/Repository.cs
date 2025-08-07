@@ -14,33 +14,55 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
         _dbSet = context.Set<TEntity>();
     }
 
-    public virtual async Task<TEntity?> GetByIdAsync(TKey id)
+    public virtual async Task<TEntity?> GetByIdAsync(
+        TKey id,
+        CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(id);
+        return await _dbSet.FindAsync([id], cancellationToken: cancellationToken);
     }
 
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
+        CancellationToken cancellationToken = default)
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.ToListAsync(cancellationToken: cancellationToken);
     }
 
-    public virtual async Task AddAsync(TEntity entity, bool saveChanges = true)
+    public virtual async Task AddAsync(
+        TEntity entity,
+        bool saveChanges = true,
+        CancellationToken cancellationToken = default)
     {
-        await _dbSet.AddAsync(entity);
+        await _dbSet.AddAsync(entity, cancellationToken);
         if (saveChanges)
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public virtual async Task UpdateAsync(TEntity entity, bool saveChanges = true)
+    public virtual async Task AddRangeAsync(
+        IEnumerable<TEntity> entities,
+        bool saveChanges = true,
+        CancellationToken cancellationToken = default)
+    {
+        await _dbSet.AddRangeAsync(entities, cancellationToken);
+        if (saveChanges)
+            await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public virtual async Task UpdateAsync(
+        TEntity entity,
+        bool saveChanges = true,
+        CancellationToken cancellationToken = default)
     {
         _dbSet.Update(entity);
         if (saveChanges)
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public virtual async Task DeleteAsync(TKey id, bool saveChanges = true)
+    public virtual async Task DeleteAsync(
+        TKey id,
+        bool saveChanges = true,
+        CancellationToken cancellationToken = default)
     {
-        var entity = await GetByIdAsync(id);
+        var entity = await GetByIdAsync(id, cancellationToken);
         if (entity != null)
         {
             _dbSet.Remove(entity);
@@ -49,16 +71,21 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
         }
     }
 
-    public virtual async Task DeleteRangeAsync(IEnumerable<TEntity> entities, bool saveChanges = true)
+    public virtual async Task DeleteRangeAsync(
+        IEnumerable<TEntity> entities,
+        bool saveChanges = true,
+        CancellationToken cancellationToken = default)
     {
         _dbSet.RemoveRange(entities);
         if (saveChanges)
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public virtual async Task<bool> ExistsAsync(TKey id)
+    public virtual async Task<bool> ExistsAsync(
+        TKey id,
+        CancellationToken cancellationToken = default)
     {
-        var entity = await GetByIdAsync(id);
+        var entity = await GetByIdAsync(id, cancellationToken);
         return entity != null;
     }
 
@@ -67,8 +94,8 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
         return _dbSet.AsQueryable();
     }
 
-    public Task<int> SaveChangesAsync()
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return _context.SaveChangesAsync();
+        return _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -26,6 +26,7 @@ var host = Host.CreateDefaultBuilder(args)
             x.AddConsumer<SummaryGeneratorConsumer>();
             x.AddConsumer<TaskEmbeddingConsumer>();
             x.AddConsumer<RelatedTasksConsumer>();
+            x.AddConsumer<DetectDuplicatesConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {

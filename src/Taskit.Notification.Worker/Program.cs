@@ -36,9 +36,13 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddScoped<IEmailMessageGenerator<ProjectActivityLogCreated>, ProjectActivityLogEmailMessageGenerator>();
         services.AddScoped<IRecipientResolver<ProjectActivityLogCreated>, ProjectActivityLogRecipientResolver>();
 
+        services.AddScoped<IInAppMessageGenerator<TaskDuplicateDetected>, TaskDuplicateInAppMessageGenerator>();
+        services.AddScoped<IRecipientResolver<TaskDuplicateDetected>, TaskDuplicateRecipientResolver>();
+
         services.AddMassTransit(x =>
         {
             x.AddConsumer<EmailNotificationConsumer<ProjectActivityLogCreated>>();
+            x.AddConsumer<InAppNotificationConsumer<TaskDuplicateDetected>>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {

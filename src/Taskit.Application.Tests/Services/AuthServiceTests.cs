@@ -123,7 +123,7 @@ public class AuthServiceTests
         signIn.Setup(s => s.CheckPasswordSignInAsync(user, "pass", false))
             .ReturnsAsync(SignInResult.Success);
         var repo = new Mock<IRefreshTokenRepository>();
-        repo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var service = CreateService(userManager, signIn, repo);
 
         var dto = new LoginRequest { Email = user.Email!, Password = "pass" };
@@ -134,7 +134,7 @@ public class AuthServiceTests
         Assert.False(string.IsNullOrWhiteSpace(response.RefreshToken));
         Assert.NotNull(response.User);
         Assert.Equal(user.Email, response.User?.Email);
-        repo.Verify(r => r.AddAsync(It.Is<RefreshToken>(t => t.UserId == user.Id), It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.AddAsync(It.Is<RefreshToken>(t => t.UserId == user.Id), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -245,15 +245,15 @@ public class AuthServiceTests
         var hash = ComputeSha256("token");
         var refresh = new RefreshToken { TokenHash = hash, UserId = user.Id, User = user, ExpiresAt = DateTime.UtcNow.AddMinutes(10) };
         repo.Setup(r => r.GetByTokenAsync(hash)).ReturnsAsync(refresh);
-        repo.Setup(r => r.UpdateAsync(refresh, It.IsAny<bool>())).Returns(Task.CompletedTask);
-        repo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.UpdateAsync(refresh, It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        repo.Setup(r => r.AddAsync(It.IsAny<RefreshToken>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var service = CreateService(userManager, signIn, repo);
 
         var response = await service.RefreshAsync("token");
 
         Assert.False(string.IsNullOrWhiteSpace(response.AccessToken));
         Assert.False(string.IsNullOrWhiteSpace(response.RefreshToken));
-        repo.Verify(r => r.UpdateAsync(It.Is<RefreshToken>(rt => rt == refresh && rt.RevokedAt != null), It.IsAny<bool>()), Times.Once);
-        repo.Verify(r => r.AddAsync(It.Is<RefreshToken>(rt => rt.UserId == user.Id), It.IsAny<bool>()), Times.Once);
+        repo.Verify(r => r.UpdateAsync(It.Is<RefreshToken>(rt => rt == refresh && rt.RevokedAt != null), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+        repo.Verify(r => r.AddAsync(It.Is<RefreshToken>(rt => rt.UserId == user.Id), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
