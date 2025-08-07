@@ -54,5 +54,13 @@ public static class GridifyMappings
         .AddMap("userId", q => q.UserId)
         .AddMap("projectId", q => q.ProjectId)
         .AddMap("taskId", q => q.TaskId);
+
+    public static readonly IGridifyMapper<Notification> NotificationMapper = new GridifyMapper<Notification>()
+        .AddMap("id", q => q.Id)
+        .AddMap("title", q => q.Title)
+        .AddMap("message", q => q.Message)
+        .AddMap("type", q => q.Type)
+        .AddMap("isRead", q => q.IsRead)
+        .AddMap("createdAt", q => q.CreatedAt);
 }
 
