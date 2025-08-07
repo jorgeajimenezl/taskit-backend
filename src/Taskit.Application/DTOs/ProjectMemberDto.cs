@@ -11,21 +11,19 @@ public record ProjectMemberDto
     public int Id { get; init; }
 
     [Required]
-    public required string UserId { get; init; }
+    public int ProjectId { get; init; }
 
     [Required]
-    public required string Username { get; init; }
+    public required UserProfileDto User { get; init; }
 
-    public string? FullName { get; init; }
+    [Required]
     public ProjectRole Role { get; init; }
 
     private class Mapping : Profile
     {
         public Mapping()
         {
-            CreateMap<ProjectMember, ProjectMemberDto>()
-                .ForMember(d => d.Username, o => o.MapFrom(s => s.User!.UserName))
-                .ForMember(d => d.FullName, o => o.MapFrom(s => s.User!.FullName));
+            CreateMap<ProjectMember, ProjectMemberDto>();
         }
     }
 }

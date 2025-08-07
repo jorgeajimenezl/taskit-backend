@@ -28,9 +28,8 @@ public class ProjectMemberServiceTests
 
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<ProjectMember, ProjectMemberDto>()
-                .ForMember(d => d.Username, o => o.MapFrom(s => s.User!.UserName))
-                .ForMember(d => d.FullName, o => o.MapFrom(s => s.User!.FullName));
+            cfg.CreateMap<AppUser, UserProfileDto>();
+            cfg.CreateMap<ProjectMember, ProjectMemberDto>();
             cfg.CreateMap<AddProjectMemberRequest, ProjectMember>();
             cfg.CreateMap<UpdateProjectMemberRequest, ProjectMember>()
                 .ForAllMembers(o => o.Condition((src, dest, member) => member != null));
@@ -152,7 +151,7 @@ public class ProjectMemberServiceTests
         var result = await service.AddAsync(1, dto, "owner");
 
         memberRepo.Verify(r => r.AddAsync(It.Is<ProjectMember>(m => m.UserId == "u" && m.ProjectId == 1), It.IsAny<bool>()), Times.Once);
-        Assert.Equal("u", result.UserId);
+        Assert.Equal("u", result.User.Id);
     }
 
     [Fact]
