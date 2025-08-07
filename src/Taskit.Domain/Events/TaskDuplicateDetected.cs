@@ -8,5 +8,5 @@ public record TaskDuplicateDetected(
     int TaskId,
     int RelatedTaskId,
     int ProjectId,
-    DateTime Timestamp = default
+    DateTime Timestamp
 ) : IEvent<TaskDuplicateDetected>;

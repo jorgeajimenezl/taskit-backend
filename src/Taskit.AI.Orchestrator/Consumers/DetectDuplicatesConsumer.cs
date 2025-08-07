@@ -43,7 +43,7 @@ public class DetectDuplicatesConsumer(
 
         if (taskEmbd is null || (taskEmbd.DescriptionEmbedding is null && taskEmbd.TitleEmbedding is null))
         {
-            _logger.LogWarning("No embeddings found for task {TaskId}. Cannot detect blockers.", message.TaskId);
+            _logger.LogWarning("No embeddings found for task {TaskId}. Cannot detect duplicates.", message.TaskId);
             return;
         }
 
@@ -63,12 +63,12 @@ public class DetectDuplicatesConsumer(
             .Include(e => e.Task)
             .Where(e => e.Task != null && e.Task.ProjectId == message.ProjectId)
             .Select(e => e.TaskId)
-            .Take(3) // Limit to 5 related tasks
+            .Take(5) // Limit to 5 related tasks
             .ToListAsync(context.CancellationToken);
 
         if (relatedIds.Count == 0)
         {
-            // No related tasks found, cannot detect blockers
+            // No related tasks found, cannot detect duplicates
             return;
         }
 
@@ -103,7 +103,7 @@ public class DetectDuplicatesConsumer(
                     continue; // Skip to the next related task
                 }
 
-                if (!response.Contains("not", StringComparison.OrdinalIgnoreCase))
+                if (response.Equals("Duplicated", StringComparison.OrdinalIgnoreCase))
                 {
                     // TODO: Handle the case where a duplicate is detected
                     await context.Publish(new TaskDuplicateDetected(
@@ -120,7 +120,7 @@ public class DetectDuplicatesConsumer(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to detect blockers for task {TaskId}", message.TaskId);
+            _logger.LogError(ex, "Failed to detect duplicates for task {TaskId}", message.TaskId);
         }
     }
 }

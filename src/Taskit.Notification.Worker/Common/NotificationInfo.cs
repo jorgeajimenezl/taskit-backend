@@ -4,6 +4,6 @@ namespace Taskit.Notification.Worker.Common;
 
 public record NotificationInfo(
     string Title,
-    string Message,
+    string? Message,
     NotificationType Type
 );

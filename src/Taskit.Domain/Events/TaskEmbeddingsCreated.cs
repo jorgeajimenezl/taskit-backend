@@ -7,5 +7,5 @@ public record TaskEmbeddingsCreated(
     string UserId,
     int TaskId,
     int ProjectId,
-    DateTime Timestamp = default
+    DateTime Timestamp
 ) : IEvent<TaskEmbeddingsCreated>;
