@@ -81,6 +81,14 @@ public class TaskEmbeddingConsumer(
 
             await _db.SaveChangesAsync(context.CancellationToken);
             _logger.LogInformation("Generated embeddings for task {TaskId}", task.Id);
+
+            await context.Publish(new TaskEmbeddingsCreated(
+                Id: Guid.NewGuid(),
+                UserId: evt.UserId,
+                TaskId: task.Id,
+                ProjectId: task.ProjectId,
+                Timestamp: DateTime.UtcNow
+            ), context.CancellationToken);
         }
         catch (DbUpdateException ex)
         {

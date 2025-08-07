@@ -26,6 +26,13 @@ public class SummaryGeneratorConsumer(
     private readonly ILogger<SummaryGeneratorConsumer> _logger = logger;
     private readonly SummaryGeneratorSettings _settings = settings.Value;
 
+    private const string SystemMessage = """
+    You are an AI that generates concise summaries of task descriptions.
+    Avoid unnecessary details and focus on clarity and brevity.
+    The length of the summary should be around one or two short sentences.
+    Only generate the summary, do not include any additional text.
+    """;
+
     public async Task Consume(ConsumeContext<ProjectActivityLogCreated> context)
     {
         var evt = context.Message;
@@ -41,7 +48,7 @@ public class SummaryGeneratorConsumer(
         {
             var chatClient = _openAiClient.GetChatClient(_settings.Model);
             var completion = await chatClient.CompleteChatAsync([
-                new SystemChatMessage("You create concise summaries of task descriptions."),
+                new SystemChatMessage(SystemMessage),
                 new UserChatMessage($"Title: {task.Title}\nDescription: {task.Description}")
             ], cancellationToken: context.CancellationToken);
 
