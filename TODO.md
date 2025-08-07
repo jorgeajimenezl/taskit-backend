@@ -5,3 +5,4 @@
 - Fix: media URL generation
 - Feat: save media in the cloud instead of local storage (Azure Blob Storage)
 - Feat: add an index to the TaskEmbeddings table for faster queries
+- Feat: add default project for new users (personal project)
