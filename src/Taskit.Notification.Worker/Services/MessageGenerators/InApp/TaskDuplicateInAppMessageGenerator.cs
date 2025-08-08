@@ -12,9 +12,12 @@ public class TaskDuplicateInAppMessageGenerator() : IInAppMessageGenerator<TaskD
         string recipientId,
         CancellationToken cancellationToken = default)
     {
+        var taskLink = $"/tasks/{@event.TaskId}";
+        var relatedTaskLink = $"/tasks/{@event.RelatedTaskId}";
+
         return Task.FromResult(new NotificationInfo(
             "Task Duplicate Detected",
-            $"The recent task with ID {@event.TaskId} has been detected as a duplicate of the task with ID {@event.RelatedTaskId}.",
+            $"The recent <a href=\"{taskLink}\">task</a> has been detected as a duplicate of the already created <a href=\"{relatedTaskLink}\">task</a>.",
             NotificationType.Warning
         ));
     }
