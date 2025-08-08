@@ -16,6 +16,7 @@ using Taskit.Infrastructure.Repositories;
 using MassTransit;
 using Taskit.Infrastructure.Workers;
 using OpenAI;
+using Taskit.Application.Consumers;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -104,6 +105,7 @@ public static class DependencyInjection
 
         builder.Services.AddMassTransit(options =>
         {
+            options.AddConsumer<RealtimeNotificationConsumer>();
             options.AddEntityFrameworkOutbox<AppDbContext>(cfg =>
             {
                 cfg.UsePostgres();

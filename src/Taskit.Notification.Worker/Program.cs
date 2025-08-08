@@ -1,4 +1,3 @@
-using System.Reflection;
 using MassTransit;
 using Taskit.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +42,6 @@ var host = Host.CreateDefaultBuilder(args)
         {
             x.AddConsumer<EmailNotificationConsumer<ProjectActivityLogCreated>>();
             x.AddConsumer<InAppNotificationConsumer<TaskDuplicateDetected>>();
-            x.AddConsumer<RealtimeNotificationConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
