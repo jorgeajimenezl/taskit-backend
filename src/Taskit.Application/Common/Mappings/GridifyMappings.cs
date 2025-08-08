@@ -9,7 +9,9 @@ public static class GridifyMappings
         .AddMap("id", q => q.Id)
         .AddMap("name", q => q.Name)
         .AddMap("description", q => q.Description)
-        .AddMap("ownerId", q => q.OwnerId);
+        .AddMap("ownerId", q => q.OwnerId)
+        .AddMap("createdAt", q => q.CreatedAt)
+        .AddMap("updatedAt", q => q.UpdatedAt);
 
     public static readonly IGridifyMapper<ProjectMember> ProjectMemberMapper = new GridifyMapper<ProjectMember>()
         .AddMap("id", q => q.Id)
@@ -17,7 +19,9 @@ public static class GridifyMappings
         .AddMap("userId", q => q.UserId)
         .AddMap("username", q => q.User!.UserName)
         .AddMap("fullName", q => q.User!.FullName)
-        .AddMap("role", q => q.Role);
+        .AddMap("role", q => q.Role)
+        .AddMap("createdAt", q => q.CreatedAt)
+        .AddMap("updatedAt", q => q.UpdatedAt);
 
     public static readonly IGridifyMapper<AppTask> TaskMapper = new GridifyMapper<AppTask>()
         .AddMap("id", q => q.Id)
@@ -35,7 +39,9 @@ public static class GridifyMappings
         .AddMap("authorId", q => q.AuthorId)
         .AddMap("assignedUserId", q => q.AssignedUserId)
         .AddMap("isArchived", q => q.IsArchived)
-        .AddMap("parentTaskId", q => q.ParentTaskId);
+        .AddMap("parentTaskId", q => q.ParentTaskId)
+        .AddMap("createdAt", q => q.CreatedAt)
+        .AddMap("updatedAt", q => q.UpdatedAt);
 
     public static readonly IGridifyMapper<TaskComment> TaskCommentMapper = new GridifyMapper<TaskComment>()
         .AddMap("id", q => q.Id)
@@ -53,7 +59,9 @@ public static class GridifyMappings
         .AddMap("eventType", q => q.EventType)
         .AddMap("userId", q => q.UserId)
         .AddMap("projectId", q => q.ProjectId)
-        .AddMap("taskId", q => q.TaskId);
+        .AddMap("taskId", q => q.TaskId)
+        .AddMap("createdAt", q => q.CreatedAt)
+        .AddMap("updatedAt", q => q.UpdatedAt);
 
     public static readonly IGridifyMapper<Notification> NotificationMapper = new GridifyMapper<Notification>()
         .AddMap("id", q => q.Id)
@@ -61,6 +69,7 @@ public static class GridifyMappings
         .AddMap("message", q => q.Message)
         .AddMap("type", q => q.Type)
         .AddMap("isRead", q => q.IsRead)
-        .AddMap("createdAt", q => q.CreatedAt);
+        .AddMap("createdAt", q => q.CreatedAt)
+        .AddMap("updatedAt", q => q.UpdatedAt);
 }
 
