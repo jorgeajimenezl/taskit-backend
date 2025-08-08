@@ -50,9 +50,22 @@ public class InAppNotificationConsumer<TEvent>(
             }
         }
 
-        if (notifications.Any())
+        if (notifications.Count != 0)
         {
-            await _notificationRepository.AddRangeAsync(notifications, cancellationToken: context.CancellationToken);
+            await _notificationRepository.AddRangeAsync(
+                notifications, saveChanges: true,
+                cancellationToken: context.CancellationToken);
+
+            foreach (var notification in notifications)
+            {
+                await context.Publish(
+                    new NotificationCreated(
+                        Id: Guid.NewGuid(),
+                        NotificationId: notification.Id,
+                        Timestamp: DateTime.UtcNow
+                    ), context.CancellationToken);
+            }
+
             _logger.LogInformation("Created {Count} notifications for event {EventType}", notifications.Count, typeof(TEvent).Name);
         }
     }
