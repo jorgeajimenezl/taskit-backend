@@ -1,7 +1,9 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OpenAI;
 using Taskit.AI.Orchestrator.Consumers;
+using Taskit.AI.Orchestrator;
 using Taskit.AI.Orchestrator.Settings;
 using Taskit.Infrastructure;
 
@@ -20,6 +22,8 @@ var host = Host.CreateDefaultBuilder(args)
         if (string.IsNullOrWhiteSpace(openAiKey))
             throw new ArgumentException("OpenAI API key is not configured.");
         services.AddSingleton(new OpenAIClient(openAiKey));
+
+        services.AddScoped<MissingTaskEmbeddingsGenerator>();
 
         services.AddMassTransit(x =>
         {
@@ -46,4 +50,12 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-host.Run();
+if (args.Contains("--generate-missing-embeddings"))
+{
+    using var scope = host.Services.CreateScope();
+    var generator = scope.ServiceProvider.GetRequiredService<MissingTaskEmbeddingsGenerator>();
+    await generator.RunAsync();
+    return;
+}
+
+await host.RunAsync();
