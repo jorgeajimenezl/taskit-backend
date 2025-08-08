@@ -13,6 +13,7 @@ public record NotificationDto
     public bool IsRead { get; init; }
     public IDictionary<string, object?>? Data { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; init; }
 
     private class Mapping : Profile
     {

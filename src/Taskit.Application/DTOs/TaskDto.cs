@@ -32,6 +32,12 @@ public record TaskDto
     public int Complexity { get; init; }
     public int CompletedPercentage { get; init; }
 
+    [Required]
+    public DateTime CreatedAt { get; init; }
+
+    [Required]
+    public DateTime UpdatedAt { get; init; }
+
     public UserDto? Author { get; init; }
     public UserDto? AssignedUser { get; init; }
     public IEnumerable<TagDto> Tags { get; init; } = [];

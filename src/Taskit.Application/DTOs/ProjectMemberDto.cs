@@ -19,6 +19,12 @@ public record ProjectMemberDto
     [Required]
     public ProjectRole Role { get; init; }
 
+    [Required]
+    public DateTime CreatedAt { get; init; }
+
+    [Required]
+    public DateTime UpdatedAt { get; init; }
+
     private class Mapping : Profile
     {
         public Mapping()
