@@ -14,6 +14,10 @@ public record ProjectActivityLogDto
     public int? TaskId { get; init; }
     public IDictionary<string, object?> Data { get; init; } = new Dictionary<string, object?>();
 
+    public DateTime CreatedAt { get; init; }
+
+    public DateTime UpdatedAt { get; init; }
+
     private class Mapping : Profile
     {
         public Mapping()

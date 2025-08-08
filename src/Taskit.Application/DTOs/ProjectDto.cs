@@ -17,6 +17,10 @@ public record ProjectDto
     [Required]
     public required UserDto Owner { get; init; }
 
+    public DateTime CreatedAt { get; init; }
+
+    public DateTime UpdatedAt { get; init; }
+
     private class Mapping : Profile
     {
         public Mapping()
